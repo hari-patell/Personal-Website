@@ -1,4 +1,5 @@
 // ||Swami Shriji||
+// Aksharam Aham Purushttam Dasosmi
 import type React from "react"
 import { useMemo } from "react"
 import { Github, Mail, Instagram, Linkedin, Code2, Binary, Terminal, Cpu, Database, Globe, Cloud } from "lucide-react"
@@ -131,8 +132,8 @@ function App() {
           </div>
 
           <div className="grid gap-4">
-            <SocialLink icon={Mail} href="mailto:your.email@example.com" label="Email" />
-            <SocialLink icon={XIcon} href="https://x.com/hari_patell" label="X (Twitter)" />
+            <SocialLink icon={Mail} href="mailto:hari1880patel@gmail.com" label="Email" />
+            <SocialLink icon={XIcon} href="https://x.com/hari_patell" label="X" />
             <SocialLink icon={Instagram} href="https://instagram.com/hari_patell" label="Instagram" />
             <SocialLink icon={Linkedin} href="https://www.linkedin.com/in/hari-krishna-patel" label="LinkedIn" />
             <SocialLink icon={Github} href="https://github.com/hari-patell" label="GitHub" />
