@@ -2,76 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes float {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate(20px, -20px) rotate(10deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-delay-2000 {
-  animation-delay: 2s;
-  left: 15%;
-  top: 20%;
-}
-
-.animate-delay-3000 {
-  animation-delay: 3s;
-  right: 20%;
-  top: 30%;
-}
-
-.animate-delay-4000 {
-  animation-delay: 4s;
-  left: 25%;
-  bottom: 20%;
-}
-
-.animate-delay-5000 {
-  animation-delay: 5s;
-  right: 15%;
-  bottom: 30%;
-}
-
-.animate-delay-6000 {
-  animation-delay: 6s;
-  left: 35%;
-  top: 40%;
-}
-
-.animate-delay-7000 {
-  animation-delay: 7s;
-  right: 30%;
-  bottom: 40%;
-}
-
-.animate-delay-8000 {
-  animation-delay: 8s;
-  left: 40%;
-  top: 15%;
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
-}
+/* ... (keep existing animations) ... */
 
 /* Enhanced Cipher Text Animation */
 .cipher-text {
@@ -81,44 +12,68 @@
 .cipher-char {
   display: inline-block;
   position: relative;
-  transition: transform 0.3s ease;
 }
 
-@keyframes scramble {
-  0%, 100% {
-    color: white;
-  }
-  25%, 75% {
-    color: #f97316;
-  }
-  50% {
-    color: transparent;
-  }
+.cipher-char > span {
+  transition: opacity 0.3s ease;
 }
 
-.group:hover .cipher-char {
-  animation: scramble 0.5s ease-in-out;
-}
-
-.group:hover .cipher-char:nth-child(1) { animation-delay: 0.02s; }
-.group:hover .cipher-char:nth-child(2) { animation-delay: 0.04s; }
-.group:hover .cipher-char:nth-child(3) { animation-delay: 0.06s; }
-.group:hover .cipher-char:nth-child(4) { animation-delay: 0.08s; }
-.group:hover .cipher-char:nth-child(5) { animation-delay: 0.1s; }
-.group:hover .cipher-char:nth-child(6) { animation-delay: 0.12s; }
-.group:hover .cipher-char:nth-child(7) { animation-delay: 0.14s; }
-.group:hover .cipher-char:nth-child(8) { animation-delay: 0.16s; }
-.group:hover .cipher-char:nth-child(9) { animation-delay: 0.18s; }
-.group:hover .cipher-char:nth-child(10) { animation-delay: 0.2s; }
-.group:hover .cipher-char:nth-child(11) { animation-delay: 0.22s; }
-.group:hover .cipher-char:nth-child(12) { animation-delay: 0.24s; }
-
-.cipher-char::before {
-  content: attr(data-scramble);
+.cipher-char::after {
+  content: attr(data-char);
   position: absolute;
   top: 0;
   left: 0;
   opacity: 0;
-  transform: translateY(100%);
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
 }
+
+.group:hover .cipher-char > span {
+  opacity: 0;
+}
+
+.group:hover .cipher-char::after {
+  opacity: 1;
+}
+
+/* Add different transition delays for each character */
+.cipher-char:nth-child(1)::before,
+.cipher-char:nth-child(1)::after {
+  transition-delay: 0.05s;
+}
+.cipher-char:nth-child(2)::before,
+.cipher-char:nth-child(2)::after {
+  transition-delay: 0.1s;
+}
+.cipher-char:nth-child(3)::before,
+.cipher-char:nth-child(3)::after {
+  transition-delay: 0.15s;
+}
+.cipher-char:nth-child(4)::before,
+.cipher-char:nth-child(4)::after {
+  transition-delay: 0.2s;
+}
+.cipher-char:nth-child(5)::before,
+.cipher-char:nth-child(5)::after {
+  transition-delay: 0.25s;
+}
+.cipher-char:nth-child(6)::before,
+.cipher-char:nth-child(6)::after {
+  transition-delay: 0.3s;
+}
+.cipher-char:nth-child(7)::before,
+.cipher-char:nth-child(7)::after {
+  transition-delay: 0.35s;
+}
+.cipher-char:nth-child(8)::before,
+.cipher-char:nth-child(8)::after {
+  transition-delay: 0.4s;
+}
+.cipher-char:nth-child(9)::before,
+.cipher-char:nth-child(9)::after {
+  transition-delay: 0.45s;
+}
+.cipher-char:nth-child(10)::before,
+.cipher-char:nth-child(10)::after {
+  transition-delay: 0.5s;
+}
+

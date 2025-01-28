@@ -1,5 +1,5 @@
 import type React from "react"
-import { useEffect, useRef } from "react"
+import { useMemo } from "react"
 import { Github, Mail, Instagram, Linkedin, Code2, Binary, Terminal, Cpu, Database, Globe, Cloud } from "lucide-react"
 
 // Custom X (Twitter) icon component
@@ -34,30 +34,22 @@ function FloatingIcon({
   )
 }
 
-function CipherText({ text }: { text: string }) {
-  const chars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
-  const intervalRef = useRef<number>()
+function getRandomChar() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?"
+  return chars[Math.floor(Math.random() * chars.length)]
+}
 
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-  }, [])
+function CipherText({ text }: { text: string }) {
+  const scrambledText = useMemo(() => text.split("").map(() => getRandomChar()), [text])
 
   return (
     <span className="cipher-text">
       {text.split("").map((char, index) => (
-        <span
-          key={index}
-          className="cipher-char"
-          data-char={char}
-          data-scramble={chars[Math.floor(Math.random() * chars.length)]}
-        >
-          {char}
+        <span key={index} className="cipher-char" data-char={char} data-scrambled={scrambledText[index]}>
+          <span aria-hidden="true">{scrambledText[index]}</span>
         </span>
       ))}
+      <span className="sr-only">{text}</span>
     </span>
   )
 }
@@ -68,7 +60,7 @@ function SocialLink({ icon: Icon, href, label }: { icon: React.ElementType; href
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2 px-6 py-3 transition-all duration-300 rounded-xl backdrop-blur-md bg-white/5 hover:bg-white/10 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 group"
+      className="group flex items-center gap-2 px-6 py-3 transition-all duration-300 rounded-xl backdrop-blur-md bg-white/5 hover:bg-white/10 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20"
     >
       <Icon className="w-5 h-5 text-orange-500 transition-transform duration-300 group-hover:rotate-12" />
       <span className="relative overflow-hidden">
