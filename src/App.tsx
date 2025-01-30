@@ -1,7 +1,7 @@
 //Swami Shriji
 //WOrking on Safari branch
 //blah blah blah working on some code here
-//working some more
+//working some moreasdf
 
 import type React from "react"
 import { useEffect, useRef } from "react"
@@ -67,6 +67,8 @@ function CipherText({ text }: { text: string }) {
   )
 }
 
+
+//these are the links
 function SocialLink({ icon: Icon, href, label }: { icon: React.ElementType; href: string; label: string }) {
   return (
     <a
