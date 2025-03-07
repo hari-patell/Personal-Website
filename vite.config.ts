@@ -8,5 +8,5 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   // Base path for GitHub Pages
-  base: process.env.NODE_ENV === 'production' ? '/project/' : '/',
+  base: '/project/',
 });
