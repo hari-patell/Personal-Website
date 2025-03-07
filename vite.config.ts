@@ -7,6 +7,6 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  // Base path for GitHub Pages
-  base: '/project/',
+  // Base path for custom domain
+  base: '/',
 });
