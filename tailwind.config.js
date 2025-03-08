@@ -6,6 +6,9 @@ export default {
       animation: {
         'spin-slow': 'spin 20s linear infinite',
       },
+      ringOffsetColor: {
+        DEFAULT: '#18181b',
+      },
     },
   },
   plugins: [],
