@@ -314,23 +314,23 @@
 .cipher-char {
   display: inline-block;
   position: relative;
-  transition: transform 0.3s ease;
+  transition: color 0.3s ease;
+  color: white;
 }
 
 @keyframes scramble {
-  0%, 100% {
-    color: #18181b;
+  0% {
+    color: white;
   }
-  25%, 75% {
+  100% {
     color: #f97316;
-  }
-  50% {
-    color: transparent;
   }
 }
 
 .group:hover .cipher-char {
-  animation: scramble 0.5s ease-in-out;
+  animation: none;
+  color: #f97316;
+  transition: color 0.3s ease;
 }
 
 .group:hover .cipher-char:nth-child(1) { animation-delay: 0.02s; }

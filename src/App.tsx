@@ -76,7 +76,7 @@ function SocialLink({ icon: Icon, href, label }: { icon: React.ElementType; href
       className="flex items-center gap-2 px-6 py-3 transition-all duration-300 rounded-xl backdrop-blur-md bg-black/5 hover:bg-black/10 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 group"
     >
       <Icon className="w-5 h-5 text-orange-500 transition-transform duration-300 group-hover:rotate-12" />
-      <span className="relative overflow-hidden">
+      <span className="relative overflow-hidden text-white">
         <CipherText text={label} />
         <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-orange-500 to-orange-300 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
       </span>
