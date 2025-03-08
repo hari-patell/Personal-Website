@@ -7,4 +7,6 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  // Copy files from public directory to build output
+  publicDir: 'public',
 });
