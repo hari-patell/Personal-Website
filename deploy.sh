@@ -3,7 +3,7 @@
 # Create a temporary directory
 mkdir -p temp_dist
 
-# Create our standalone HTML file
+# Create our standalone HTML file - this is a completely self-contained file with no external dependencies
 cat > temp_dist/index.html << 'EOL'
 <!DOCTYPE html>
 <html lang="en">
@@ -250,11 +250,11 @@ EOL
 # Create CNAME file
 echo "haripatell.com" > temp_dist/CNAME
 
-# Create .nojekyll file
+# Create .nojekyll file to prevent GitHub Pages processing
 touch temp_dist/.nojekyll
 
-# Deploy using gh-pages
-npx gh-pages -d temp_dist
+# Deploy directly to GitHub Pages using gh-pages
+npx gh-pages -d temp_dist --no-history
 
 # Clean up
 rm -rf temp_dist
