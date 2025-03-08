@@ -4,10 +4,155 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>Hari Patel</title>
+    <style>
+      /* Fallback styles that will be visible if React doesn't load */
+      #fallback {
+        display: none;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #111;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(249, 115, 22, 0.3);
+        border: 1px solid rgba(249, 115, 22, 0.5);
+        color: white;
+      }
+      #fallback h1 {
+        color: #f97316;
+      }
+      #fallback a {
+        color: #f97316;
+        text-decoration: none;
+        margin: 0 8px;
+      }
+      #fallback a:hover {
+        text-decoration: underline;
+      }
+      body {
+        background-color: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      #debug-info {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #f97316;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 12px;
+        max-width: 80%;
+        overflow: auto;
+        max-height: 200px;
+        display: none;
+      }
+    </style>
+    <!-- Start Single Page Apps for GitHub Pages -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafgraph/spa-github-pages
+      // This script checks to see if a redirect is present in the query string,
+      // converts it back into the correct url and adds it to the
+      // browser's history using window.history.replaceState(...),
+      // which won't cause the browser to attempt to load the new url.
+      // When the single page app is loaded further down in this file,
+      // the correct url will be waiting in the browser's history for
+      // the single page app to route accordingly.
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+    <!-- End Single Page Apps for GitHub Pages -->
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Fallback content that will be shown if React doesn't load -->
+    <div id="fallback">
+      <h1>Hari-Krishna Patel</h1>
+      <p>Software Engineer & Developer</p>
+      <p>
+        <a href="mailto:hari1880patel@gmail.com">Email</a>
+        <a href="https://x.com/hari_patell">X</a>
+        <a href="https://instagram.com/hari_patell">Instagram</a>
+        <a href="https://www.linkedin.com/in/hari-krishna-patel">LinkedIn</a>
+        <a href="https://github.com/hari-patell">GitHub</a>
+      </p>
+      <p>If you're seeing this message, the React application failed to load.</p>
+      <p>Please try refreshing the page or clearing your browser cache.</p>
+    </div>
+
+    <!-- Debug info panel -->
+    <div id="debug-info"></div>
+
+    <script>
+      // Debug information
+      (function() {
+        var debugInfo = document.getElementById('debug-info');
+        var urlParams = new URLSearchParams(window.location.search);
+        var debugMessages = [];
+        
+        // Check if we came from a 404 redirect
+        if (urlParams.has('from') && urlParams.get('from') === '404') {
+          debugMessages.push('Redirected from 404 page');
+          debugMessages.push('Original path: ' + urlParams.get('path'));
+        }
+        
+        // Add browser information
+        debugMessages.push('User Agent: ' + navigator.userAgent);
+        debugMessages.push('Window Size: ' + window.innerWidth + 'x' + window.innerHeight);
+        debugMessages.push('Document URL: ' + document.URL);
+        
+        // Display debug info if there are messages
+        if (debugMessages.length > 0) {
+          debugInfo.innerHTML = debugMessages.join('<br>');
+          debugInfo.style.display = 'block';
+        }
+        
+        // Log to console as well
+        console.log('Debug Info:', debugMessages);
+      })();
+
+      // Show fallback content if React doesn't load within 3 seconds
+      setTimeout(function() {
+        if (!document.querySelector('#root > *')) {
+          document.getElementById('fallback').style.display = 'block';
+          console.error('React app failed to load. Showing fallback content.');
+          
+          // Add error to debug info
+          var debugInfo = document.getElementById('debug-info');
+          debugInfo.innerHTML += '<br>ERROR: React app failed to load after 3 seconds';
+          debugInfo.style.display = 'block';
+          
+          // Try to load script info
+          var scripts = document.querySelectorAll('script');
+          var scriptInfo = '<br>Scripts on page:<br>';
+          for (var i = 0; i < scripts.length; i++) {
+            scriptInfo += (i + 1) + '. ' + (scripts[i].src || 'inline script') + '<br>';
+          }
+          debugInfo.innerHTML += scriptInfo;
+        }
+      }, 3000);
+    </script>
+    
+    <!-- The script below is causing the error - removing it since Vite will inject the proper script during build -->
+    <!-- <script defer src="/src/main.tsx"></script> -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
