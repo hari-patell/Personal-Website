@@ -16,6 +16,23 @@ The site uses a custom domain (haripatell.com) configured through:
 - A CNAME file in the public directory
 - GitHub Pages settings in the repository
 
+#### DNS Configuration
+
+To configure your domain with GitHub Pages, add the following DNS records with your domain registrar:
+
+1. **A Records** (for apex domain):
+   - `185.199.108.153`
+   - `185.199.109.153`
+   - `185.199.110.153`
+   - `185.199.111.153`
+
+2. **CNAME Record** (for www subdomain):
+   - `www.haripatell.com` should point to `haripatell.github.io.`
+
+3. **Verify DNS propagation** using tools like [dnschecker.org](https://dnschecker.org)
+
+4. **Enable HTTPS** in the GitHub Pages settings for your repository
+
 ### Local Development
 
 ```bash
