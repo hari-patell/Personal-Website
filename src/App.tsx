@@ -1,7 +1,5 @@
+// Updated on March 7, 2025 to fix deployment issue
 //Swami Shriji
-//WOrking on Safari branch
-//blah blah blah working on some code here
-//working some moreasdf
 
 import type React from "react"
 import { useEffect, useRef } from "react"
