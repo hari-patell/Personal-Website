@@ -39,21 +39,6 @@
         min-height: 100vh;
         margin: 0;
       }
-      #debug-info {
-        position: fixed;
-        bottom: 10px;
-        left: 10px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #f97316;
-        padding: 10px;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 12px;
-        max-width: 80%;
-        overflow: auto;
-        max-height: 200px;
-        display: none;
-      }
     </style>
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
@@ -98,61 +83,16 @@
       <p>Please try refreshing the page or clearing your browser cache.</p>
     </div>
 
-    <!-- Debug info panel -->
-    <div id="debug-info"></div>
-
     <script>
-      // Debug information
-      (function() {
-        var debugInfo = document.getElementById('debug-info');
-        var urlParams = new URLSearchParams(window.location.search);
-        var debugMessages = [];
-        
-        // Check if we came from a 404 redirect
-        if (urlParams.has('from') && urlParams.get('from') === '404') {
-          debugMessages.push('Redirected from 404 page');
-          debugMessages.push('Original path: ' + urlParams.get('path'));
-        }
-        
-        // Add browser information
-        debugMessages.push('User Agent: ' + navigator.userAgent);
-        debugMessages.push('Window Size: ' + window.innerWidth + 'x' + window.innerHeight);
-        debugMessages.push('Document URL: ' + document.URL);
-        
-        // Display debug info if there are messages
-        if (debugMessages.length > 0) {
-          debugInfo.innerHTML = debugMessages.join('<br>');
-          debugInfo.style.display = 'block';
-        }
-        
-        // Log to console as well
-        console.log('Debug Info:', debugMessages);
-      })();
-
       // Show fallback content if React doesn't load within 3 seconds
       setTimeout(function() {
         if (!document.querySelector('#root > *')) {
           document.getElementById('fallback').style.display = 'block';
           console.error('React app failed to load. Showing fallback content.');
-          
-          // Add error to debug info
-          var debugInfo = document.getElementById('debug-info');
-          debugInfo.innerHTML += '<br>ERROR: React app failed to load after 3 seconds';
-          debugInfo.style.display = 'block';
-          
-          // Try to load script info
-          var scripts = document.querySelectorAll('script');
-          var scriptInfo = '<br>Scripts on page:<br>';
-          for (var i = 0; i < scripts.length; i++) {
-            scriptInfo += (i + 1) + '. ' + (scripts[i].src || 'inline script') + '<br>';
-          }
-          debugInfo.innerHTML += scriptInfo;
         }
       }, 3000);
     </script>
     
-    <!-- The script below is causing the error - removing it since Vite will inject the proper script during build -->
-    <!-- <script defer src="/src/main.tsx"></script> -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -30,7 +30,7 @@ function FloatingIcon({
 
   return (
     <div
-      className={`absolute animate-float ${delay} backdrop-blur-sm bg-orange-500/10 ${sizeClasses[size]} rounded-2xl border border-white/5`}
+      className={`absolute animate-float ${delay} backdrop-blur-sm bg-orange-500/10 ${sizeClasses[size]} rounded-2xl border border-black/5`}
     >
       {children}
     </div>
@@ -73,7 +73,7 @@ function SocialLink({ icon: Icon, href, label }: { icon: React.ElementType; href
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2 px-6 py-3 transition-all duration-300 rounded-xl backdrop-blur-md bg-white/5 hover:bg-white/10 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 group"
+      className="flex items-center gap-2 px-6 py-3 transition-all duration-300 rounded-xl backdrop-blur-md bg-black/5 hover:bg-black/10 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 group"
     >
       <Icon className="w-5 h-5 text-orange-500 transition-transform duration-300 group-hover:rotate-12" />
       <span className="relative overflow-hidden">
@@ -115,7 +115,7 @@ function App() {
 
       {/* Main Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
-        <div className="w-full max-w-2xl p-8 rounded-3xl backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl relative overflow-hidden">
+        <div className="w-full max-w-2xl p-8 rounded-3xl backdrop-blur-xl bg-black/5 border border-black/10 shadow-2xl relative overflow-hidden">
           {/* Decorative Elements */}
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl"></div>
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-600/20 rounded-full blur-3xl"></div>

@@ -86,7 +86,7 @@
 
 @keyframes scramble {
   0%, 100% {
-    color: white;
+    color: #18181b;
   }
   25%, 75% {
     color: #f97316;
