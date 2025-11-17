@@ -8,6 +8,7 @@ import Skills from './components/Skills'
 import Experience from './components/Experience'
 import Projects from './components/Projects'
 import Footer from './components/Footer'
+import ResumeChat from './components/ResumeChat'
 
 const sections = ['home', 'about', 'skills', 'experience', 'projects']
 
@@ -23,6 +24,7 @@ function App() {
         <Projects />
       </main>
       <Footer />
+      <ResumeChat />
     </div>
   )
 }
