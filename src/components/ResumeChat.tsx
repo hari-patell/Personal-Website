@@ -248,7 +248,7 @@ export default function ResumeChat() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask a question about the resume..."
+                  placeholder="Ask about resume..."
                   className="flex-1 bg-zinc-800/80 text-white px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 border border-zinc-700/50 transition-all"
                   disabled={isLoading}
                 />
