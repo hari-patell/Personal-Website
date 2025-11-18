@@ -9,6 +9,7 @@ interface NavigationProps {
 export default function Navigation({ sections }: NavigationProps) {
   const [activeSection, setActiveSection] = useState('home')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [clickedButton, setClickedButton] = useState<string | null>(null)
   const { isScrolled } = useScrollPosition()
 
   useEffect(() => {
@@ -65,6 +66,15 @@ export default function Navigation({ sections }: NavigationProps) {
     }
   }
 
+  const handleButtonClick = (sectionId: string) => {
+    setClickedButton(sectionId)
+    scrollToSection(sectionId)
+    // Remove the outline after animation completes
+    setTimeout(() => {
+      setClickedButton(null)
+    }, 600) // Match the transition duration
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent, sectionId: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -85,24 +95,23 @@ export default function Navigation({ sections }: NavigationProps) {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => scrollToSection('home')}
-              onKeyDown={(e) => handleKeyDown(e, 'home')}
-              aria-label="Navigate to home section"
-              className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black rounded"
-            >
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
               Hari Patel
-            </button>
+            </span>
             <div className="hidden md:flex items-center gap-6" role="menubar">
               {sections.map((section) => (
                 <button
                   key={section}
-                  onClick={() => scrollToSection(section)}
+                  onClick={() => handleButtonClick(section)}
                   onKeyDown={(e) => handleKeyDown(e, section)}
                   aria-label={`Navigate to ${section} section`}
                   aria-current={activeSection === section ? 'page' : undefined}
                   role="menuitem"
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black ${
+                  className={`px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                    clickedButton === section
+                      ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-black animate-[fadeOut_0.6s_ease-out_forwards]'
+                      : ''
+                  } ${
                     activeSection === section
                       ? 'text-orange-500 bg-orange-500/10'
                       : 'text-gray-400 hover:text-orange-500 hover:bg-orange-500/5'
@@ -141,10 +150,14 @@ export default function Navigation({ sections }: NavigationProps) {
             {sections.map((section) => (
               <button
                 key={section}
-                onClick={() => scrollToSection(section)}
+                onClick={() => handleButtonClick(section)}
                 onKeyDown={(e) => handleKeyDown(e, section)}
                 aria-label={`Navigate to ${section} section`}
-                className={`w-full text-left px-4 py-3 text-base font-medium transition-all duration-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black ${
+                className={`w-full text-left px-4 py-3 text-base font-medium transition-all duration-300 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                  clickedButton === section
+                    ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-black animate-[fadeOut_0.6s_ease-out_forwards]'
+                    : ''
+                } ${
                   activeSection === section
                     ? 'text-orange-500 bg-orange-500/10'
                     : 'text-gray-400 hover:text-orange-500 hover:bg-orange-500/5'

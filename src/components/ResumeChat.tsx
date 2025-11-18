@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, X } from 'lucide-react';
+import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { getResumeContext } from '../data/resume';
 
@@ -17,7 +17,6 @@ export default function ResumeChat() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { ref, hasIntersected } = useIntersectionObserver();
 
@@ -151,104 +150,112 @@ export default function ResumeChat() {
   };
 
   return (
-    <>
-      {/* Chat Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 group"
-        aria-label="Open resume chat"
-      >
-        <Bot className="w-6 h-6" />
-        <span className="hidden sm:inline font-medium">Ask about my resume</span>
-      </button>
-
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-full max-w-md h-[600px] bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl flex flex-col">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bot className="w-5 h-5 text-white" />
-              <h3 className="text-white font-semibold">Resume Assistant</h3>
-            </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white hover:bg-white/20 p-1 rounded transition-colors"
-              aria-label="Close chat"
-            >
-              <X className="w-5 h-5" />
-            </button>
+    <section
+      id="AI"
+      ref={ref}
+      className="relative min-h-screen py-20 px-4 sm:px-6 lg:px-8"
+    >
+      <div className="max-w-5xl mx-auto">
+        {/* Section Header */}
+        <div
+          className={`text-center mb-12 transition-all duration-1000 ${
+            hasIntersected
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-10'
+          }`}
+        >
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Bot className="w-8 h-8 text-orange-500" />
+            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+              Ask About My Resume
+            </h2>
           </div>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Have questions about my experience, skills, or projects? Chat with my AI assistant to learn more!
+          </p>
+        </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                {message.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-white" />
-                  </div>
-                )}
+        {/* Chat Interface */}
+        <div
+          className={`transition-all duration-1000 delay-200 ${
+            hasIntersected
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-10'
+          }`}
+        >
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
+            {/* Messages */}
+            <div className="h-[500px] overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+              {messages.map((message, index) => (
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    message.role === 'user'
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-zinc-800 text-gray-100'
+                  key={index}
+                  className={`flex gap-3 ${
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                </div>
-                {message.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-white" />
+                  {message.role === 'assistant' && (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-5 h-5 text-white" />
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-5 py-3 ${
+                      message.role === 'user'
+                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
+                        : 'bg-zinc-800/80 text-gray-100 border border-zinc-700/50'
+                    }`}
+                  >
+                    <p className="text-sm sm:text-base whitespace-pre-wrap leading-relaxed">
+                      {message.content}
+                    </p>
                   </div>
-                )}
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-white" />
+                  {message.role === 'user' && (
+                    <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-white" />
+                    </div>
+                  )}
                 </div>
-                <div className="bg-zinc-800 rounded-lg px-4 py-2 flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />
-                  <span className="text-xs text-gray-400">Thinking...</span>
+              ))}
+              {isLoading && (
+                <div className="flex gap-3 justify-start">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="bg-zinc-800/80 border border-zinc-700/50 rounded-2xl px-5 py-3 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />
+                    <span className="text-sm text-gray-400">Thinking...</span>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
 
-          {/* Input */}
-          <div className="p-4 border-t border-zinc-800">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask a question about the resume..."
-                className="flex-1 bg-zinc-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                disabled={isLoading}
-              />
-              <button
-                onClick={handleSend}
-                disabled={isLoading || !input.trim()}
-                className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Send message"
-              >
-                <Send className="w-5 h-5" />
-              </button>
+            {/* Input */}
+            <div className="p-6 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-sm">
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask a question about the resume..."
+                  className="flex-1 bg-zinc-800/80 text-white px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 border border-zinc-700/50 transition-all"
+                  disabled={isLoading}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={isLoading || !input.trim()}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25"
+                  aria-label="Send message"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      )}
-    </>
+      </div>
+    </section>
   );
 }
 

@@ -10,7 +10,7 @@ import Projects from './components/Projects'
 import Footer from './components/Footer'
 import ResumeChat from './components/ResumeChat'
 
-const sections = ['home', 'about', 'skills', 'experience', 'projects']
+const sections = ['home', 'about', 'skills', 'experience', 'projects', 'AI']
 
 function App() {
   return (
@@ -22,9 +22,9 @@ function App() {
         <Skills />
         <Experience />
         <Projects />
+        <ResumeChat />
       </main>
       <Footer />
-      <ResumeChat />
     </div>
   )
 }
