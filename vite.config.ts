@@ -9,6 +9,16 @@ export default defineConfig({
   },
   // Base path for custom domain - using relative paths
   base: './',
+  server: {
+    // Proxy API requests to vercel dev server when running vite directly
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   build: {
     // Disable minification for debugging
     minify: false,
