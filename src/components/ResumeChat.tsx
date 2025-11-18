@@ -19,10 +19,14 @@ export default function ResumeChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialMount, setIsInitialMount] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { ref, hasIntersected } = useIntersectionObserver();
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll within the messages container only, not the entire page
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -191,7 +195,7 @@ export default function ResumeChat() {
         >
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
             {/* Messages */}
-            <div className="h-[500px] overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+            <div ref={messagesContainerRef} className="h-[500px] overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
               {messages.map((message, index) => (
                 <div
                   key={index}
