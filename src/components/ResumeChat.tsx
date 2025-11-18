@@ -40,10 +40,9 @@ export default function ResumeChat() {
     try {
       const resumeContext = getResumeContext();
       
-      // Determine API endpoint based on environment
-      const apiUrl = import.meta.env.PROD 
-        ? '/api/chat'  // Production: Vercel serverless function
-        : 'http://localhost:3000/api/chat';  // Development: local Vercel dev server
+      // Use relative path - works in both production and development with vercel dev
+      // When running 'npm run dev' (Vite only), you need to use 'vercel dev' instead
+      const apiUrl = '/api/chat';
 
       // Add timeout to frontend request (65 seconds to account for server timeout + model loading)
       const controller = new AbortController();
@@ -64,11 +63,36 @@ export default function ResumeChat() {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData: any = {};
+        try {
+          const text = await response.text();
+          errorData = text ? JSON.parse(text) : {};
+        } catch (e) {
+          // If response isn't JSON, use status text
+          errorData = { error: response.statusText || `HTTP ${response.status}` };
+        }
+        
+        console.error('API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          url: apiUrl,
+        });
+        
         if (response.status === 504 || response.status === 503) {
           throw new Error(errorData.error || 'Request timed out. Please try again.');
         }
-        throw new Error(errorData.error || 'Failed to get response');
+        
+        // More specific error messages
+        if (response.status === 404) {
+          throw new Error('API endpoint not found. Make sure you are running "vercel dev" or "npm run dev:vercel" instead of "npm run dev".');
+        }
+        
+        if (response.status === 500) {
+          throw new Error(errorData.error || errorData.message || 'Server error. Check console for details.');
+        }
+        
+        throw new Error(errorData.error || errorData.message || `Failed to get response (${response.status})`);
       }
 
       const data = await response.json();
@@ -100,9 +124,13 @@ export default function ResumeChat() {
           errorMessage = 'The request timed out after 60 seconds. The AI model may still be loading. Please wait 10-20 seconds and try again - subsequent requests will be much faster.';
         } else if (error.message.includes('loading')) {
           errorMessage = error.message;
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorMessage = 'Network error. Make sure you are running "vercel dev" or "npm run dev:vercel" to start the development server with API support.';
         } else {
           errorMessage = error.message || errorMessage;
         }
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = String(error.message);
       }
       
       const errorMsg: Message = {
