@@ -17,6 +17,7 @@ export default function ResumeChat() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialMount, setIsInitialMount] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { ref, hasIntersected } = useIntersectionObserver();
 
@@ -25,8 +26,13 @@ export default function ResumeChat() {
   };
 
   useEffect(() => {
+    // Skip scrolling on initial mount to prevent page from scrolling to bottom on load
+    if (isInitialMount) {
+      setIsInitialMount(false);
+      return;
+    }
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isInitialMount]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
