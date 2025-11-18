@@ -14,12 +14,15 @@ const socialLinks: SocialLink[] = [
 
 export default function Hero() {
   return (
-    <section id="home" className="relative min-h-screen w-full bg-gradient-to-br from-black via-black to-zinc-900 text-white overflow-hidden flex items-center justify-center">
-      {/* Animated Background Grid */}
-      <div className="fixed inset-0 w-full h-screen bg-[linear-gradient(to_right,#27272a_1px,transparent_1px),linear-gradient(to_bottom,#27272a_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+    <section id="home" className="relative min-h-screen w-full bg-black text-white overflow-hidden flex items-center justify-center">
+      {/* Base gradient layer */}
+      <div className="fixed inset-0 w-full h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900"></div>
       
-      {/* Gradient Overlay */}
-      <div className="fixed inset-0 w-full h-screen bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0)_15%,rgba(0,0,0,0.3)_30%,rgba(0,0,0,0.7)_50%,rgba(0,0,0,0.9)_70%,rgba(0,0,0,1)_85%)] pointer-events-none"></div>
+      {/* Animated Background Grid */}
+      <div className="fixed inset-0 w-full h-screen bg-[linear-gradient(to_right,#27272a_1px,transparent_1px),linear-gradient(to_bottom,#27272a_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40"></div>
+      
+      {/* Smooth vignette overlay - much smoother gradient */}
+      <div className="fixed inset-0 w-full h-screen bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_40%,rgba(0,0,0,0.4)_70%,rgba(0,0,0,0.8)_90%,black_100%)] pointer-events-none"></div>
 
       {/* Floating Icons Container - Hidden on mobile for better performance */}
       <div className="hidden sm:block fixed inset-0 w-full h-screen overflow-hidden pointer-events-none">
@@ -57,14 +60,14 @@ export default function Hero() {
 
       {/* Main Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full p-4 sm:p-8 safe-area-top safe-area-bottom">
-        {/* Glass effect enhancement */}
-        <div className="fixed top-0 left-0 w-full h-screen bg-gradient-to-tr from-zinc-900/20 via-black/10 to-zinc-800/20 blur-3xl opacity-50 pointer-events-none"></div>
-        <div className="fixed bottom-0 right-0 w-full h-screen bg-gradient-to-bl from-zinc-800/20 via-black/10 to-zinc-900/20 blur-3xl opacity-50 pointer-events-none"></div>
+        {/* Subtle ambient glow */}
+        <div className="fixed top-0 left-0 w-1/2 h-1/2 bg-gradient-to-br from-zinc-900/10 to-transparent blur-3xl pointer-events-none"></div>
+        <div className="fixed bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-zinc-900/10 to-transparent blur-3xl pointer-events-none"></div>
         
-        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl backdrop-blur-xl bg-black/5 border border-zinc-800/50 shadow-2xl shadow-orange-500/5 relative overflow-hidden z-20">
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl backdrop-blur-sm bg-transparent border-0 relative overflow-hidden z-20">
           {/* Decorative Elements */}
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/20 rounded-full blur-3xl overflow-hidden"></div>
-          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-600/20 rounded-full blur-3xl overflow-hidden"></div>
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/5 rounded-full blur-3xl overflow-hidden"></div>
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-600/5 rounded-full blur-3xl overflow-hidden"></div>
 
           <div className="relative mb-6 text-center">
             <div className="relative">
@@ -92,13 +95,6 @@ export default function Hero() {
             {socialLinks.map((link) => (
               <SocialLinkComponent key={link.label} {...link} />
             ))}
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-orange-500/50 rounded-full flex items-start justify-center p-2">
-            <div className="w-1 h-3 bg-orange-500 rounded-full"></div>
           </div>
         </div>
       </div>
