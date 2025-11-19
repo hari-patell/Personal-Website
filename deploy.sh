@@ -12,13 +12,13 @@ cat > temp_dist/index.html << 'EOL'
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- HTML Meta Tags -->
-    <title>Hari Patel | Software Engineer</title>
-    <meta name="description" content="Portfolio of Hari Patel, Software Engineer & Developer">
+    <title>Hari Patel</title>
+    <meta name="description" content="Portfolio of Hari Patel">
 
     <!-- Facebook Meta Tags -->
     <meta property="og:url" content="https://haripatell.com">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Hari Patel | Software Engineer">
+    <meta property="og:title" content="Hari Patel">
     <meta property="og:description" content="Portfolio of Hari Patel, Software Engineer & Developer">
     <meta property="og:image" content="https://haripatell.com/preview.png">
 
@@ -26,7 +26,7 @@ cat > temp_dist/index.html << 'EOL'
     <meta name="twitter:card" content="summary_large_image">
     <meta property="twitter:domain" content="haripatell.com">
     <meta property="twitter:url" content="https://haripatell.com">
-    <meta name="twitter:title" content="Hari Patel | Software Engineer">
+    <meta name="twitter:title" content="Hari Patel">
     <meta name="twitter:description" content="Portfolio of Hari Patel, Software Engineer & Developer">
     <meta name="twitter:image" content="https://haripatell.com/preview.png">
 
