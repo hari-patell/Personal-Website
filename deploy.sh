@@ -11,22 +11,26 @@ cat > temp_dist/index.html << 'EOL'
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://haripatell.com/" />
-    <meta property="og:title" content="Hari Patel | Software Engineer" />
-    <meta property="og:description" content="Portfolio of Hari Patel, Software Engineer & Developer. Check out my portfolio." />
-    <meta property="og:image" content="https://haripatell.com/preview.png" />
-    <meta property="og:site_name" content="Hari Patel" />
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://haripatell.com/" />
-    <meta property="twitter:title" content="Hari Patel | Software Engineer" />
-    <meta property="twitter:description" content="Portfolio of Hari Patel, Software Engineer & Developer. Check out my portfolio." />
-    <meta property="twitter:image" content="https://haripatell.com/preview.png" />
-
+    <!-- HTML Meta Tags -->
     <title>Hari Patel | Software Engineer</title>
+    <meta name="description" content="Portfolio of Hari Patel, Software Engineer & Developer">
+
+    <!-- Facebook Meta Tags -->
+    <meta property="og:url" content="https://haripatell.com">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Hari Patel | Software Engineer">
+    <meta property="og:description" content="Portfolio of Hari Patel, Software Engineer & Developer">
+    <meta property="og:image" content="https://haripatell.com/preview.png">
+
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="haripatell.com">
+    <meta property="twitter:url" content="https://haripatell.com">
+    <meta name="twitter:title" content="Hari Patel | Software Engineer">
+    <meta name="twitter:description" content="Portfolio of Hari Patel, Software Engineer & Developer">
+    <meta name="twitter:image" content="https://haripatell.com/preview.png">
+
+    <!-- Meta Tags Generated via https://www.opengraph.xyz -->
     <style>
         :root {
             --orange-500: #f97316;
@@ -266,13 +270,7 @@ EOL
 # Create CNAME file
 echo "haripatell.com" > temp_dist/CNAME
 
-# Create .nojekyll file to prevent GitHub Pages processing
-touch temp_dist/.nojekyll
-
-# Deploy directly to GitHub Pages using gh-pages
-npx gh-pages -d temp_dist --no-history
-
 # Clean up
-rm -rf temp_dist
+# rm -rf temp_dist
 
-echo "Deployment complete!" 
+echo "Deployment preparation complete! The static site is in temp_dist/" 
