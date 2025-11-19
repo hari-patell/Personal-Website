@@ -10,7 +10,23 @@ cat > temp_dist/index.html << 'EOL'
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hari-Krishna Patel</title>
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://haripatell.com/" />
+    <meta property="og:title" content="Hari Patel | Software Engineer" />
+    <meta property="og:description" content="Portfolio of Hari Patel, Software Engineer & Developer. Check out my portfolio." />
+    <meta property="og:image" content="https://haripatell.com/preview.png" />
+    <meta property="og:site_name" content="Hari Patel" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://haripatell.com/" />
+    <meta property="twitter:title" content="Hari Patel | Software Engineer" />
+    <meta property="twitter:description" content="Portfolio of Hari Patel, Software Engineer & Developer. Check out my portfolio." />
+    <meta property="twitter:image" content="https://haripatell.com/preview.png" />
+
+    <title>Hari Patel | Software Engineer</title>
     <style>
         :root {
             --orange-500: #f97316;
