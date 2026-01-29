@@ -94,6 +94,19 @@
   animation: float 6s ease-in-out infinite;
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
 .animate-delay-2000 {
   animation-delay: 2s;
   left: 15%;
