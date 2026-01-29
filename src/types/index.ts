@@ -35,4 +35,5 @@ export interface Experience {
   description: string
   achievements: string[]
   technologies: string[]
+  incoming?: boolean
 }

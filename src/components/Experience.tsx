@@ -1,5 +1,6 @@
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 import { experiences } from '../data/experience'
+import type { Experience } from '../types'
 import { Briefcase, MapPin, Calendar } from 'lucide-react'
 
 export default function Experience() {
@@ -41,12 +42,27 @@ export default function Experience() {
 function ExperienceCard({ experience, index }: { experience: Experience; index: number }) {
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl bg-zinc-900/50 border border-zinc-800/50 backdrop-blur-sm transition-all duration-500 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10"
+      className={`group relative overflow-hidden rounded-2xl bg-zinc-900/50 border backdrop-blur-sm transition-all duration-500 ${
+        experience.incoming
+          ? 'border-orange-500/40 shadow-lg shadow-orange-500/10 hover:border-orange-500/60 hover:shadow-xl hover:shadow-orange-500/15'
+          : 'border-zinc-800/50 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10'
+      }`}
       style={{
         animationDelay: `${index * 100}ms`,
         animation: 'fadeInUp 0.6s ease-out forwards',
       }}
     >
+      {/* Incoming badge */}
+      {experience.incoming && (
+        <div className="absolute top-4 right-4 z-10">
+          <div
+            className="px-3 py-1.5 text-xs font-bold tracking-widest uppercase rounded-md bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 bg-[length:200%_100%] text-white animate-shimmer"
+          >
+            Incoming
+          </div>
+        </div>
+      )}
+
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/0 to-orange-500/0 group-hover:from-orange-500/10 group-hover:via-orange-500/5 group-hover:to-orange-500/10 transition-all duration-500" />
 
