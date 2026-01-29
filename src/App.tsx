@@ -18,18 +18,17 @@ const sections = ['home', 'about', 'skills', 'experience', 'projects', 'AI']
 function App() {
   useEffect(() => {
     // Ensure page starts at the top on initial load
-    // Clear any hash that might cause auto-scrolling
-    if (window.location.hash && !window.location.hash.includes('?')) {
-      // Only clear if it's not from GitHub Pages routing (which has ? in hash)
-      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    // Ensure page starts at the top on initial load
+    if (window.location.hash) {
+      // Standard hash handling if needed, or just remove the specific GH pages check
     }
-    
+
     // Force scroll to top immediately and after other effects
     window.scrollTo(0, 0)
     const timer = setTimeout(() => {
       window.scrollTo(0, 0)
     }, 10)
-    
+
     return () => clearTimeout(timer)
   }, [])
 
