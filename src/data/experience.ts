@@ -2,6 +2,18 @@ import { Experience } from '../types'
 
 export const experiences: Experience[] = [
   {
+    id: '2',
+    company: 'Capital One',
+    position: 'Software Engineering Intern',
+    incoming: true,
+    location: 'McLean, VA',
+    startDate: 'Jun. 2026',
+    endDate: 'Aug. 2026',
+    description: 'I will be working at Capital One as part of the Technology Internship Program.',
+    achievements: ['Incoming Summer 2026 – Technology Internship Program'],
+    technologies: ['Summer 2026'],
+  },
+  {
     id: '1',
     company: 'Honeywell',
     position: 'Software Engineering Intern',
