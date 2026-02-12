@@ -20,7 +20,7 @@ cat > temp_dist/index.html << 'EOL'
     <meta property="og:type" content="website">
     <meta property="og:title" content="Hari Patel">
     <meta property="og:description" content="Portfolio of Hari Patel, Software Engineer & Developer">
-    <meta property="og:image" content="https://haripatell.com/preview.png">
+    <meta property="og:image" content="https://haripatell.com/og-image.png">
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
@@ -28,7 +28,7 @@ cat > temp_dist/index.html << 'EOL'
     <meta property="twitter:url" content="https://haripatell.com">
     <meta name="twitter:title" content="Hari Patel">
     <meta name="twitter:description" content="Portfolio of Hari Patel, Software Engineer & Developer">
-    <meta name="twitter:image" content="https://haripatell.com/preview.png">
+    <meta name="twitter:image" content="https://haripatell.com/og-image.png">
 
     <!-- Meta Tags Generated via https://www.opengraph.xyz -->
     <style>
