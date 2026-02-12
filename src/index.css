@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 /* Multiple float animations with different patterns */
 @keyframes float-1 {
   0% {
@@ -72,7 +80,7 @@
 
 .animate-float-nodelay {
   animation: float 6s ease-in-out infinite;
-  animation-delay: 0s; /* No delay */
+  animation-delay: 0s;
 }
 
 .animate-float-1 {
@@ -170,225 +178,69 @@
 
 /* Media query for landscape orientation */
 @media (orientation: landscape) {
-  .animate-delay-2000 {
-    left: 10%;
-    top: 15%;
-  }
-  
-  .animate-delay-3000 {
-    right: 10%;
-    top: 20%;
-  }
-  
-  .animate-delay-4000 {
-    left: 15%;
-    bottom: 15%;
-  }
-  
-  .animate-delay-5000 {
-    right: 15%;
-    bottom: 20%;
-  }
-  
-  .animate-delay-6000 {
-    left: 25%;
-    top: 25%;
-  }
-  
-  .animate-delay-7000 {
-    right: 25%;
-    bottom: 25%;
-  }
-  
-  .animate-delay-8000 {
-    left: 30%;
-    top: 10%;
-  }
-  
-  .animate-delay-9000 {
-    left: 3%;
-    top: 45%;
-  }
-  
-  .animate-delay-10000 {
-    right: 3%;
-    top: 55%;
-  }
-  
-  .animate-delay-11000 {
-    left: 45%;
-    bottom: 5%;
-  }
+  .animate-delay-2000 { left: 10%; top: 15%; }
+  .animate-delay-3000 { right: 10%; top: 20%; }
+  .animate-delay-4000 { left: 15%; bottom: 15%; }
+  .animate-delay-5000 { right: 15%; bottom: 20%; }
+  .animate-delay-6000 { left: 25%; top: 25%; }
+  .animate-delay-7000 { right: 25%; bottom: 25%; }
+  .animate-delay-8000 { left: 30%; top: 10%; }
+  .animate-delay-9000 { left: 3%; top: 45%; }
+  .animate-delay-10000 { right: 3%; top: 55%; }
+  .animate-delay-11000 { left: 45%; bottom: 5%; }
 }
 
 /* Media query for wider screens */
 @media (min-width: 1280px) {
-  .animate-delay-2000 {
-    left: 15%;
-    top: 20%;
-  }
-  
-  .animate-delay-3000 {
-    right: 15%;
-    top: 25%;
-  }
-  
-  .animate-delay-4000 {
-    left: 20%;
-    bottom: 20%;
-  }
-  
-  .animate-delay-5000 {
-    right: 20%;
-    bottom: 25%;
-  }
-  
-  .animate-delay-6000 {
-    left: 5%;
-    top: 40%;
-  }
-  
-  .animate-delay-7000 {
-    right: 5%;
-    bottom: 40%;
-  }
-  
-  .animate-delay-8000 {
-    left: 25%;
-    top: 10%;
-  }
-  
-  .animate-delay-9000 {
-    left: 2%;
-    top: 50%;
-  }
-  
-  .animate-delay-10000 {
-    right: 2%;
-    top: 60%;
-  }
-  
-  .animate-delay-11000 {
-    left: 48%;
-    bottom: 8%;
-  }
+  .animate-delay-2000 { left: 15%; top: 20%; }
+  .animate-delay-3000 { right: 15%; top: 25%; }
+  .animate-delay-4000 { left: 20%; bottom: 20%; }
+  .animate-delay-5000 { right: 20%; bottom: 25%; }
+  .animate-delay-6000 { left: 5%; top: 40%; }
+  .animate-delay-7000 { right: 5%; bottom: 40%; }
+  .animate-delay-8000 { left: 25%; top: 10%; }
+  .animate-delay-9000 { left: 2%; top: 50%; }
+  .animate-delay-10000 { right: 2%; top: 60%; }
+  .animate-delay-11000 { left: 48%; bottom: 8%; }
 }
 
 /* Media query for extra wide screens */
 @media (min-width: 1920px) {
-  .animate-delay-2000 {
-    left: 20%;
-    top: 20%;
-  }
-  
-  .animate-delay-3000 {
-    right: 20%;
-    top: 25%;
-  }
-  
-  .animate-delay-4000 {
-    left: 25%;
-    bottom: 20%;
-  }
-  
-  .animate-delay-5000 {
-    right: 25%;
-    bottom: 25%;
-  }
-  
-  .animate-delay-6000 {
-    left: 10%;
-    top: 40%;
-  }
-  
-  .animate-delay-7000 {
-    right: 10%;
-    bottom: 40%;
-  }
-  
-  .animate-delay-8000 {
-    left: 30%;
-    top: 10%;
-  }
-  
-  .animate-delay-9000 {
-    left: 5%;
-    top: 60%;
-  }
-  
-  .animate-delay-10000 {
-    right: 5%;
-    top: 70%;
-  }
-  
-  .animate-delay-11000 {
-    left: 45%;
-    bottom: 15%;
-  }
+  .animate-delay-2000 { left: 20%; top: 20%; }
+  .animate-delay-3000 { right: 20%; top: 25%; }
+  .animate-delay-4000 { left: 25%; bottom: 20%; }
+  .animate-delay-5000 { right: 25%; bottom: 25%; }
+  .animate-delay-6000 { left: 10%; top: 40%; }
+  .animate-delay-7000 { right: 10%; bottom: 40%; }
+  .animate-delay-8000 { left: 30%; top: 10%; }
+  .animate-delay-9000 { left: 5%; top: 60%; }
+  .animate-delay-10000 { right: 5%; top: 70%; }
+  .animate-delay-11000 { left: 45%; bottom: 15%; }
 }
 
 /* Media query for small screens in landscape orientation */
 @media (orientation: landscape) and (max-height: 500px) {
   .animate-float {
-    /* Reduce animation distance for small landscape screens */
     animation: float-small 6s ease-in-out infinite;
   }
-  
-  .animate-delay-2000 {
-    left: 5%;
-    top: 10%;
-  }
-  
-  .animate-delay-3000 {
-    right: 5%;
-    top: 15%;
-  }
-  
-  .animate-delay-4000 {
-    left: 10%;
-    bottom: 10%;
-  }
-  
-  .animate-delay-5000 {
-    right: 10%;
-    bottom: 15%;
-  }
-  
-  .animate-delay-6000 {
-    left: 20%;
-    top: 20%;
-  }
-  
-  .animate-delay-7000 {
-    right: 20%;
-    bottom: 20%;
-  }
-  
-  .animate-delay-8000 {
-    left: 25%;
-    top: 5%;
-  }
+  .animate-delay-2000 { left: 5%; top: 10%; }
+  .animate-delay-3000 { right: 5%; top: 15%; }
+  .animate-delay-4000 { left: 10%; bottom: 10%; }
+  .animate-delay-5000 { right: 10%; bottom: 15%; }
+  .animate-delay-6000 { left: 20%; top: 20%; }
+  .animate-delay-7000 { right: 20%; bottom: 20%; }
+  .animate-delay-8000 { left: 25%; top: 5%; }
 }
 
 @keyframes float-small {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate(10px, -10px) rotate(5deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(10px, -10px) rotate(5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
 }
 
 @keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-spin-slow {
@@ -404,21 +256,17 @@
   display: inline-block;
   position: relative;
   transition: color 0.3s ease;
-  color: white;
+  color: #1C1917;
 }
 
 @keyframes scramble {
-  0% {
-    color: white;
-  }
-  100% {
-    color: #f97316;
-  }
+  0% { color: #1C1917; }
+  100% { color: #78716C; }
 }
 
 .group:hover .cipher-char {
   animation: none;
-  color: #f97316;
+  color: #78716C;
   transition: color 0.3s ease;
 }
 
@@ -469,22 +317,22 @@ body {
   max-width: 100vw;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - refined for light theme */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: #FAF7F2;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #f97316;
-  border-radius: 5px;
+  background: #D6D3D1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
+  background: #A8A29E;
 }
 
 /* Safe area insets for iPhone notch and home indicator */
@@ -506,16 +354,22 @@ body {
 
 /* Mobile optimizations */
 @media (max-width: 640px) {
-  /* Reduce animation complexity on mobile */
   .animate-float-1,
   .animate-float-2,
   .animate-float-3 {
     animation-duration: 8s;
   }
   
-  /* Better touch targets */
   button, a {
     min-height: 44px;
     min-width: 44px;
   }
+}
+
+/* Decorative thin horizontal rule */
+.serif-divider {
+  width: 60px;
+  height: 1px;
+  background: #D6D3D1;
+  margin: 0 auto;
 }

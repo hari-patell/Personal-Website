@@ -38,7 +38,7 @@ export default function FloatingIcon({
 
   return (
     <div
-      className={`absolute ${animationClass} backdrop-blur-sm bg-zinc-900/30 rounded-2xl border border-zinc-800/30 z-0 flex items-center justify-center`}
+      className={`absolute ${animationClass} backdrop-blur-sm bg-white/40 rounded-2xl border border-stone-200/40 z-0 flex items-center justify-center`}
       style={{ 
         ...defaultPosition,
         width: sizeDimensions[size],
@@ -52,4 +52,3 @@ export default function FloatingIcon({
     </div>
   )
 }
-

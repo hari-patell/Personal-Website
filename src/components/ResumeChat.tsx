@@ -23,14 +23,12 @@ export default function ResumeChat() {
   const { ref, hasIntersected } = useIntersectionObserver();
 
   const scrollToBottom = () => {
-    // Scroll within the messages container only, not the entire page
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   };
 
   useEffect(() => {
-    // Skip scrolling on initial mount to prevent page from scrolling to bottom on load
     if (isInitialMount) {
       setIsInitialMount(false);
       return;
@@ -48,12 +46,8 @@ export default function ResumeChat() {
 
     try {
       const resumeContext = getResumeContext();
-      
-      // Use relative path - works in both production and development with vercel dev
-      // When running 'npm run dev' (Vite only), you need to use 'vercel dev' instead
       const apiUrl = '/api/chat';
 
-      // Add timeout to frontend request (65 seconds to account for server timeout + model loading)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 65000);
 
@@ -77,7 +71,6 @@ export default function ResumeChat() {
           const text = await response.text();
           errorData = text ? JSON.parse(text) : {};
         } catch (e) {
-          // If response isn't JSON, use status text
           errorData = { error: response.statusText || `HTTP ${response.status}` };
         }
         
@@ -92,7 +85,6 @@ export default function ResumeChat() {
           throw new Error(errorData.error || 'Request timed out. Please try again.');
         }
         
-        // More specific error messages
         if (response.status === 404) {
           throw new Error('API endpoint not found. Make sure you are running "vercel dev" or "npm run dev:vercel" instead of "npm run dev".');
         }
@@ -108,7 +100,6 @@ export default function ResumeChat() {
       
       if (data.error) {
         if (data.retry) {
-          // Model is loading, suggest retry
           const errorMessage: Message = {
             role: 'assistant',
             content: 'The AI model is loading. Please wait a moment and try again.',
@@ -175,13 +166,14 @@ export default function ResumeChat() {
           }`}
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Bot className="w-8 h-8 text-orange-500" />
-            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
-              Ask About My Resume
+            <Bot className="w-7 h-7 text-stone-500" />
+            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-900 tracking-tight">
+              Ask About <span className="italic font-medium">My Resume</span>
             </h2>
           </div>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Have questions about my experience, skills, or projects? Chat with my AI assistant to learn more!
+          <div className="serif-divider my-6"></div>
+          <p className="text-stone-500 text-lg max-w-2xl mx-auto">
+            Have questions about my experience, skills, or projects? Chat with my AI assistant to learn more.
           </p>
         </div>
 
@@ -193,9 +185,9 @@ export default function ResumeChat() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm">
+          <div className="bg-white/70 border border-stone-200/60 rounded-2xl shadow-sm overflow-hidden backdrop-blur-sm">
             {/* Messages */}
-            <div ref={messagesContainerRef} className="h-[500px] overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+            <div ref={messagesContainerRef} className="h-[500px] overflow-y-auto p-6 space-y-4">
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -204,15 +196,15 @@ export default function ResumeChat() {
                   }`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center flex-shrink-0">
                       <Bot className="w-5 h-5 text-white" />
                     </div>
                   )}
                   <div
                     className={`max-w-[75%] rounded-2xl px-5 py-3 ${
                       message.role === 'user'
-                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white'
-                        : 'bg-zinc-800/80 text-gray-100 border border-zinc-700/50'
+                        ? 'bg-stone-900 text-white'
+                        : 'bg-cream-200/60 text-stone-800 border border-stone-200/40'
                     }`}
                   >
                     <p className="text-sm sm:text-base whitespace-pre-wrap leading-relaxed">
@@ -220,20 +212,20 @@ export default function ResumeChat() {
                     </p>
                   </div>
                   {message.role === 'user' && (
-                    <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                      <User className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-stone-600" />
                     </div>
                   )}
                 </div>
               ))}
               {isLoading && (
                 <div className="flex gap-3 justify-start">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center flex-shrink-0">
                     <Bot className="w-5 h-5 text-white" />
                   </div>
-                  <div className="bg-zinc-800/80 border border-zinc-700/50 rounded-2xl px-5 py-3 flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />
-                    <span className="text-sm text-gray-400">Thinking...</span>
+                  <div className="bg-cream-200/60 border border-stone-200/40 rounded-2xl px-5 py-3 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 text-stone-500 animate-spin" />
+                    <span className="text-sm text-stone-500">Thinking...</span>
                   </div>
                 </div>
               )}
@@ -241,7 +233,7 @@ export default function ResumeChat() {
             </div>
 
             {/* Input */}
-            <div className="p-6 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-sm">
+            <div className="p-6 border-t border-stone-200/60 bg-cream-50/80 backdrop-blur-sm">
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -249,13 +241,13 @@ export default function ResumeChat() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask about resume..."
-                  className="flex-1 bg-zinc-800/80 text-white px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 border border-zinc-700/50 transition-all"
+                  className="flex-1 bg-white text-stone-900 px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 border border-stone-200/60 transition-all placeholder:text-stone-400"
                   disabled={isLoading}
                 />
                 <button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25"
+                  className="bg-stone-900 hover:bg-stone-800 text-white px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                   aria-label="Send message"
                 >
                   <Send className="w-5 h-5" />
@@ -268,4 +260,3 @@ export default function ResumeChat() {
     </section>
   );
 }
-
