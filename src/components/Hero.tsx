@@ -14,10 +14,6 @@ const socialLinks: SocialLink[] = [
 export default function Hero() {
   return (
     <section id="home" className="relative min-h-screen w-full bg-cream-100 overflow-hidden flex items-center justify-center">
-      {/* Subtle decorative elements */}
-      <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-bl from-cream-200/60 to-transparent pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-tr from-cream-200/40 to-transparent pointer-events-none"></div>
-
       {/* Main Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom">
         <div className="w-full max-w-2xl text-center">
