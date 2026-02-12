@@ -19,55 +19,56 @@ export default function About() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-center bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
-            About Me
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 tracking-tight">
+            About <span className="italic font-medium">Me</span>
           </h2>
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 mt-8 md:mt-12">
-            <div className="space-y-4 md:space-y-6">
-              <p className="text-gray-300 leading-relaxed text-base sm:text-lg">
+          <div className="serif-divider my-6"></div>
+          <div className="grid md:grid-cols-2 gap-6 md:gap-10 mt-10 md:mt-14">
+            <div className="space-y-5">
+              <p className="text-stone-600 leading-relaxed text-base sm:text-lg">
                 I'm a Software Engineering Intern at Honeywell with a passion for creating high-performance solutions.
                 I've optimized systems achieving 96.67% performance improvements and built scalable applications
                 serving 100+ teams. My expertise spans full-stack development, machine learning, and mobile applications.
               </p>
-              <p className="text-gray-300 leading-relaxed text-base sm:text-lg">
+              <p className="text-stone-600 leading-relaxed text-base sm:text-lg">
                 I thrive on solving complex problems through clean code and systematic optimization. Whether it's
                 reducing execution time from 4.5 seconds to 150ms, achieving 94.2% accuracy with custom neural networks,
                 or leading teams to build innovative solutions, I'm driven by measurable impact and continuous learning.
               </p>
             </div>
-            <div className="space-y-6">
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50">
-                <Code2 className="w-6 h-6 text-orange-500 mt-1 flex-shrink-0" />
+            <div className="space-y-4">
+              <div className="flex items-start gap-4 p-5 rounded-xl bg-white/60 border border-stone-200/60 transition-all duration-300 hover:bg-white hover:shadow-sm hover:border-stone-300/60">
+                <Code2 className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Clean Code</h3>
-                  <p className="text-gray-400 text-sm">
+                  <h3 className="font-serif font-semibold text-stone-900 mb-1">Clean Code</h3>
+                  <p className="text-stone-500 text-sm leading-relaxed">
                     Writing maintainable, scalable, and well-documented code
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50">
-                <Rocket className="w-6 h-6 text-orange-500 mt-1 flex-shrink-0" />
+              <div className="flex items-start gap-4 p-5 rounded-xl bg-white/60 border border-stone-200/60 transition-all duration-300 hover:bg-white hover:shadow-sm hover:border-stone-300/60">
+                <Rocket className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Performance</h3>
-                  <p className="text-gray-400 text-sm">
+                  <h3 className="font-serif font-semibold text-stone-900 mb-1">Performance</h3>
+                  <p className="text-stone-500 text-sm leading-relaxed">
                     Optimizing applications for speed and efficiency
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50">
-                <Target className="w-6 h-6 text-orange-500 mt-1 flex-shrink-0" />
+              <div className="flex items-start gap-4 p-5 rounded-xl bg-white/60 border border-stone-200/60 transition-all duration-300 hover:bg-white hover:shadow-sm hover:border-stone-300/60">
+                <Target className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Problem Solving</h3>
-                  <p className="text-gray-400 text-sm">
+                  <h3 className="font-serif font-semibold text-stone-900 mb-1">Problem Solving</h3>
+                  <p className="text-stone-500 text-sm leading-relaxed">
                     Breaking down complex challenges into manageable solutions
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50">
-                <Heart className="w-6 h-6 text-orange-500 mt-1 flex-shrink-0" />
+              <div className="flex items-start gap-4 p-5 rounded-xl bg-white/60 border border-stone-200/60 transition-all duration-300 hover:bg-white hover:shadow-sm hover:border-stone-300/60">
+                <Heart className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-white mb-1">Passion</h3>
-                  <p className="text-gray-400 text-sm">
+                  <h3 className="font-serif font-semibold text-stone-900 mb-1">Passion</h3>
+                  <p className="text-stone-500 text-sm leading-relaxed">
                     Genuine enthusiasm for technology and continuous growth
                   </p>
                 </div>
@@ -79,4 +80,3 @@ export default function About() {
     </section>
   )
 }
-

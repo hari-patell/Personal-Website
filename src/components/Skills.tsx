@@ -4,18 +4,18 @@ import { skills } from '../data/skills'
 import { Skill } from '../types'
 
 const categoryColors = {
-  frontend: 'from-blue-500 to-cyan-500',
-  backend: 'from-green-500 to-emerald-500',
-  database: 'from-purple-500 to-pink-500',
-  tools: 'from-yellow-500 to-orange-500',
-  cloud: 'from-indigo-500 to-purple-500',
+  frontend: 'from-stone-600 to-stone-500',
+  backend: 'from-stone-700 to-stone-600',
+  database: 'from-stone-500 to-stone-400',
+  tools: 'from-stone-800 to-stone-700',
+  cloud: 'from-stone-600 to-stone-500',
 }
 
 const proficiencyColors = {
-  beginner: 'bg-gray-600',
-  intermediate: 'bg-blue-600',
-  advanced: 'bg-green-600',
-  expert: 'bg-orange-600',
+  beginner: 'bg-stone-300',
+  intermediate: 'bg-stone-400',
+  advanced: 'bg-stone-600',
+  expert: 'bg-stone-800',
 }
 
 export default function Skills() {
@@ -42,23 +42,24 @@ export default function Skills() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
-            Skills & Technologies
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 tracking-tight">
+            Skills & <span className="italic font-medium">Technologies</span>
           </h2>
-          <p className="text-gray-400 text-center mb-8 sm:mb-12 text-sm sm:text-base">
+          <div className="serif-divider my-6"></div>
+          <p className="text-stone-500 text-center mb-8 sm:mb-12 text-sm sm:text-base">
             Technologies I work with and continue to learn
           </p>
 
           {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
+          <div className="flex flex-wrap justify-center gap-2 mb-12">
             <button
               onClick={() => setSelectedCategory(null)}
               aria-label="Show all skills"
               aria-pressed={selectedCategory === null}
-              className={`px-4 py-2 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 focus:ring-offset-cream-100 ${
                 selectedCategory === null
-                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/50'
-                  : 'bg-zinc-900/50 text-gray-400 hover:text-white hover:bg-zinc-800/50 border border-zinc-800/50'
+                  ? 'bg-stone-900 text-white shadow-sm'
+                  : 'bg-white/60 text-stone-500 hover:text-stone-800 hover:bg-white border border-stone-200/60'
               }`}
             >
               All
@@ -69,10 +70,10 @@ export default function Skills() {
                 onClick={() => setSelectedCategory(category)}
                 aria-label={`Filter skills by ${category}`}
                 aria-pressed={selectedCategory === category}
-                className={`px-4 py-2 rounded-lg transition-all duration-300 capitalize focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 capitalize focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 focus:ring-offset-cream-100 ${
                   selectedCategory === category
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/50'
-                    : 'bg-zinc-900/50 text-gray-400 hover:text-white hover:bg-zinc-800/50 border border-zinc-800/50'
+                    ? 'bg-stone-900 text-white shadow-sm'
+                    : 'bg-white/60 text-stone-500 hover:text-stone-800 hover:bg-white border border-stone-200/60'
                 }`}
               >
                 {category}
@@ -97,7 +98,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
 
   return (
     <div
-      className={`group relative p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 backdrop-blur-sm transition-all duration-300 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/20 hover:scale-105 cursor-pointer`}
+      className="group relative p-4 rounded-xl bg-white/60 border border-stone-200/60 transition-all duration-300 hover:bg-white hover:border-stone-300 hover:shadow-sm cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -107,16 +108,16 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
     >
       <div className="flex flex-col items-center gap-3">
         <div
-          className={`w-12 h-12 rounded-lg bg-gradient-to-br ${
+          className={`w-11 h-11 rounded-lg bg-gradient-to-br ${
             categoryColors[skill.category]
-          } flex items-center justify-center text-white font-bold text-lg transition-transform duration-300 ${
-            isHovered ? 'scale-110 rotate-6' : ''
+          } flex items-center justify-center text-white font-serif font-bold text-lg transition-transform duration-300 ${
+            isHovered ? 'scale-110' : ''
           }`}
         >
           {skill.name.charAt(0)}
         </div>
         <div className="text-center">
-          <h3 className="text-white font-semibold text-sm mb-1">{skill.name}</h3>
+          <h3 className="text-stone-800 font-medium text-sm mb-1.5">{skill.name}</h3>
           <div className="flex items-center gap-1 justify-center">
             {['beginner', 'intermediate', 'advanced', 'expert'].map((level, i) => {
               const levelIndex = ['beginner', 'intermediate', 'advanced', 'expert'].indexOf(
@@ -128,7 +129,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
                   className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                     i <= levelIndex
                       ? proficiencyColors[skill.proficiency as keyof typeof proficiencyColors]
-                      : 'bg-gray-700'
+                      : 'bg-stone-200'
                   }`}
                 />
               )
@@ -139,4 +140,3 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
     </div>
   )
 }
-

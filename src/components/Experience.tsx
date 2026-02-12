@@ -21,14 +21,15 @@ export default function Experience() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
-            Experience
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 tracking-tight">
+            <span className="italic font-medium">Experience</span>
           </h2>
-          <p className="text-gray-400 text-center mb-12 text-sm sm:text-base">
+          <div className="serif-divider my-6"></div>
+          <p className="text-stone-500 text-center mb-12 text-sm sm:text-base">
             Professional experience and internships
           </p>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             {experiences.map((experience, index) => (
               <ExperienceCard key={experience.id} experience={experience} index={index} />
             ))}
@@ -42,10 +43,10 @@ export default function Experience() {
 function ExperienceCard({ experience, index }: { experience: Experience; index: number }) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl bg-zinc-900/50 border backdrop-blur-sm transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-2xl bg-white/60 border backdrop-blur-sm transition-all duration-500 ${
         experience.incoming
-          ? 'border-orange-500/40 shadow-lg shadow-orange-500/10 hover:border-orange-500/60 hover:shadow-xl hover:shadow-orange-500/15'
-          : 'border-zinc-800/50 hover:border-orange-500/30 hover:shadow-lg hover:shadow-orange-500/10'
+          ? 'border-stone-400/50 shadow-sm hover:shadow-md hover:border-stone-400/70'
+          : 'border-stone-200/60 hover:border-stone-300 hover:shadow-sm hover:bg-white'
       }`}
       style={{
         animationDelay: `${index * 100}ms`,
@@ -56,32 +57,29 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
       {experience.incoming && (
         <div className="absolute top-4 right-4 z-10">
           <div
-            className="px-3 py-1.5 text-xs font-bold tracking-widest uppercase rounded-md bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 bg-[length:200%_100%] text-white animate-shimmer"
+            className="px-3 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-md bg-stone-900 text-white"
           >
             Incoming
           </div>
         </div>
       )}
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/0 to-orange-500/0 group-hover:from-orange-500/10 group-hover:via-orange-500/5 group-hover:to-orange-500/10 transition-all duration-500" />
-
-      <div className="relative p-6">
+      <div className="relative p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4">
           <div className="flex items-start justify-between mb-2 flex-wrap gap-2">
             <div>
-              <h3 className="text-xl font-bold text-white mb-1 group-hover:text-orange-400 transition-colors">
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 mb-1 group-hover:text-stone-700 transition-colors">
                 {experience.position}
               </h3>
-              <div className="flex items-center gap-2 text-orange-500 font-semibold">
-                <Briefcase className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-stone-600 font-medium">
+                <Briefcase className="w-4 h-4 text-stone-400" />
                 <span>{experience.company}</span>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mt-3">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-stone-500 mt-3">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4" />
               <span>{experience.startDate} – {experience.endDate}</span>
@@ -94,17 +92,17 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
         </div>
 
         {/* Description */}
-        <p className="text-gray-300 mb-4 text-sm sm:text-base leading-relaxed">
+        <p className="text-stone-600 mb-4 text-sm sm:text-base leading-relaxed">
           {experience.description}
         </p>
 
         {/* Achievements */}
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-gray-400 mb-2">Key Achievements:</h4>
+          <h4 className="text-sm font-semibold text-stone-500 mb-2 uppercase tracking-wider">Key Achievements</h4>
           <ul className="space-y-2">
             {experience.achievements.map((achievement, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-gray-300">
-                <span className="text-orange-500 mt-1.5">•</span>
+              <li key={idx} className="flex items-start gap-2 text-sm text-stone-600">
+                <span className="text-stone-400 mt-1.5 text-xs">&#9679;</span>
                 <span className="leading-relaxed">{achievement}</span>
               </li>
             ))}
@@ -112,11 +110,11 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
         </div>
 
         {/* Technologies */}
-        <div className="flex flex-wrap gap-2 pt-4 border-t border-zinc-800/50">
+        <div className="flex flex-wrap gap-2 pt-4 border-t border-stone-200/60">
           {experience.technologies.map((tech) => (
             <span
               key={tech}
-              className="px-2 py-0.5 text-xs rounded-md bg-zinc-800/50 text-gray-300 border border-zinc-700/50 group-hover:border-orange-500/30 transition-colors leading-tight inline-flex items-center h-5"
+              className="px-2.5 py-0.5 text-xs rounded-md bg-cream-200/80 text-stone-600 border border-stone-200/40 transition-colors leading-tight inline-flex items-center h-5 font-medium"
             >
               {tech}
             </span>
@@ -126,4 +124,3 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
     </div>
   )
 }
-
