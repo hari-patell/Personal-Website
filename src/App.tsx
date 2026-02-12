@@ -33,7 +33,7 @@ function App() {
   }, [])
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-black via-black to-zinc-900 text-white overflow-x-hidden">
+    <div className="relative min-h-screen w-full bg-cream-100 text-stone-900 font-sans overflow-x-hidden">
       <Navigation sections={sections} />
       <main>
         <Hero />

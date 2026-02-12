@@ -38,7 +38,6 @@ export default function Navigation({ sections }: NavigationProps) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
-      // Don't close if clicking on the menu button or inside the nav
       if (
         isMobileMenuOpen &&
         !target.closest('nav') &&
@@ -50,7 +49,6 @@ export default function Navigation({ sections }: NavigationProps) {
     }
 
     if (isMobileMenuOpen) {
-      // Use a small delay to avoid conflicts with button click
       setTimeout(() => {
         document.addEventListener('click', handleClickOutside)
       }, 100)
@@ -62,17 +60,16 @@ export default function Navigation({ sections }: NavigationProps) {
     const element = document.getElementById(sectionId)
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      setIsMobileMenuOpen(false) // Close mobile menu after navigation
+      setIsMobileMenuOpen(false)
     }
   }
 
   const handleButtonClick = (sectionId: string) => {
     setClickedButton(sectionId)
     scrollToSection(sectionId)
-    // Remove the outline after animation completes
     setTimeout(() => {
       setClickedButton(null)
-    }, 600) // Match the transition duration
+    }, 600)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent, sectionId: string) => {
@@ -89,16 +86,16 @@ export default function Navigation({ sections }: NavigationProps) {
         aria-label="Main navigation"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 safe-area-top ${
           isScrolled
-            ? 'bg-black/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg shadow-orange-500/5'
+            ? 'bg-cream-100/90 backdrop-blur-xl border-b border-stone-200/60 shadow-sm'
             : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+            <span className="text-lg sm:text-xl font-serif font-bold text-stone-900 tracking-tight">
               Hari Patel
             </span>
-            <div className="hidden md:flex items-center gap-6" role="menubar">
+            <div className="hidden md:flex items-center gap-1" role="menubar">
               {sections.map((section) => (
                 <button
                   key={section}
@@ -107,14 +104,14 @@ export default function Navigation({ sections }: NavigationProps) {
                   aria-label={`Navigate to ${section} section`}
                   aria-current={activeSection === section ? 'page' : undefined}
                   role="menuitem"
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                  className={`px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 ${
                     clickedButton === section
-                      ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-black animate-[fadeOut_0.6s_ease-out_forwards]'
+                      ? 'ring-2 ring-stone-400 ring-offset-2 ring-offset-cream-100 animate-[fadeOut_0.6s_ease-out_forwards]'
                       : ''
                   } ${
                     activeSection === section
-                      ? 'text-orange-500 bg-orange-500/10'
-                      : 'text-gray-400 hover:text-orange-500 hover:bg-orange-500/5'
+                      ? 'text-stone-900 bg-stone-900/5'
+                      : 'text-stone-500 hover:text-stone-900 hover:bg-stone-900/5'
                   }`}
                 >
                   {section.charAt(0).toUpperCase() + section.slice(1)}
@@ -128,7 +125,7 @@ export default function Navigation({ sections }: NavigationProps) {
               }}
               aria-label="Toggle mobile menu"
               aria-expanded={isMobileMenuOpen}
-              className="md:hidden text-orange-500 hover:text-orange-400 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black rounded p-2 z-50 relative"
+              className="md:hidden text-stone-700 hover:text-stone-900 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 focus:ring-offset-cream-100 rounded p-2 z-50 relative"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -145,7 +142,7 @@ export default function Navigation({ sections }: NavigationProps) {
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-black/95 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg">
+        <div className="bg-cream-100/95 backdrop-blur-xl border-b border-stone-200/60 shadow-sm">
           <div className="px-4 py-4 space-y-2">
             {sections.map((section) => (
               <button
@@ -153,14 +150,14 @@ export default function Navigation({ sections }: NavigationProps) {
                 onClick={() => handleButtonClick(section)}
                 onKeyDown={(e) => handleKeyDown(e, section)}
                 aria-label={`Navigate to ${section} section`}
-                className={`w-full text-left px-4 py-3 text-base font-medium transition-all duration-300 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                className={`w-full text-left px-4 py-3 text-base font-medium transition-all duration-300 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 ${
                   clickedButton === section
-                    ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-black animate-[fadeOut_0.6s_ease-out_forwards]'
+                    ? 'ring-2 ring-stone-400 ring-offset-2 ring-offset-cream-100 animate-[fadeOut_0.6s_ease-out_forwards]'
                     : ''
                 } ${
                   activeSection === section
-                    ? 'text-orange-500 bg-orange-500/10'
-                    : 'text-gray-400 hover:text-orange-500 hover:bg-orange-500/5'
+                    ? 'text-stone-900 bg-stone-900/5'
+                    : 'text-stone-500 hover:text-stone-900 hover:bg-stone-900/5'
                 }`}
               >
                 {section.charAt(0).toUpperCase() + section.slice(1)}
@@ -172,4 +169,3 @@ export default function Navigation({ sections }: NavigationProps) {
     </>
   )
 }
-
