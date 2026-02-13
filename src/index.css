@@ -283,6 +283,16 @@
 .group:hover .cipher-char:nth-child(11) { animation-delay: 0.22s; }
 .group:hover .cipher-char:nth-child(12) { animation-delay: 0.24s; }
 
+/* Dark mode cipher text - cream-100 for default, cream-400 for hover */
+.dark .cipher-char {
+  color: #FAF7F2;
+}
+
+.dark .group:hover .cipher-char {
+  animation: none;
+  color: #D6CFC3;
+}
+
 .cipher-char::before {
   content: attr(data-scramble);
   position: absolute;
@@ -335,6 +345,19 @@ body {
   background: #A8A29E;
 }
 
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #171717;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #404040;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
 /* Safe area insets for iPhone notch and home indicator */
 .safe-area-top {
   padding-top: env(safe-area-inset-top);
@@ -372,4 +395,8 @@ body {
   height: 1px;
   background: #D6D3D1;
   margin: 0 auto;
+}
+
+.dark .serif-divider {
+  background: #57534E;
 }

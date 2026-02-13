@@ -21,11 +21,11 @@ export default function Experience() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 tracking-tight">
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
             <span className="italic font-medium">Experience</span>
           </h2>
           <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 text-center mb-12 text-sm sm:text-base">
+          <p className="text-stone-500 dark:text-cream-200 text-center mb-12 text-sm sm:text-base">
             Professional experience and internships
           </p>
 
@@ -43,10 +43,10 @@ export default function Experience() {
 function ExperienceCard({ experience, index }: { experience: Experience; index: number }) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl bg-white/60 border backdrop-blur-sm transition-all duration-500 ${
+      className={`group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-stone-800/50 border backdrop-blur-sm transition-all duration-500 ${
         experience.incoming
-          ? 'border-stone-400/50 shadow-sm hover:shadow-md hover:border-stone-400/70'
-          : 'border-stone-200/60 hover:border-stone-300 hover:shadow-sm hover:bg-white'
+          ? 'border-stone-400/50 dark:border-stone-500/50 shadow-sm hover:shadow-md hover:border-stone-400/70 dark:hover:border-stone-500/70'
+          : 'border-stone-200/60 dark:border-stone-600/50 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm hover:bg-white dark:hover:bg-stone-700/60'
       }`}
       style={{
         animationDelay: `${index * 100}ms`,
@@ -57,7 +57,7 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
       {experience.incoming && (
         <div className="absolute top-4 right-4 z-10">
           <div
-            className="px-3 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-md bg-stone-900 text-white"
+            className="px-3 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-md bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg"
           >
             Incoming
           </div>
@@ -69,17 +69,17 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
         <div className="mb-4">
           <div className="flex items-start justify-between mb-2 flex-wrap gap-2">
             <div>
-              <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 mb-1 group-hover:text-stone-700 transition-colors">
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 dark:text-cream-100 mb-1 group-hover:text-stone-700 dark:group-hover:text-cream-200 transition-colors">
                 {experience.position}
               </h3>
-              <div className="flex items-center gap-2 text-stone-600 font-medium">
-                <Briefcase className="w-4 h-4 text-stone-400" />
+              <div className="flex items-center gap-2 text-stone-600 dark:text-cream-200 font-medium">
+                <Briefcase className="w-4 h-4 text-stone-400 dark:text-cream-300" />
                 <span>{experience.company}</span>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4 text-sm text-stone-500 mt-3">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-stone-500 dark:text-cream-200/90 mt-3">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4" />
               <span>{experience.startDate} – {experience.endDate}</span>
@@ -92,17 +92,17 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
         </div>
 
         {/* Description */}
-        <p className="text-stone-600 mb-4 text-sm sm:text-base leading-relaxed">
+        <p className="text-stone-600 dark:text-cream-200 mb-4 text-sm sm:text-base leading-relaxed">
           {experience.description}
         </p>
 
         {/* Achievements */}
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-stone-500 mb-2 uppercase tracking-wider">Key Achievements</h4>
+          <h4 className="text-sm font-semibold text-stone-500 dark:text-cream-300 mb-2 uppercase tracking-wider">Key Achievements</h4>
           <ul className="space-y-2">
             {experience.achievements.map((achievement, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-stone-600">
-                <span className="text-stone-400 mt-1.5 text-xs">&#9679;</span>
+              <li key={idx} className="flex items-start gap-2 text-sm text-stone-600 dark:text-cream-200">
+                <span className="text-stone-400 dark:text-cream-400 mt-1.5 text-xs">&#9679;</span>
                 <span className="leading-relaxed">{achievement}</span>
               </li>
             ))}
@@ -110,11 +110,11 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
         </div>
 
         {/* Technologies */}
-        <div className="flex flex-wrap gap-2 pt-4 border-t border-stone-200/60">
+        <div className="flex flex-wrap gap-2 pt-4 border-t border-stone-200/60 dark:border-stone-600/50">
           {experience.technologies.map((tech) => (
             <span
               key={tech}
-              className="px-2.5 py-0.5 text-xs rounded-md bg-cream-200/80 text-stone-600 border border-stone-200/40 transition-colors leading-tight inline-flex items-center h-5 font-medium"
+              className="px-2.5 py-0.5 text-xs rounded-md bg-cream-200/80 dark:bg-stone-700/80 text-stone-600 dark:text-cream-200 border border-stone-200/40 dark:border-stone-600/50 transition-colors leading-tight inline-flex items-center h-5 font-medium"
             >
               {tech}
             </span>

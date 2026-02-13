@@ -166,13 +166,13 @@ export default function ResumeChat() {
           }`}
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Bot className="w-7 h-7 text-stone-500" />
-            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-900 tracking-tight">
+            <Bot className="w-7 h-7 text-stone-500 dark:text-cream-300" />
+            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-900 dark:text-cream-100 tracking-tight">
               Ask About <span className="italic font-medium">My Resume</span>
             </h2>
           </div>
           <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 text-lg max-w-2xl mx-auto">
+          <p className="text-stone-500 dark:text-cream-200 text-lg max-w-2xl mx-auto">
             Have questions about my experience, skills, or projects? Chat with my AI assistant to learn more.
           </p>
         </div>
@@ -185,7 +185,7 @@ export default function ResumeChat() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="bg-white/70 border border-stone-200/60 rounded-2xl shadow-sm overflow-hidden backdrop-blur-sm">
+          <div className="bg-white/70 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-600/50 rounded-2xl shadow-sm overflow-hidden backdrop-blur-sm">
             {/* Messages */}
             <div ref={messagesContainerRef} className="h-[500px] overflow-y-auto p-6 space-y-4">
               {messages.map((message, index) => (
@@ -196,15 +196,15 @@ export default function ResumeChat() {
                   }`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-5 h-5 text-white dark:text-darkBg" />
                     </div>
                   )}
                   <div
                     className={`max-w-[75%] rounded-2xl px-5 py-3 ${
                       message.role === 'user'
-                        ? 'bg-stone-900 text-white'
-                        : 'bg-cream-200/60 text-stone-800 border border-stone-200/40'
+                        ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg'
+                        : 'bg-cream-200/60 dark:bg-stone-700/60 text-stone-800 dark:text-cream-100 border border-stone-200/40 dark:border-stone-600/50'
                     }`}
                   >
                     <p className="text-sm sm:text-base whitespace-pre-wrap leading-relaxed">
@@ -212,20 +212,20 @@ export default function ResumeChat() {
                     </p>
                   </div>
                   {message.role === 'user' && (
-                    <div className="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center flex-shrink-0">
-                      <User className="w-5 h-5 text-stone-600" />
+                    <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-stone-600 dark:text-cream-100" />
                     </div>
                   )}
                 </div>
               ))}
               {isLoading && (
                 <div className="flex gap-3 justify-start">
-                  <div className="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-5 h-5 text-white dark:text-darkBg" />
                   </div>
-                  <div className="bg-cream-200/60 border border-stone-200/40 rounded-2xl px-5 py-3 flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-stone-500 animate-spin" />
-                    <span className="text-sm text-stone-500">Thinking...</span>
+                  <div className="bg-cream-200/60 dark:bg-stone-700/60 border border-stone-200/40 dark:border-stone-600/50 rounded-2xl px-5 py-3 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 text-stone-500 dark:text-cream-300 animate-spin" />
+                    <span className="text-sm text-stone-500 dark:text-cream-200">Thinking...</span>
                   </div>
                 </div>
               )}
@@ -233,7 +233,7 @@ export default function ResumeChat() {
             </div>
 
             {/* Input */}
-            <div className="p-6 border-t border-stone-200/60 bg-cream-50/80 backdrop-blur-sm">
+            <div className="p-6 border-t border-stone-200/60 dark:border-stone-600/50 bg-cream-50/80 dark:bg-stone-800/80 backdrop-blur-sm">
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -241,13 +241,13 @@ export default function ResumeChat() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask about resume..."
-                  className="flex-1 bg-white text-stone-900 px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 border border-stone-200/60 transition-all placeholder:text-stone-400"
+                  className="flex-1 bg-white dark:bg-stone-700/50 text-stone-900 dark:text-cream-100 px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 border border-stone-200/60 dark:border-stone-600/50 transition-all placeholder:text-stone-400 dark:placeholder:text-cream-400/60"
                   disabled={isLoading}
                 />
                 <button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  className="bg-stone-900 hover:bg-stone-800 text-white px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                  className="bg-stone-900 dark:bg-cream-100 hover:bg-stone-800 dark:hover:bg-cream-200 text-white dark:text-darkBg px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                   aria-label="Send message"
                 >
                   <Send className="w-5 h-5" />

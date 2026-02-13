@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { ThemeProvider } from './contexts/ThemeContext';
 import App from './App.tsx';
 import './index.css';
 
@@ -10,6 +11,8 @@ if ('scrollRestoration' in history) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </StrictMode>
 );
