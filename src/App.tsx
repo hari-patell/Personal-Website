@@ -12,8 +12,9 @@ import Experience from './components/Experience'
 import Projects from './components/Projects'
 import Footer from './components/Footer'
 import ResumeChat from './components/ResumeChat'
+import Interactive from './components/Interactive'
 
-const sections = ['home', 'about', 'skills', 'experience', 'projects', 'AI']
+const sections = ['home', 'about', 'interactive', 'skills', 'experience', 'projects', 'AI']
 
 function App() {
   useEffect(() => {
@@ -38,6 +39,7 @@ function App() {
       <main>
         <Hero />
         <About />
+        <Interactive />
         <Skills />
         <Experience />
         <Projects />
