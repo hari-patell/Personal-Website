@@ -7,47 +7,82 @@ export default function CursorGlow() {
   const currentRef = useRef({ x: -1000, y: -1000 })
   const rafRef = useRef<number>(0)
   const visibleRef = useRef(false)
+  const fadeTimerRef = useRef<number>(0)
   const { isDark } = useTheme()
 
   useEffect(() => {
     const glow = glowRef.current
     if (!glow) return
 
-    // Hide on touch devices — no persistent cursor
     const isTouch = window.matchMedia('(hover: none)').matches
-    if (isTouch) return
 
-    const handleMouseMove = (e: MouseEvent) => {
-      posRef.current = { x: e.clientX, y: e.clientY }
+    const show = (x: number, y: number) => {
+      posRef.current = { x, y }
+      clearTimeout(fadeTimerRef.current)
       if (!visibleRef.current) {
         visibleRef.current = true
+        // On touch, snap immediately so glow doesn't lerp in from offscreen
+        if (isTouch) {
+          currentRef.current = { x, y }
+        }
         glow.style.opacity = '1'
       }
     }
 
-    const handleMouseLeave = () => {
+    const hide = () => {
       visibleRef.current = false
       glow.style.opacity = '0'
     }
 
+    // --- Desktop: mouse ---
+    const handleMouseMove = (e: MouseEvent) => show(e.clientX, e.clientY)
+    const handleMouseLeave = () => hide()
+
+    // --- Mobile: touch ---
+    const handleTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0]
+      show(t.clientX, t.clientY)
+    }
+    const handleTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0]
+      show(t.clientX, t.clientY)
+    }
+    const handleTouchEnd = () => {
+      // Linger briefly then fade out
+      fadeTimerRef.current = window.setTimeout(hide, 600)
+    }
+
+    // --- Animation loop ---
     const animate = () => {
-      const lerp = 0.07
+      const lerp = isTouch ? 0.15 : 0.07
       currentRef.current.x += (posRef.current.x - currentRef.current.x) * lerp
       currentRef.current.y += (posRef.current.y - currentRef.current.y) * lerp
 
       glow.style.transform = `translate(${currentRef.current.x}px, ${currentRef.current.y}px) translate(-50%, -50%)`
-
       rafRef.current = requestAnimationFrame(animate)
     }
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true })
-    document.addEventListener('mouseleave', handleMouseLeave)
+    if (isTouch) {
+      window.addEventListener('touchstart', handleTouchStart, { passive: true })
+      window.addEventListener('touchmove', handleTouchMove, { passive: true })
+      window.addEventListener('touchend', handleTouchEnd, { passive: true })
+    } else {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true })
+      document.addEventListener('mouseleave', handleMouseLeave)
+    }
     rafRef.current = requestAnimationFrame(animate)
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseleave', handleMouseLeave)
+      clearTimeout(fadeTimerRef.current)
       cancelAnimationFrame(rafRef.current)
+      if (isTouch) {
+        window.removeEventListener('touchstart', handleTouchStart)
+        window.removeEventListener('touchmove', handleTouchMove)
+        window.removeEventListener('touchend', handleTouchEnd)
+      } else {
+        window.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseleave', handleMouseLeave)
+      }
     }
   }, [])
 
