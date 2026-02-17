@@ -303,6 +303,47 @@
   transition: all 0.3s ease;
 }
 
+/* Hero entrance animation */
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroDividerExpand {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.hero-animate {
+  opacity: 0;
+  animation: heroFadeIn 0.8s ease-out forwards;
+}
+
+.hero-animate-delay-1 { animation-delay: 0.1s; }
+.hero-animate-delay-2 { animation-delay: 0.25s; }
+.hero-animate-delay-3 { animation-delay: 0.4s; }
+.hero-animate-delay-4 { animation-delay: 0.55s; }
+.hero-animate-delay-5 { animation-delay: 0.7s; }
+
+.hero-divider-animate {
+  opacity: 0;
+  transform-origin: center;
+  animation: heroDividerExpand 0.6s ease-out forwards;
+  animation-delay: 0.4s;
+}
+
 /* Fade in up animation for sections */
 @keyframes fadeInUp {
   from {

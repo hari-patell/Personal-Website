@@ -18,7 +18,7 @@ export default function Hero() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom">
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
-          <div className="relative mb-8 inline-block">
+          <div className="relative mb-8 inline-block hero-animate hero-animate-delay-1">
             <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 ring-offset-4 ring-offset-cream-100 dark:ring-offset-darkBg">
               <img
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/profile.jpg-EeWllMPYDsF3TgFrZLyr78EH91io3Q.jpeg"
@@ -29,22 +29,22 @@ export default function Hero() {
           </div>
 
           {/* Name - Large Serif */}
-          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-stone-900 dark:text-cream-100 tracking-tight leading-[0.95] mb-4">
+          <h1 className="hero-animate hero-animate-delay-2 font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-stone-900 dark:text-cream-100 tracking-tight leading-[0.95] mb-4">
             Hari-Krishna
             <br />
             <span className="italic font-medium">Patel</span>
           </h1>
 
           {/* Thin divider */}
-          <div className="serif-divider my-6"></div>
+          <div className="serif-divider my-6 hero-divider-animate"></div>
 
           {/* Subtitle */}
-          <p className="text-base sm:text-lg text-stone-500 dark:text-cream-200 font-light tracking-wide mb-10">
+          <p className="hero-animate hero-animate-delay-4 text-base sm:text-lg text-stone-500 dark:text-cream-200 font-light tracking-wide mb-10">
             Software Engineer & Developer
           </p>
 
           {/* Social Links - Horizontal row */}
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <div className="hero-animate hero-animate-delay-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
             {socialLinks.map((link) => (
               <SocialLinkComponent key={link.label} {...link} />
             ))}
