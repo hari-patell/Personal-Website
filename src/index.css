@@ -283,6 +283,16 @@
 .group:hover .cipher-char:nth-child(11) { animation-delay: 0.22s; }
 .group:hover .cipher-char:nth-child(12) { animation-delay: 0.24s; }
 
+/* Dark mode cipher text - cream-100 for default, cream-400 for hover */
+.dark .cipher-char {
+  color: #FAF7F2;
+}
+
+.dark .group:hover .cipher-char {
+  animation: none;
+  color: #D6CFC3;
+}
+
 .cipher-char::before {
   content: attr(data-scramble);
   position: absolute;
@@ -291,6 +301,47 @@
   opacity: 0;
   transform: translateY(100%);
   transition: all 0.3s ease;
+}
+
+/* Hero entrance animation */
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroDividerExpand {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.hero-animate {
+  opacity: 0;
+  animation: heroFadeIn 0.8s ease-out forwards;
+}
+
+.hero-animate-delay-1 { animation-delay: 0.1s; }
+.hero-animate-delay-2 { animation-delay: 0.25s; }
+.hero-animate-delay-3 { animation-delay: 0.4s; }
+.hero-animate-delay-4 { animation-delay: 0.55s; }
+.hero-animate-delay-5 { animation-delay: 0.7s; }
+
+.hero-divider-animate {
+  opacity: 0;
+  transform-origin: center;
+  animation: heroDividerExpand 0.6s ease-out forwards;
+  animation-delay: 0.4s;
 }
 
 /* Fade in up animation for sections */
@@ -335,6 +386,19 @@ body {
   background: #A8A29E;
 }
 
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #171717;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #404040;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
 /* Safe area insets for iPhone notch and home indicator */
 .safe-area-top {
   padding-top: env(safe-area-inset-top);
@@ -372,4 +436,8 @@ body {
   height: 1px;
   background: #D6D3D1;
   margin: 0 auto;
+}
+
+.dark .serif-divider {
+  background: #57534E;
 }

@@ -42,11 +42,11 @@ export default function Skills() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 tracking-tight">
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
             Skills & <span className="italic font-medium">Technologies</span>
           </h2>
           <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 text-center mb-8 sm:mb-12 text-sm sm:text-base">
+          <p className="text-stone-500 dark:text-cream-200 text-center mb-8 sm:mb-12 text-sm sm:text-base">
             Technologies I work with and continue to learn
           </p>
 
@@ -56,10 +56,10 @@ export default function Skills() {
               onClick={() => setSelectedCategory(null)}
               aria-label="Show all skills"
               aria-pressed={selectedCategory === null}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 focus:ring-offset-cream-100 ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg ${
                 selectedCategory === null
-                  ? 'bg-stone-900 text-white shadow-sm'
-                  : 'bg-white/60 text-stone-500 hover:text-stone-800 hover:bg-white border border-stone-200/60'
+                  ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg shadow-sm'
+                  : 'bg-white/60 dark:bg-stone-800/60 text-stone-500 dark:text-cream-200 hover:text-stone-800 dark:hover:text-cream-100 hover:bg-white dark:hover:bg-stone-700/80 border border-stone-200/60 dark:border-stone-600/60'
               }`}
             >
               All
@@ -70,10 +70,10 @@ export default function Skills() {
                 onClick={() => setSelectedCategory(category)}
                 aria-label={`Filter skills by ${category}`}
                 aria-pressed={selectedCategory === category}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 capitalize focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 focus:ring-offset-cream-100 ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 capitalize focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg ${
                   selectedCategory === category
-                    ? 'bg-stone-900 text-white shadow-sm'
-                    : 'bg-white/60 text-stone-500 hover:text-stone-800 hover:bg-white border border-stone-200/60'
+                    ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg shadow-sm'
+                    : 'bg-white/60 dark:bg-stone-800/60 text-stone-500 dark:text-cream-200 hover:text-stone-800 dark:hover:text-cream-100 hover:bg-white dark:hover:bg-stone-700/80 border border-stone-200/60 dark:border-stone-600/60'
                 }`}
               >
                 {category}
@@ -98,7 +98,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
 
   return (
     <div
-      className="group relative p-4 rounded-xl bg-white/60 border border-stone-200/60 transition-all duration-300 hover:bg-white hover:border-stone-300 hover:shadow-sm cursor-pointer"
+      className="group relative p-4 rounded-xl bg-white/60 dark:bg-stone-800/50 border border-stone-200/60 dark:border-stone-600/50 transition-all duration-300 hover:bg-white dark:hover:bg-stone-700/60 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -117,7 +117,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
           {skill.name.charAt(0)}
         </div>
         <div className="text-center">
-          <h3 className="text-stone-800 font-medium text-sm mb-1.5">{skill.name}</h3>
+          <h3 className="text-stone-800 dark:text-cream-100 font-medium text-sm mb-1.5">{skill.name}</h3>
           <div className="flex items-center gap-1 justify-center">
             {['beginner', 'intermediate', 'advanced', 'expert'].map((level, i) => {
               const levelIndex = ['beginner', 'intermediate', 'advanced', 'expert'].indexOf(
@@ -129,7 +129,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
                   className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                     i <= levelIndex
                       ? proficiencyColors[skill.proficiency as keyof typeof proficiencyColors]
-                      : 'bg-stone-200'
+                      : 'bg-stone-200 dark:bg-stone-600'
                   }`}
                 />
               )
