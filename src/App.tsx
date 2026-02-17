@@ -12,9 +12,9 @@ import Experience from './components/Experience'
 import Projects from './components/Projects'
 import Footer from './components/Footer'
 import ResumeChat from './components/ResumeChat'
-import Interactive from './components/Interactive'
+import CursorGlow from './components/CursorGlow'
 
-const sections = ['home', 'about', 'interactive', 'skills', 'experience', 'projects', 'AI']
+const sections = ['home', 'about', 'skills', 'experience', 'projects', 'AI']
 
 function App() {
   useEffect(() => {
@@ -35,11 +35,11 @@ function App() {
 
   return (
     <div className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg text-stone-900 dark:text-cream-100 font-sans overflow-x-hidden">
+      <CursorGlow />
       <Navigation sections={sections} />
       <main>
         <Hero />
         <About />
-        <Interactive />
         <Skills />
         <Experience />
         <Projects />
