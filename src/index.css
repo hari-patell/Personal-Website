@@ -368,6 +368,16 @@ body {
   max-width: 100vw;
 }
 
+/* Dark mode body background — overrides the hardcoded cream bg in index.html */
+.dark body {
+  background-color: #171717;
+}
+
+/* Fix ring-offset color for dark mode (Tailwind default is cream from tailwind.config.js) */
+.dark *, .dark ::before, .dark ::after {
+  --tw-ring-offset-color: #171717;
+}
+
 /* Custom scrollbar - refined for light theme */
 ::-webkit-scrollbar {
   width: 8px;
