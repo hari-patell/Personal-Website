@@ -50,7 +50,7 @@ export default async function handler(
       // - "mistralai/Mistral-7B-Instruct-v0.2" (good balance)
       // - "google/gemma-2-2b-it" (very fast)
       const completion = await client.chat.completions.create({
-        model: 'meta-llama/Llama-3.2-3B-Instruct',
+        model: 'openai/gpt-oss-120b:groq',
         messages: [
           {
             role: 'system',
