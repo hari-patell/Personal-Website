@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { getResumeContext } from '../data/resume';
 
@@ -220,9 +221,22 @@ export default function ResumeChat() {
                         : 'bg-cream-200/60 dark:bg-stone-700/60 text-stone-800 dark:text-cream-100 border border-stone-200/40 dark:border-stone-600/50'
                     }`}
                   >
-                    <p className="text-sm sm:text-base whitespace-pre-wrap leading-relaxed">
-                      {message.content}
-                    </p>
+                    {message.role === 'user' ? (
+                      <p className="text-sm sm:text-base leading-relaxed">{message.content}</p>
+                    ) : (
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p className="text-sm sm:text-base leading-relaxed mb-2 last:mb-0">{children}</p>,
+                          strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                          ul: ({ children }) => <ul className="list-disc list-outside ml-4 my-1 space-y-0.5">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal list-outside ml-4 my-1 space-y-0.5">{children}</ol>,
+                          li: ({ children }) => <li className="text-sm sm:text-base leading-relaxed">{children}</li>,
+                          code: ({ children }) => <code className="bg-stone-200/60 dark:bg-stone-600/60 rounded px-1 py-0.5 text-xs font-mono">{children}</code>,
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    )}
                   </div>
                   {message.role === 'user' && (
                     <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center flex-shrink-0">
