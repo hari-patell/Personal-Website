@@ -37,7 +37,7 @@ Twitter/X: https://x.com/hari_patell
 Instagram: https://instagram.com/hari_patell
 
 PROFESSIONAL SUMMARY:
-I'm a Software Engineering Intern at Honeywell with a passion for creating high-performance solutions. I've optimized systems achieving 96.67% performance improvements and built scalable applications serving 100+ teams. My expertise spans full-stack development, machine learning, and mobile applications. I thrive on solving complex problems through clean code and systematic optimization. Whether it's reducing execution time from 4.5 seconds to 150ms, achieving 94.2% accuracy with custom neural networks, or leading teams to build innovative solutions, I'm driven by measurable impact and continuous learning.
+I'm a Computer Science student at the University of Florida with a passion for creating high-performance solutions. I completed a Software Engineering Internship at Honeywell (Summer 2025) and am an Incoming Full Stack Software Engineering Intern at Capital One (Summer 2026). I've optimized systems achieving 96.67% performance improvements and built scalable applications serving 100+ teams. My expertise spans full-stack development, machine learning, mobile applications, and financial systems (limit order books, market microstructure). I thrive on solving complex problems through clean code and systematic optimization. Whether it's reducing execution time from 4.5 seconds to 150ms, achieving 94.2% accuracy with custom neural networks, building a limit order book engine processing ~50,000 orders/sec, or leading teams to build innovative solutions, I'm driven by measurable impact and continuous learning.
 
 CORE VALUES & WORK PHILOSOPHY:
 - Clean Code: Writing maintainable, scalable, and well-documented code is a priority. I believe code should be readable and maintainable for future developers.
@@ -59,6 +59,7 @@ ${projectsText}
 KEY ACHIEVEMENTS & METRICS:
 - Performance Optimization: Achieved 96.67% performance improvement (4.5 seconds to 150ms) on TSPL Parser optimization
 - Machine Learning: Built neural network from scratch achieving 94.2% accuracy on MNIST dataset, reducing training time by 60%
+- Financial Systems: Built a limit order book engine processing 3,000+ events at ~50,000 orders/sec with real-time microstructure metrics (bid-ask spread, mid-price, OFI)
 - Scalability: Built applications serving 100+ teams with real-time data processing
 - Team Leadership: Led teams of 4-10 members on complex projects with successful delivery
 - Backend Optimization: Improved backend throughput by 30% and reduced page load time from 1.2s to 0.8s

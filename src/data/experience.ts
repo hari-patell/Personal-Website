@@ -4,7 +4,7 @@ export const experiences: Experience[] = [
   {
     id: '2',
     company: 'Capital One',
-    position: 'Software Engineering Intern',
+    position: 'Incoming Full Stack Software Engineering Intern',
     incoming: true,
     location: 'McLean, VA',
     startDate: 'Jun. 2026',

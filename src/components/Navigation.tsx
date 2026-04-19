@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useScrollPosition } from '../hooks/useScrollPosition'
-import { useTheme } from '../contexts/ThemeContext'
-import { Menu, X, Moon, Sun } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 
 interface NavigationProps {
   sections: string[]
@@ -12,8 +11,6 @@ export default function Navigation({ sections }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [clickedButton, setClickedButton] = useState<string | null>(null)
   const { isScrolled } = useScrollPosition()
-  const { isDark, toggleTheme } = useTheme()
-
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 100
@@ -121,13 +118,6 @@ export default function Navigation({ sections }: NavigationProps) {
               ))}
             </div>
             <div className="flex items-center gap-1">
-              <button
-                onClick={toggleTheme}
-                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="p-2 rounded-lg text-stone-600 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation()
