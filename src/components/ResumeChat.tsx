@@ -59,6 +59,7 @@ export default function ResumeChat() {
         body: JSON.stringify({
           question: userMessage.content,
           context: resumeContext,
+          history: messages,
         }),
         signal: controller.signal,
       });
@@ -143,6 +144,18 @@ export default function ResumeChat() {
     }
   };
 
+  const SUGGESTED_QUESTIONS = [
+    "What's Hari's most recent internship?",
+    "What programming languages does he know?",
+    "Tell me about his projects",
+    "What's his GPA and major?",
+  ];
+
+  const handleChipClick = (question: string) => {
+    if (isLoading) return;
+    setInput(question);
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -218,6 +231,19 @@ export default function ResumeChat() {
                   )}
                 </div>
               ))}
+              {messages.length === 1 && !isLoading && (
+                <div className="flex flex-wrap gap-2 px-1">
+                  {SUGGESTED_QUESTIONS.map((q) => (
+                    <button
+                      key={q}
+                      onClick={() => handleChipClick(q)}
+                      className="text-sm px-4 py-2 rounded-full border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-cream-200 hover:bg-stone-100 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-cream-100 transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
               {isLoading && (
                 <div className="flex gap-3 justify-start">
                   <div className="w-10 h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
