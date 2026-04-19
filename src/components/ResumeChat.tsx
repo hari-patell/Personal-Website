@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { getResumeContext } from '../data/resume';
 
@@ -225,6 +226,7 @@ export default function ResumeChat() {
                       <p className="text-sm sm:text-base leading-relaxed">{message.content}</p>
                     ) : (
                       <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
                         components={{
                           p: ({ children }) => <p className="text-sm sm:text-base leading-relaxed mb-2 last:mb-0">{children}</p>,
                           strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
@@ -232,6 +234,10 @@ export default function ResumeChat() {
                           ol: ({ children }) => <ol className="list-decimal list-outside ml-4 my-1 space-y-0.5">{children}</ol>,
                           li: ({ children }) => <li className="text-sm sm:text-base leading-relaxed">{children}</li>,
                           code: ({ children }) => <code className="bg-stone-200/60 dark:bg-stone-600/60 rounded px-1 py-0.5 text-xs font-mono">{children}</code>,
+                          table: ({ children }) => <div className="overflow-x-auto my-2"><table className="text-sm border-collapse w-full">{children}</table></div>,
+                          thead: ({ children }) => <thead className="border-b border-stone-300 dark:border-stone-500">{children}</thead>,
+                          th: ({ children }) => <th className="text-left font-semibold px-3 py-1.5 whitespace-nowrap">{children}</th>,
+                          td: ({ children }) => <td className="px-3 py-1.5 border-t border-stone-200/60 dark:border-stone-600/40">{children}</td>,
                         }}
                       >
                         {message.content}
