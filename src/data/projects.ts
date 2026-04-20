@@ -2,6 +2,15 @@ import { Project } from '../types'
 
 export const projects: Project[] = [
   {
+    id: '4',
+    title: 'Limit Order Book Simulator & Market Microstructure Analyzer',
+    description: 'Price-time priority limit order book engine processing 3,000+ events at ~50,000 orders/sec with real-time microstructure metrics',
+    longDescription: 'Built a price-time priority limit order book engine using a SortedDict-backed matching engine supporting limit/market orders, partial fills, and cancellations — processing 3,000+ events at ~50,000 orders/sec. Simulated realistic order flow via Poisson arrival process with configurable volatility, spread, and lot sizes around a random-walk price process. Computed real-time microstructure metrics (bid-ask spread, mid-price, OFI) and visualized spread dynamics against price movement using matplotlib.',
+    technologies: ['Python'],
+    githubUrl: 'https://github.com/hari-patell',
+    featured: true,
+  },
+  {
     id: '1',
     title: 'Yogi Cup Tournament Platform',
     description: 'Live tournament bracket and court queue system for 100 teams with real-time PostgreSQL data',
