@@ -53,30 +53,26 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
         animation: 'fadeInUp 0.6s ease-out forwards',
       }}
     >
-      {/* Incoming badge */}
-      {experience.incoming && (
-        <div className="absolute top-4 right-4 z-10">
-          <div
-            className="px-3 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-md bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg"
-          >
-            Incoming
-          </div>
-        </div>
-      )}
-
       <div className="relative p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4">
-          <div className="flex items-start justify-between mb-2 flex-wrap gap-2">
-            <div>
+          <div className="flex items-start justify-between mb-2 gap-3">
+            <div className="min-w-0">
               <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 dark:text-cream-100 mb-1 group-hover:text-stone-700 dark:group-hover:text-cream-200 transition-colors">
                 {experience.position}
               </h3>
               <div className="flex items-center gap-2 text-stone-600 dark:text-cream-200 font-medium">
-                <Briefcase className="w-4 h-4 text-stone-400 dark:text-cream-300" />
+                <Briefcase className="w-4 h-4 text-stone-400 dark:text-cream-300 shrink-0" />
                 <span>{experience.company}</span>
               </div>
             </div>
+            {experience.incoming && (
+              <div className="shrink-0 mt-1">
+                <div className="px-3 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-md bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg">
+                  Incoming
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex flex-wrap items-center gap-4 text-sm text-stone-500 dark:text-cream-200/90 mt-3">
