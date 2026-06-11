@@ -19,24 +19,19 @@ export default function ResumeChat() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialMount, setIsInitialMount] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { ref, hasIntersected } = useIntersectionObserver();
 
-  const scrollToBottom = () => {
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  };
-
-  useEffect(() => {
-    if (isInitialMount) {
-      setIsInitialMount(false);
-      return;
-    }
-    scrollToBottom();
-  }, [messages, isInitialMount]);
+  }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -47,20 +42,15 @@ export default function ResumeChat() {
     setIsLoading(true);
 
     try {
-      const resumeContext = getResumeContext();
-      const apiUrl = '/api/chat';
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 65000);
 
-      const response = await fetch(apiUrl, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: userMessage.content,
-          context: resumeContext,
+          context: getResumeContext(),
           history: messages,
         }),
         signal: controller.signal,
@@ -68,79 +58,38 @@ export default function ResumeChat() {
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        let errorData: any = {};
-        try {
-          const text = await response.text();
-          errorData = text ? JSON.parse(text) : {};
-        } catch (e) {
-          errorData = { error: response.statusText || `HTTP ${response.status}` };
-        }
-        
-        console.error('API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-          url: apiUrl,
-        });
-        
-        if (response.status === 504 || response.status === 503) {
-          throw new Error(errorData.error || 'Request timed out. Please try again.');
-        }
-        
-        if (response.status === 404) {
-          throw new Error('API endpoint not found. Make sure you are running "vercel dev" or "npm run dev:vercel" instead of "npm run dev".');
-        }
-        
-        if (response.status === 500) {
-          throw new Error(errorData.error || errorData.message || 'Server error. Check console for details.');
-        }
-        
-        throw new Error(errorData.error || errorData.message || `Failed to get response (${response.status})`);
+      let data: { answer?: string; error?: string; retry?: boolean } = {};
+      try {
+        data = await response.json();
+      } catch {
+        // Non-JSON response; fall through to the generic error below
       }
 
-      const data = await response.json();
-      
-      if (data.error) {
+      if (!response.ok || data.error) {
         if (data.retry) {
-          const errorMessage: Message = {
-            role: 'assistant',
-            content: 'The AI model is loading. Please wait a moment and try again.',
-          };
-          setMessages((prev) => [...prev, errorMessage]);
-        } else {
-          throw new Error(data.error);
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: 'The assistant is warming up. Please try again in a moment.' },
+          ]);
+          return;
         }
-      } else {
-        const assistantMessage: Message = {
+        throw new Error(data.error || `Request failed (${response.status})`);
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
           role: 'assistant',
-          content: data.answer || 'I apologize, but I could not generate an answer to that question.',
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      }
+          content: data.answer || 'I could not generate an answer to that question. Please try rephrasing it.',
+        },
+      ]);
     } catch (error) {
-      console.error('Error:', error);
-      let errorMessage = 'Sorry, I encountered an error. Please try again later.';
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError' || error.message.includes('timeout')) {
-          errorMessage = 'The request timed out after 60 seconds. The AI model may still be loading. Please wait 10-20 seconds and try again - subsequent requests will be much faster.';
-        } else if (error.message.includes('loading')) {
-          errorMessage = error.message;
-        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-          errorMessage = 'Network error. Make sure you are running "vercel dev" or "npm run dev:vercel" to start the development server with API support.';
-        } else {
-          errorMessage = error.message || errorMessage;
-        }
-      } else if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = String(error.message);
-      }
-      
-      const errorMsg: Message = {
-        role: 'assistant',
-        content: errorMessage,
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      console.error('Chat error:', error);
+      const content =
+        error instanceof Error && error.name === 'AbortError'
+          ? 'The request timed out. Please try again in a moment.'
+          : 'Sorry, something went wrong. Please try again later.';
+      setMessages((prev) => [...prev, { role: 'assistant', content }]);
     } finally {
       setIsLoading(false);
     }
@@ -158,7 +107,7 @@ export default function ResumeChat() {
     setInput(question);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -180,14 +129,11 @@ export default function ResumeChat() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Bot className="w-7 h-7 text-stone-500 dark:text-cream-300" />
-            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-900 dark:text-cream-100 tracking-tight">
-              Ask About <span className="italic font-medium">My Resume</span>
-            </h2>
-          </div>
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
+            Ask About <span className="italic font-medium">My Resume</span>
+          </h2>
           <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 dark:text-cream-200 text-lg max-w-2xl mx-auto">
+          <p className="text-stone-500 dark:text-cream-200 text-center text-sm sm:text-base max-w-2xl mx-auto px-2">
             Have questions about my experience, skills, or projects? Chat with my AI assistant to learn more.
           </p>
         </div>
@@ -202,21 +148,21 @@ export default function ResumeChat() {
         >
           <div className="bg-white/70 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-600/50 rounded-2xl shadow-sm overflow-hidden backdrop-blur-sm">
             {/* Messages */}
-            <div ref={messagesContainerRef} className="h-[500px] overflow-y-auto p-6 space-y-4">
+            <div ref={messagesContainerRef} className="h-[420px] sm:h-[500px] overflow-y-auto p-4 sm:p-6 space-y-4">
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex gap-3 ${
+                  className={`flex gap-2.5 sm:gap-3 ${
                     message.role === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-10 h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-5 h-5 text-white dark:text-darkBg" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-darkBg" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[75%] rounded-2xl px-5 py-3 ${
+                    className={`max-w-[82%] sm:max-w-[75%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 ${
                       message.role === 'user'
                         ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg'
                         : 'bg-cream-200/60 dark:bg-stone-700/60 text-stone-800 dark:text-cream-100 border border-stone-200/40 dark:border-stone-600/50'
@@ -245,8 +191,8 @@ export default function ResumeChat() {
                     )}
                   </div>
                   {message.role === 'user' && (
-                    <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center flex-shrink-0">
-                      <User className="w-5 h-5 text-stone-600 dark:text-cream-100" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-stone-600 dark:text-cream-100" />
                     </div>
                   )}
                 </div>
@@ -265,35 +211,34 @@ export default function ResumeChat() {
                 </div>
               )}
               {isLoading && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-10 h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-white dark:text-darkBg" />
+                <div className="flex gap-2.5 sm:gap-3 justify-start">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-darkBg" />
                   </div>
-                  <div className="bg-cream-200/60 dark:bg-stone-700/60 border border-stone-200/40 dark:border-stone-600/50 rounded-2xl px-5 py-3 flex items-center gap-2">
+                  <div className="bg-cream-200/60 dark:bg-stone-700/60 border border-stone-200/40 dark:border-stone-600/50 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2">
                     <Loader2 className="w-4 h-4 text-stone-500 dark:text-cream-300 animate-spin" />
                     <span className="text-sm text-stone-500 dark:text-cream-200">Thinking...</span>
                   </div>
                 </div>
               )}
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
-            <div className="p-6 border-t border-stone-200/60 dark:border-stone-600/50 bg-cream-50/80 dark:bg-stone-800/80 backdrop-blur-sm">
-              <div className="flex gap-3">
+            <div className="p-4 sm:p-6 border-t border-stone-200/60 dark:border-stone-600/50 bg-cream-50/80 dark:bg-stone-800/80 backdrop-blur-sm">
+              <div className="flex gap-2.5 sm:gap-3">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask about resume..."
-                  className="flex-1 bg-white dark:bg-stone-700/50 text-stone-900 dark:text-cream-100 px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 border border-stone-200/60 dark:border-stone-600/50 transition-all placeholder:text-stone-400 dark:placeholder:text-cream-400/60"
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask about my resume..."
+                  className="flex-1 min-w-0 bg-white dark:bg-stone-700/50 text-stone-900 dark:text-cream-100 px-4 sm:px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 border border-stone-200/60 dark:border-stone-600/50 transition-all placeholder:text-stone-400 dark:placeholder:text-cream-400/60"
                   disabled={isLoading}
                 />
                 <button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  className="bg-stone-900 dark:bg-cream-100 hover:bg-stone-800 dark:hover:bg-cream-200 text-white dark:text-darkBg px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                  className="bg-stone-900 dark:bg-cream-100 hover:bg-stone-800 dark:hover:bg-cream-200 text-white dark:text-darkBg px-4 sm:px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm flex-shrink-0"
                   aria-label="Send message"
                 >
                   <Send className="w-5 h-5" />

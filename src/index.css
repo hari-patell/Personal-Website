@@ -10,297 +10,23 @@
   }
 }
 
-/* Multiple float animations with different patterns */
-@keyframes float-1 {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  33% {
-    transform: translate(15px, -15px) rotate(5deg);
-  }
-  66% {
-    transform: translate(-10px, -20px) rotate(-3deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
 }
 
-@keyframes float-2 {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(-12px, -8px) rotate(-5deg);
-  }
-  50% {
-    transform: translate(10px, -25px) rotate(8deg);
-  }
-  75% {
-    transform: translate(18px, -12px) rotate(3deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
+body {
+  overflow-x: hidden;
 }
 
-@keyframes float-3 {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  20% {
-    transform: translate(20px, -10px) rotate(10deg);
-  }
-  40% {
-    transform: translate(5px, -25px) rotate(5deg);
-  }
-  60% {
-    transform: translate(-15px, -15px) rotate(-8deg);
-  }
-  80% {
-    transform: translate(-5px, -5px) rotate(-4deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
+/* Dark mode body background — overrides the hardcoded cream bg in index.html */
+.dark body {
+  background-color: #171717;
 }
 
-/* Original float animation for backward compatibility */
-@keyframes float {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate(20px, -20px) rotate(10deg);
-  }
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-.animate-float-nodelay {
-  animation: float 6s ease-in-out infinite;
-  animation-delay: 0s;
-}
-
-.animate-float-1 {
-  animation: float-1 7s ease-in-out infinite;
-  animation-delay: 0s;
-}
-
-.animate-float-2 {
-  animation: float-2 9s ease-in-out infinite;
-  animation-delay: 0s;
-}
-
-.animate-float-3 {
-  animation: float-3 8s ease-in-out infinite;
-  animation-delay: 0s;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.animate-shimmer {
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-.animate-delay-2000 {
-  animation-delay: 2s;
-  left: 15%;
-  top: 20%;
-}
-
-.animate-delay-3000 {
-  animation-delay: 3s;
-  right: 20%;
-  top: 30%;
-}
-
-.animate-delay-4000 {
-  animation-delay: 4s;
-  left: 25%;
-  bottom: 20%;
-}
-
-.animate-delay-5000 {
-  animation-delay: 5s;
-  right: 15%;
-  bottom: 30%;
-}
-
-.animate-delay-6000 {
-  animation-delay: 6s;
-  left: 35%;
-  top: 40%;
-}
-
-.animate-delay-7000 {
-  animation-delay: 7s;
-  right: 30%;
-  bottom: 40%;
-}
-
-.animate-delay-8000 {
-  animation-delay: 8s;
-  left: 40%;
-  top: 15%;
-}
-
-/* Additional animation delays for wider screens */
-.animate-delay-9000 {
-  animation-delay: 9s;
-  left: 5%;
-  top: 50%;
-}
-
-.animate-delay-10000 {
-  animation-delay: 10s;
-  right: 5%;
-  top: 60%;
-}
-
-.animate-delay-11000 {
-  animation-delay: 11s;
-  left: 50%;
-  bottom: 10%;
-}
-
-/* Media query for landscape orientation */
-@media (orientation: landscape) {
-  .animate-delay-2000 { left: 10%; top: 15%; }
-  .animate-delay-3000 { right: 10%; top: 20%; }
-  .animate-delay-4000 { left: 15%; bottom: 15%; }
-  .animate-delay-5000 { right: 15%; bottom: 20%; }
-  .animate-delay-6000 { left: 25%; top: 25%; }
-  .animate-delay-7000 { right: 25%; bottom: 25%; }
-  .animate-delay-8000 { left: 30%; top: 10%; }
-  .animate-delay-9000 { left: 3%; top: 45%; }
-  .animate-delay-10000 { right: 3%; top: 55%; }
-  .animate-delay-11000 { left: 45%; bottom: 5%; }
-}
-
-/* Media query for wider screens */
-@media (min-width: 1280px) {
-  .animate-delay-2000 { left: 15%; top: 20%; }
-  .animate-delay-3000 { right: 15%; top: 25%; }
-  .animate-delay-4000 { left: 20%; bottom: 20%; }
-  .animate-delay-5000 { right: 20%; bottom: 25%; }
-  .animate-delay-6000 { left: 5%; top: 40%; }
-  .animate-delay-7000 { right: 5%; bottom: 40%; }
-  .animate-delay-8000 { left: 25%; top: 10%; }
-  .animate-delay-9000 { left: 2%; top: 50%; }
-  .animate-delay-10000 { right: 2%; top: 60%; }
-  .animate-delay-11000 { left: 48%; bottom: 8%; }
-}
-
-/* Media query for extra wide screens */
-@media (min-width: 1920px) {
-  .animate-delay-2000 { left: 20%; top: 20%; }
-  .animate-delay-3000 { right: 20%; top: 25%; }
-  .animate-delay-4000 { left: 25%; bottom: 20%; }
-  .animate-delay-5000 { right: 25%; bottom: 25%; }
-  .animate-delay-6000 { left: 10%; top: 40%; }
-  .animate-delay-7000 { right: 10%; bottom: 40%; }
-  .animate-delay-8000 { left: 30%; top: 10%; }
-  .animate-delay-9000 { left: 5%; top: 60%; }
-  .animate-delay-10000 { right: 5%; top: 70%; }
-  .animate-delay-11000 { left: 45%; bottom: 15%; }
-}
-
-/* Media query for small screens in landscape orientation */
-@media (orientation: landscape) and (max-height: 500px) {
-  .animate-float {
-    animation: float-small 6s ease-in-out infinite;
-  }
-  .animate-delay-2000 { left: 5%; top: 10%; }
-  .animate-delay-3000 { right: 5%; top: 15%; }
-  .animate-delay-4000 { left: 10%; bottom: 10%; }
-  .animate-delay-5000 { right: 10%; bottom: 15%; }
-  .animate-delay-6000 { left: 20%; top: 20%; }
-  .animate-delay-7000 { right: 20%; bottom: 20%; }
-  .animate-delay-8000 { left: 25%; top: 5%; }
-}
-
-@keyframes float-small {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(10px, -10px) rotate(5deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
-}
-
-/* Enhanced Cipher Text Animation */
-.cipher-text {
-  display: inline-flex;
-}
-
-.cipher-char {
-  display: inline-block;
-  position: relative;
-  transition: color 0.3s ease;
-  color: #1C1917;
-}
-
-@keyframes scramble {
-  0% { color: #1C1917; }
-  100% { color: #78716C; }
-}
-
-.group:hover .cipher-char {
-  animation: none;
-  color: #78716C;
-  transition: color 0.3s ease;
-}
-
-.group:hover .cipher-char:nth-child(1) { animation-delay: 0.02s; }
-.group:hover .cipher-char:nth-child(2) { animation-delay: 0.04s; }
-.group:hover .cipher-char:nth-child(3) { animation-delay: 0.06s; }
-.group:hover .cipher-char:nth-child(4) { animation-delay: 0.08s; }
-.group:hover .cipher-char:nth-child(5) { animation-delay: 0.1s; }
-.group:hover .cipher-char:nth-child(6) { animation-delay: 0.12s; }
-.group:hover .cipher-char:nth-child(7) { animation-delay: 0.14s; }
-.group:hover .cipher-char:nth-child(8) { animation-delay: 0.16s; }
-.group:hover .cipher-char:nth-child(9) { animation-delay: 0.18s; }
-.group:hover .cipher-char:nth-child(10) { animation-delay: 0.2s; }
-.group:hover .cipher-char:nth-child(11) { animation-delay: 0.22s; }
-.group:hover .cipher-char:nth-child(12) { animation-delay: 0.24s; }
-
-/* Dark mode cipher text - cream-100 for default, cream-400 for hover */
-.dark .cipher-char {
-  color: #FAF7F2;
-}
-
-.dark .group:hover .cipher-char {
-  animation: none;
-  color: #D6CFC3;
-}
-
-.cipher-char::before {
-  content: attr(data-scramble);
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  transform: translateY(100%);
-  transition: all 0.3s ease;
+/* Fix ring-offset color for dark mode (Tailwind default is cream from tailwind.config.js) */
+.dark *, .dark ::before, .dark ::after {
+  --tw-ring-offset-color: #171717;
 }
 
 /* Hero entrance animation */
@@ -333,7 +59,6 @@
 
 .hero-animate-delay-1 { animation-delay: 0.1s; }
 .hero-animate-delay-2 { animation-delay: 0.25s; }
-.hero-animate-delay-3 { animation-delay: 0.4s; }
 .hero-animate-delay-4 { animation-delay: 0.55s; }
 .hero-animate-delay-5 { animation-delay: 0.7s; }
 
@@ -344,7 +69,7 @@
   animation-delay: 0.4s;
 }
 
-/* Fade in up animation for sections */
+/* Fade in up animation for cards */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -356,26 +81,17 @@
   }
 }
 
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
-}
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 
-body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
-
-/* Dark mode body background — overrides the hardcoded cream bg in index.html */
-.dark body {
-  background-color: #171717;
-}
-
-/* Fix ring-offset color for dark mode (Tailwind default is cream from tailwind.config.js) */
-.dark *, .dark ::before, .dark ::after {
-  --tw-ring-offset-color: #171717;
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Custom scrollbar - refined for light theme */
@@ -418,22 +134,8 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.safe-area-left {
-  padding-left: env(safe-area-inset-left);
-}
-
-.safe-area-right {
-  padding-right: env(safe-area-inset-right);
-}
-
-/* Mobile optimizations */
+/* Comfortable touch targets on small screens */
 @media (max-width: 640px) {
-  .animate-float-1,
-  .animate-float-2,
-  .animate-float-3 {
-    animation-duration: 8s;
-  }
-  
   button, a {
     min-height: 44px;
     min-width: 44px;
