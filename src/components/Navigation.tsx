@@ -102,7 +102,7 @@ export default function Navigation({ sections, onOpenTerminal }: NavigationProps
                   onClick={onOpenTerminal}
                   aria-label="Open terminal"
                   title="Open terminal (press `)"
-                  className="inline-flex items-center justify-center w-11 h-11 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10 transition-colors duration-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg"
+                  className="hidden md:inline-flex items-center justify-center w-11 h-11 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10 transition-colors duration-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg"
                 >
                   <Terminal className="w-5 h-5" />
                 </button>

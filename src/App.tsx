@@ -22,6 +22,8 @@ function App() {
   const [terminalLoaded, setTerminalLoaded] = useState(false)
 
   const openTerminal = useCallback(() => {
+    // Desktop-only easter egg; matches the md breakpoint that shows the nav icon
+    if (!window.matchMedia('(min-width: 768px)').matches) return
     setTerminalLoaded(true)
     setIsTerminalOpen(true)
   }, [])
