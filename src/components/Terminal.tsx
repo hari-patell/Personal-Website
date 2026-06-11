@@ -58,6 +58,17 @@ const SKILL_CATEGORIES: Record<string, string> = {
   tools: 'Tools',
 };
 
+function Prompt() {
+  return (
+    <span className="select-none whitespace-pre">
+      <span className="text-green-400 font-bold">guest@hari-patel</span>
+      <span className="text-stone-300">:</span>
+      <span className="text-blue-400 font-bold">~</span>
+      <span className="text-stone-300">$ </span>
+    </span>
+  );
+}
+
 function HelpOutput() {
   const rows: Array<[string, string]> = [
     ['about', 'who is hari?'],
@@ -73,10 +84,10 @@ function HelpOutput() {
     ['exit', 'close the terminal (or press Esc)'],
   ];
   return (
-    <div className="space-y-0.5">
+    <div>
       {rows.map(([cmd, desc]) => (
         <div key={cmd} className="flex">
-          <span className="w-40 flex-shrink-0 text-emerald-300">{cmd}</span>
+          <span className="w-40 flex-shrink-0 text-green-400">{cmd}</span>
           <span className="text-stone-400">{desc}</span>
         </div>
       ))}
@@ -89,7 +100,7 @@ function AboutOutput() {
   return (
     <div className="space-y-2 text-stone-300">
       <p>
-        Hey, I'm <span className="text-cream-100 font-semibold">Hari-Krishna Patel</span> — a Computer
+        Hey, I'm <span className="text-stone-100 font-semibold">Hari-Krishna Patel</span> — a Computer
         Science student at the University of Florida who likes making software fast.
       </p>
       <p>
@@ -107,12 +118,12 @@ function AboutOutput() {
 
 function ProjectsOutput() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {projects.map((project) => (
         <div key={project.id}>
-          <div className="text-cream-100 font-semibold">{project.title}</div>
+          <div className="text-stone-100 font-semibold">{project.title}</div>
           <div className="text-stone-400">{project.description}</div>
-          <div className="text-emerald-300/80 text-xs mt-0.5">[{project.technologies.join(', ')}]</div>
+          <div className="text-green-400/80 text-xs mt-0.5">[{project.technologies.join(', ')}]</div>
         </div>
       ))}
     </div>
@@ -121,11 +132,11 @@ function ProjectsOutput() {
 
 function ExperienceOutput() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {experiences.map((exp) => (
         <div key={exp.id}>
           <div>
-            <span className="text-cream-100 font-semibold">{exp.company}</span>
+            <span className="text-stone-100 font-semibold">{exp.company}</span>
             <span className="text-stone-500"> · {exp.location}</span>
           </div>
           <div className="text-stone-400">
@@ -147,11 +158,11 @@ function SkillsOutput() {
     return acc;
   }, {});
   return (
-    <div className="space-y-1">
+    <div>
       {Object.entries(SKILL_CATEGORIES).map(([key, label]) =>
         grouped[key] ? (
           <div key={key} className="flex flex-col sm:flex-row">
-            <span className="w-44 flex-shrink-0 text-emerald-300">{label}</span>
+            <span className="w-44 flex-shrink-0 text-green-400">{label}</span>
             <span className="text-stone-400">{grouped[key].join(', ')}</span>
           </div>
         ) : null,
@@ -162,15 +173,15 @@ function SkillsOutput() {
 
 function ContactOutput() {
   return (
-    <div className="space-y-0.5">
+    <div>
       {SOCIALS.map(({ label, value, href }) => (
         <div key={label} className="flex">
-          <span className="w-28 flex-shrink-0 text-emerald-300">{label}</span>
+          <span className="w-28 flex-shrink-0 text-green-400">{label}</span>
           <a
             href={href}
             target={href.startsWith('mailto:') ? undefined : '_blank'}
             rel="noopener noreferrer"
-            className="text-stone-300 underline decoration-stone-600 underline-offset-2 hover:text-cream-100"
+            className="text-stone-300 underline decoration-stone-600 underline-offset-2 hover:text-stone-100"
           >
             {value}
           </a>
@@ -187,8 +198,10 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
   const { isDark, toggleTheme } = useTheme();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [input, setInput] = useState('');
+  const [cursorPos, setCursorPos] = useState(0);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [lastLogin] = useState(() => new Date());
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -206,6 +219,15 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
 
   const print = (content: React.ReactNode, kind: HistoryEntry['kind'] = 'output') => {
     setHistory((prev) => [...prev, { id: nextId(), kind, content }]);
+  };
+
+  const setLine = (value: string) => {
+    setInput(value);
+    setCursorPos(value.length);
+  };
+
+  const syncCursor = (el: HTMLInputElement) => {
+    setCursorPos(el.selectionStart ?? el.value.length);
   };
 
   const runCommand = (raw: string) => {
@@ -281,7 +303,7 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
       default:
         print(
           <span>
-            <span className="text-red-400">command not found: {command}</span>
+            <span className="text-stone-300">zsh: command not found: {command}</span>
             <span className="text-stone-500"> — type 'help' to see what I can do</span>
           </span>,
         );
@@ -292,23 +314,23 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     if (e.key === 'Enter') {
       e.preventDefault();
       runCommand(input);
-      setInput('');
+      setLine('');
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (commandHistory.length === 0) return;
       const index = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
       setHistoryIndex(index);
-      setInput(commandHistory[index]);
+      setLine(commandHistory[index]);
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (historyIndex === -1) return;
       const index = historyIndex + 1;
       if (index >= commandHistory.length) {
         setHistoryIndex(-1);
-        setInput('');
+        setLine('');
       } else {
         setHistoryIndex(index);
-        setInput(commandHistory[index]);
+        setLine(commandHistory[index]);
       }
     } else if (e.key === 'Tab') {
       e.preventDefault();
@@ -316,7 +338,7 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
       if (!partial || partial.includes(' ')) return;
       const matches = COMMANDS.filter((c) => c.startsWith(partial));
       if (matches.length === 1) {
-        setInput(matches[0] + ' ');
+        setLine(matches[0] + ' ');
       } else if (matches.length > 1) {
         print(input, 'command');
         print(matches.join('  '));
@@ -328,6 +350,11 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
 
   if (!isOpen) return null;
 
+  // Mirror of the hidden input, split around the caret so a block cursor can sit on it
+  const beforeCursor = input.slice(0, cursorPos);
+  const atCursor = input.slice(cursorPos, cursorPos + 1) || ' ';
+  const afterCursor = input.slice(cursorPos + 1);
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm"
@@ -337,18 +364,20 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
       aria-label="Interactive terminal"
     >
       <div
-        className="w-full max-w-2xl h-[75vh] sm:h-[32rem] flex flex-col rounded-xl overflow-hidden border border-stone-700 bg-[#0c0c0c] shadow-2xl font-mono text-[13px] sm:text-sm"
+        className="w-full max-w-2xl h-[75vh] sm:h-[32rem] flex flex-col rounded-md overflow-hidden border border-stone-700/80 bg-[#0a0a0a] shadow-2xl font-mono text-[13px] leading-snug"
         onClick={(e) => {
           e.stopPropagation();
           inputRef.current?.focus();
         }}
       >
         {/* Title bar */}
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-stone-900 border-b border-stone-700/60 flex-shrink-0">
-          <span className="w-3 h-3 rounded-full bg-red-500/90" />
-          <span className="w-3 h-3 rounded-full bg-yellow-500/90" />
-          <span className="w-3 h-3 rounded-full bg-green-500/90" />
-          <span className="flex-1 text-center text-stone-400 text-xs select-none">hari@portfolio: ~</span>
+        <div className="flex items-center gap-1.5 px-3 py-2 bg-[#1c1c1c] border-b border-black/60 flex-shrink-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+          <span className="flex-1 text-center text-stone-400 text-xs select-none">
+            guest@hari-patel: ~ — zsh
+          </span>
           <button
             onClick={onClose}
             aria-label="Close terminal"
@@ -359,37 +388,46 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
         </div>
 
         {/* Scrollback */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-1.5 leading-relaxed">
-          <pre className="text-emerald-300 text-[11px] sm:text-xs leading-tight select-none">
+        <div ref={scrollRef} className="terminal-scrollback flex-1 overflow-y-auto px-3 py-2 text-stone-300">
+          <pre className="text-green-400 text-[11px] leading-tight select-none">
             {BANNER_LINES.join('\n')}
           </pre>
-          <p className="text-stone-400 pb-2">
-            Welcome to Hari's portfolio terminal. Type{' '}
-            <span className="text-emerald-300">help</span> to get started.
-          </p>
+          <div className="text-stone-400">
+            Last login: {lastLogin.toDateString().slice(0, -5)} {lastLogin.toTimeString().slice(0, 8)} on ttys001
+          </div>
+          <div className="text-stone-500 pb-1.5">Type 'help' for available commands.</div>
           {history.map((entry) => (
             <div key={entry.id}>
               {entry.kind === 'command' ? (
-                <div className="flex gap-2">
-                  <span className="text-emerald-400 select-none flex-shrink-0">❯</span>
-                  <span className="text-cream-100 break-all">{entry.content}</span>
+                <div>
+                  <Prompt />
+                  <span className="text-stone-100 break-all whitespace-pre-wrap">{entry.content}</span>
                 </div>
               ) : (
-                <div className="text-stone-300 pl-0 sm:pl-4 break-words">{entry.content}</div>
+                <div className="break-words">{entry.content}</div>
               )}
             </div>
           ))}
-          {/* Prompt */}
-          <div className="flex gap-2 items-center">
-            <span className="text-emerald-400 select-none flex-shrink-0">❯</span>
+          {/* Live prompt line: a hidden input drives the visible mirror + block cursor */}
+          <div className="relative cursor-text">
+            <Prompt />
+            <span className="text-stone-100 whitespace-pre-wrap break-all" aria-hidden="true">
+              {beforeCursor}
+              <span className="terminal-cursor">{atCursor}</span>
+              {afterCursor}
+            </span>
             <input
               ref={inputRef}
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                syncCursor(e.target);
+              }}
               onKeyDown={handleKeyDown}
-              className="flex-1 min-w-0 bg-transparent text-cream-100 caret-emerald-400 focus:outline-none placeholder:text-stone-600"
-              placeholder="type a command..."
+              onKeyUp={(e) => syncCursor(e.currentTarget)}
+              onSelect={(e) => syncCursor(e.currentTarget)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-text"
               autoCapitalize="off"
               autoComplete="off"
               autoCorrect="off"

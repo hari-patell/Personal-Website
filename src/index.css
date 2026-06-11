@@ -81,6 +81,38 @@ body {
   }
 }
 
+/* Terminal easter egg: blinking block cursor (solid block when reduced motion) */
+.terminal-cursor {
+  background-color: #d6d3d1;
+  color: #0a0a0a;
+  animation: terminalBlink 1.06s step-end infinite;
+}
+
+@keyframes terminalBlink {
+  50%, 100% {
+    background-color: transparent;
+    color: inherit;
+  }
+}
+
+/* Terminal easter egg: dark scrollbar regardless of site theme */
+.terminal-scrollback::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-scrollback::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.terminal-scrollback::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 0;
+}
+
+.terminal-scrollback::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   html {
