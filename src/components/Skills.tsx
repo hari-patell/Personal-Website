@@ -12,10 +12,10 @@ const categoryColors = {
 }
 
 const proficiencyColors = {
-  beginner: 'bg-stone-300',
-  intermediate: 'bg-stone-400',
-  advanced: 'bg-stone-600',
-  expert: 'bg-stone-800',
+  beginner: 'bg-stone-300 dark:bg-stone-400',
+  intermediate: 'bg-stone-400 dark:bg-cream-400',
+  advanced: 'bg-stone-600 dark:bg-cream-300',
+  expert: 'bg-stone-800 dark:bg-cream-100',
 }
 
 export default function Skills() {

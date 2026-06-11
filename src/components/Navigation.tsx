@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useScrollPosition } from '../hooks/useScrollPosition'
-import { Menu, X } from 'lucide-react'
+import { useTheme } from '../contexts/ThemeContext'
+import { Menu, X, Sun, Moon } from 'lucide-react'
 
 interface NavigationProps {
   sections: string[]
@@ -10,6 +11,7 @@ export default function Navigation({ sections }: NavigationProps) {
   const [activeSection, setActiveSection] = useState('home')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { isScrolled } = useScrollPosition()
+  const { isDark, toggleTheme } = useTheme()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -95,6 +97,13 @@ export default function Navigation({ sections }: NavigationProps) {
             </div>
             <div className="flex items-center gap-1">
               <button
+                onClick={toggleTheme}
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10 transition-colors duration-200 rounded-lg p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg"
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <button
                 onClick={(e) => {
                   e.stopPropagation()
                   setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -119,7 +128,7 @@ export default function Navigation({ sections }: NavigationProps) {
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-cream-100/95 dark:bg-darkBg/98 backdrop-blur-xl border-b border-stone-200/60 dark:border-stone-700/60 shadow-sm">
+        <div className="bg-cream-100/95 dark:bg-darkBg/95 backdrop-blur-xl border-b border-stone-200/60 dark:border-stone-700/60 shadow-sm">
           <div className="px-4 py-4 space-y-2">
             {sections.map((section) => (
               <button

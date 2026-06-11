@@ -129,14 +129,11 @@ export default function ResumeChat() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Bot className="w-7 h-7 text-stone-500 dark:text-cream-300" />
-            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-900 dark:text-cream-100 tracking-tight">
-              Ask About <span className="italic font-medium">My Resume</span>
-            </h2>
-          </div>
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
+            Ask About <span className="italic font-medium">My Resume</span>
+          </h2>
           <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 dark:text-cream-200 text-lg max-w-2xl mx-auto">
+          <p className="text-stone-500 dark:text-cream-200 text-center text-sm sm:text-base max-w-2xl mx-auto px-2">
             Have questions about my experience, skills, or projects? Chat with my AI assistant to learn more.
           </p>
         </div>
@@ -151,21 +148,21 @@ export default function ResumeChat() {
         >
           <div className="bg-white/70 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-600/50 rounded-2xl shadow-sm overflow-hidden backdrop-blur-sm">
             {/* Messages */}
-            <div ref={messagesContainerRef} className="h-[500px] overflow-y-auto p-6 space-y-4">
+            <div ref={messagesContainerRef} className="h-[420px] sm:h-[500px] overflow-y-auto p-4 sm:p-6 space-y-4">
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex gap-3 ${
+                  className={`flex gap-2.5 sm:gap-3 ${
                     message.role === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-10 h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-5 h-5 text-white dark:text-darkBg" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-darkBg" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[75%] rounded-2xl px-5 py-3 ${
+                    className={`max-w-[82%] sm:max-w-[75%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 ${
                       message.role === 'user'
                         ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg'
                         : 'bg-cream-200/60 dark:bg-stone-700/60 text-stone-800 dark:text-cream-100 border border-stone-200/40 dark:border-stone-600/50'
@@ -194,8 +191,8 @@ export default function ResumeChat() {
                     )}
                   </div>
                   {message.role === 'user' && (
-                    <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center flex-shrink-0">
-                      <User className="w-5 h-5 text-stone-600 dark:text-cream-100" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-stone-600 dark:text-cream-100" />
                     </div>
                   )}
                 </div>
@@ -214,11 +211,11 @@ export default function ResumeChat() {
                 </div>
               )}
               {isLoading && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-10 h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-white dark:text-darkBg" />
+                <div className="flex gap-2.5 sm:gap-3 justify-start">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-darkBg" />
                   </div>
-                  <div className="bg-cream-200/60 dark:bg-stone-700/60 border border-stone-200/40 dark:border-stone-600/50 rounded-2xl px-5 py-3 flex items-center gap-2">
+                  <div className="bg-cream-200/60 dark:bg-stone-700/60 border border-stone-200/40 dark:border-stone-600/50 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2">
                     <Loader2 className="w-4 h-4 text-stone-500 dark:text-cream-300 animate-spin" />
                     <span className="text-sm text-stone-500 dark:text-cream-200">Thinking...</span>
                   </div>
@@ -227,21 +224,21 @@ export default function ResumeChat() {
             </div>
 
             {/* Input */}
-            <div className="p-6 border-t border-stone-200/60 dark:border-stone-600/50 bg-cream-50/80 dark:bg-stone-800/80 backdrop-blur-sm">
-              <div className="flex gap-3">
+            <div className="p-4 sm:p-6 border-t border-stone-200/60 dark:border-stone-600/50 bg-cream-50/80 dark:bg-stone-800/80 backdrop-blur-sm">
+              <div className="flex gap-2.5 sm:gap-3">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask about resume..."
-                  className="flex-1 bg-white dark:bg-stone-700/50 text-stone-900 dark:text-cream-100 px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 border border-stone-200/60 dark:border-stone-600/50 transition-all placeholder:text-stone-400 dark:placeholder:text-cream-400/60"
+                  placeholder="Ask about my resume..."
+                  className="flex-1 min-w-0 bg-white dark:bg-stone-700/50 text-stone-900 dark:text-cream-100 px-4 sm:px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 border border-stone-200/60 dark:border-stone-600/50 transition-all placeholder:text-stone-400 dark:placeholder:text-cream-400/60"
                   disabled={isLoading}
                 />
                 <button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  className="bg-stone-900 dark:bg-cream-100 hover:bg-stone-800 dark:hover:bg-cream-200 text-white dark:text-darkBg px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                  className="bg-stone-900 dark:bg-cream-100 hover:bg-stone-800 dark:hover:bg-cream-200 text-white dark:text-darkBg px-4 sm:px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm flex-shrink-0"
                   aria-label="Send message"
                 >
                   <Send className="w-5 h-5" />
