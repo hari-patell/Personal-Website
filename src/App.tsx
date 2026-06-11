@@ -1,7 +1,4 @@
-// Updated on March 7, 2025 to fix deployment issue
-//Swami Shriji
-
-import { useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { Analytics } from '@vercel/analytics/react'
 import Navigation from './components/Navigation'
@@ -11,27 +8,13 @@ import Skills from './components/Skills'
 import Experience from './components/Experience'
 import Projects from './components/Projects'
 import Footer from './components/Footer'
-import ResumeChat from './components/ResumeChat'
+
+// Below the fold and pulls in markdown rendering — load it in its own chunk
+const ResumeChat = lazy(() => import('./components/ResumeChat'))
 
 const sections = ['home', 'about', 'skills', 'experience', 'projects', 'AI']
 
 function App() {
-  useEffect(() => {
-    // Ensure page starts at the top on initial load
-    // Ensure page starts at the top on initial load
-    if (window.location.hash) {
-      // Standard hash handling if needed, or just remove the specific GH pages check
-    }
-
-    // Force scroll to top immediately and after other effects
-    window.scrollTo(0, 0)
-    const timer = setTimeout(() => {
-      window.scrollTo(0, 0)
-    }, 10)
-
-    return () => clearTimeout(timer)
-  }, [])
-
   return (
     <div className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg text-stone-900 dark:text-cream-100 font-sans overflow-x-hidden">
       <Navigation sections={sections} />
@@ -41,7 +24,9 @@ function App() {
         <Skills />
         <Experience />
         <Projects />
-        <ResumeChat />
+        <Suspense fallback={<section id="AI" className="min-h-screen" />}>
+          <ResumeChat />
+        </Suspense>
       </main>
       <Footer />
       <SpeedInsights />

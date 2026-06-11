@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 import { projects } from '../data/projects'
 import { Project } from '../types'
@@ -6,7 +5,6 @@ import { Github, ExternalLink, Code2 } from 'lucide-react'
 
 export default function Projects() {
   const { ref, hasIntersected } = useIntersectionObserver()
-  const [hoveredProject, setHoveredProject] = useState<string | null>(null)
 
   const featuredProjects = projects.filter((p) => p.featured)
   const otherProjects = projects.filter((p) => !p.featured)
@@ -37,15 +35,7 @@ export default function Projects() {
           {/* Featured Projects */}
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-12 sm:mb-16">
             {featuredProjects.map((project, index) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                index={index}
-                isHovered={hoveredProject === project.id}
-                onHover={() => setHoveredProject(project.id)}
-                onLeave={() => setHoveredProject(null)}
-                featured
-              />
+              <ProjectCard key={project.id} project={project} index={index} featured />
             ))}
           </div>
 
@@ -59,9 +49,6 @@ export default function Projects() {
                     key={project.id}
                     project={project}
                     index={index + featuredProjects.length}
-                    isHovered={hoveredProject === project.id}
-                    onHover={() => setHoveredProject(project.id)}
-                    onLeave={() => setHoveredProject(null)}
                   />
                 ))}
               </div>
@@ -76,29 +63,15 @@ export default function Projects() {
 function ProjectCard({
   project,
   index,
-  isHovered,
-  onHover,
-  onLeave,
   featured = false,
 }: {
   project: Project
   index: number
-  isHovered: boolean
-  onHover: () => void
-  onLeave: () => void
   featured?: boolean
 }) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-stone-800/50 border border-stone-200/60 dark:border-stone-600/50 transition-all duration-500 ${
-        featured ? 'md:col-span-1' : ''
-      } ${
-        isHovered
-          ? 'border-stone-300 dark:border-stone-500 shadow-md bg-white dark:bg-stone-700/60 scale-[1.01]'
-          : 'hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm hover:bg-white dark:hover:bg-stone-700/60'
-      }`}
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
+      className="group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-stone-800/50 border border-stone-200/60 dark:border-stone-600/50 transition-all duration-300 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-md hover:bg-white dark:hover:bg-stone-700/60"
       style={{
         animationDelay: `${index * 100}ms`,
         animation: 'fadeInUp 0.6s ease-out forwards',
@@ -139,13 +112,13 @@ function ProjectCard({
 
         {/* Links */}
         <div className="flex items-center gap-4 mt-auto pt-4 border-t border-stone-200/60 dark:border-stone-600/50">
-            {project.githubUrl && (
+          {project.githubUrl && (
             <a
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`View ${project.title} source code on GitHub`}
-              className="flex items-center gap-2 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg rounded"
+              className="flex items-center gap-2 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 rounded"
             >
               <Github className="w-4 h-4" aria-hidden="true" />
               <span>Code</span>
@@ -157,7 +130,7 @@ function ProjectCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`View ${project.title} live demo`}
-              className="flex items-center gap-2 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg rounded"
+              className="flex items-center gap-2 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 rounded"
             >
               <ExternalLink className="w-4 h-4" aria-hidden="true" />
               <span>Live</span>

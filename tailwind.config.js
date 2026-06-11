@@ -18,9 +18,6 @@ export default {
         },
         darkBg: '#171717',
       },
-      animation: {
-        'spin-slow': 'spin 20s linear infinite',
-      },
       ringOffsetColor: {
         DEFAULT: '#FAF7F2',
       },

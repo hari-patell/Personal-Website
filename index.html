@@ -15,10 +15,10 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <!-- Google Fonts: Playfair Display (serif headings) + Inter (body) -->
+  <!-- Google Fonts: Playfair Display (serif headings) + Inter (body) — only the weights in use -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- HTML Meta Tags -->
   <title>Hari Patel</title>
@@ -39,45 +39,11 @@
   <meta name="twitter:description" content="Portfolio of Hari Patel, Software Engineer & Developer">
   <meta name="twitter:image" content="https://haripatell.com/og-image.png">
 
-  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
   <style>
-    /* Fallback styles that will be visible if React doesn't load */
-    #fallback {
-      display: none;
-      font-family: 'Playfair Display', Georgia, serif;
-      text-align: center;
-      padding: 2rem;
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #FFFFFF;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid #E7E5E4;
-      color: #1C1917;
-    }
-
-    #fallback h1 {
-      color: #1C1917;
-      font-family: 'Playfair Display', Georgia, serif;
-    }
-
-    #fallback a {
-      color: #44403C;
-      text-decoration: none;
-      margin: 0 8px;
-    }
-
-    #fallback a:hover {
-      text-decoration: underline;
-    }
-
     body {
       background-color: #FAF7F2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       margin: 0;
+      min-height: 100vh;
     }
 
     #root {
@@ -90,32 +56,6 @@
 
 <body>
   <div id="root"></div>
-
-  <!-- Fallback content that will be shown if React doesn't load -->
-  <div id="fallback">
-    <h1>Hari-Krishna Patel</h1>
-    <p>Software Engineer & Developer</p>
-    <p>
-      <a href="mailto:hari1880patel@gmail.com">Email</a>
-      <a href="https://x.com/hari_patell">X</a>
-      <a href="https://instagram.com/hari_patell">Instagram</a>
-      <a href="https://www.linkedin.com/in/hari-krishna-patel">LinkedIn</a>
-      <a href="https://github.com/hari-patell">GitHub</a>
-    </p>
-    <p>If you're seeing this message, the React application failed to load.</p>
-    <p>Please try refreshing the page or clearing your browser cache.</p>
-  </div>
-
-  <script>
-    // Show fallback content if React doesn't load within 3 seconds
-    setTimeout(function () {
-      if (!document.querySelector('#root > *')) {
-        document.getElementById('fallback').style.display = 'block';
-        console.error('React app failed to load. Showing fallback content.');
-      }
-    }, 3000);
-  </script>
-
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

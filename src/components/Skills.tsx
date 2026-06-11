@@ -94,13 +94,9 @@ export default function Skills() {
 }
 
 function SkillCard({ skill, index }: { skill: Skill; index: number }) {
-  const [isHovered, setIsHovered] = useState(false)
-
   return (
     <div
       className="group relative p-4 rounded-xl bg-white/60 dark:bg-stone-800/50 border border-stone-200/60 dark:border-stone-600/50 transition-all duration-300 hover:bg-white dark:hover:bg-stone-700/60 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       style={{
         animationDelay: `${index * 50}ms`,
         animation: 'fadeInUp 0.6s ease-out forwards',
@@ -110,9 +106,7 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
         <div
           className={`w-11 h-11 rounded-lg bg-gradient-to-br ${
             categoryColors[skill.category]
-          } flex items-center justify-center text-white font-serif font-bold text-lg transition-transform duration-300 ${
-            isHovered ? 'scale-110' : ''
-          }`}
+          } flex items-center justify-center text-white font-serif font-bold text-lg transition-transform duration-300 group-hover:scale-110`}
         >
           {skill.name.charAt(0)}
         </div>

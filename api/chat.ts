@@ -97,9 +97,11 @@ ${context}`,
         answer: answer,
         model: completion.model,
       });
-    } catch (fetchError: any) {
+    } catch (error) {
       clearTimeout(timeoutId);
-      
+
+      const fetchError = error as { name?: string; message?: string; status?: number };
+
       if (fetchError.name === 'AbortError' || fetchError.message?.includes('timeout')) {
         return response.status(504).json({ 
           error: 'Request timed out after 60 seconds. The AI model may still be loading. Please wait 10-20 seconds and try again.',

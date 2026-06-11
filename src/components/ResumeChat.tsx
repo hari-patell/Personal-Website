@@ -19,24 +19,19 @@ export default function ResumeChat() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialMount, setIsInitialMount] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { ref, hasIntersected } = useIntersectionObserver();
 
-  const scrollToBottom = () => {
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  };
-
-  useEffect(() => {
-    if (isInitialMount) {
-      setIsInitialMount(false);
-      return;
-    }
-    scrollToBottom();
-  }, [messages, isInitialMount]);
+  }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -47,20 +42,15 @@ export default function ResumeChat() {
     setIsLoading(true);
 
     try {
-      const resumeContext = getResumeContext();
-      const apiUrl = '/api/chat';
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 65000);
 
-      const response = await fetch(apiUrl, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: userMessage.content,
-          context: resumeContext,
+          context: getResumeContext(),
           history: messages,
         }),
         signal: controller.signal,
@@ -68,79 +58,38 @@ export default function ResumeChat() {
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        let errorData: any = {};
-        try {
-          const text = await response.text();
-          errorData = text ? JSON.parse(text) : {};
-        } catch (e) {
-          errorData = { error: response.statusText || `HTTP ${response.status}` };
-        }
-        
-        console.error('API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-          url: apiUrl,
-        });
-        
-        if (response.status === 504 || response.status === 503) {
-          throw new Error(errorData.error || 'Request timed out. Please try again.');
-        }
-        
-        if (response.status === 404) {
-          throw new Error('API endpoint not found. Make sure you are running "vercel dev" or "npm run dev:vercel" instead of "npm run dev".');
-        }
-        
-        if (response.status === 500) {
-          throw new Error(errorData.error || errorData.message || 'Server error. Check console for details.');
-        }
-        
-        throw new Error(errorData.error || errorData.message || `Failed to get response (${response.status})`);
+      let data: { answer?: string; error?: string; retry?: boolean } = {};
+      try {
+        data = await response.json();
+      } catch {
+        // Non-JSON response; fall through to the generic error below
       }
 
-      const data = await response.json();
-      
-      if (data.error) {
+      if (!response.ok || data.error) {
         if (data.retry) {
-          const errorMessage: Message = {
-            role: 'assistant',
-            content: 'The AI model is loading. Please wait a moment and try again.',
-          };
-          setMessages((prev) => [...prev, errorMessage]);
-        } else {
-          throw new Error(data.error);
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: 'The assistant is warming up. Please try again in a moment.' },
+          ]);
+          return;
         }
-      } else {
-        const assistantMessage: Message = {
+        throw new Error(data.error || `Request failed (${response.status})`);
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
           role: 'assistant',
-          content: data.answer || 'I apologize, but I could not generate an answer to that question.',
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      }
+          content: data.answer || 'I could not generate an answer to that question. Please try rephrasing it.',
+        },
+      ]);
     } catch (error) {
-      console.error('Error:', error);
-      let errorMessage = 'Sorry, I encountered an error. Please try again later.';
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError' || error.message.includes('timeout')) {
-          errorMessage = 'The request timed out after 60 seconds. The AI model may still be loading. Please wait 10-20 seconds and try again - subsequent requests will be much faster.';
-        } else if (error.message.includes('loading')) {
-          errorMessage = error.message;
-        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-          errorMessage = 'Network error. Make sure you are running "vercel dev" or "npm run dev:vercel" to start the development server with API support.';
-        } else {
-          errorMessage = error.message || errorMessage;
-        }
-      } else if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = String(error.message);
-      }
-      
-      const errorMsg: Message = {
-        role: 'assistant',
-        content: errorMessage,
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      console.error('Chat error:', error);
+      const content =
+        error instanceof Error && error.name === 'AbortError'
+          ? 'The request timed out. Please try again in a moment.'
+          : 'Sorry, something went wrong. Please try again later.';
+      setMessages((prev) => [...prev, { role: 'assistant', content }]);
     } finally {
       setIsLoading(false);
     }
@@ -158,7 +107,7 @@ export default function ResumeChat() {
     setInput(question);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -275,7 +224,6 @@ export default function ResumeChat() {
                   </div>
                 </div>
               )}
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
@@ -285,7 +233,7 @@ export default function ResumeChat() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                   placeholder="Ask about resume..."
                   className="flex-1 bg-white dark:bg-stone-700/50 text-stone-900 dark:text-cream-100 px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 border border-stone-200/60 dark:border-stone-600/50 transition-all placeholder:text-stone-400 dark:placeholder:text-cream-400/60"
                   disabled={isLoading}
