@@ -99,7 +99,7 @@ export default function Navigation({ sections }: NavigationProps) {
               <button
                 onClick={toggleTheme}
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10 transition-colors duration-200 rounded-lg p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg"
+                className="inline-flex items-center justify-center w-11 h-11 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10 transition-colors duration-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg"
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
@@ -110,7 +110,7 @@ export default function Navigation({ sections }: NavigationProps) {
                 }}
                 aria-label="Toggle mobile menu"
                 aria-expanded={isMobileMenuOpen}
-                className="md:hidden text-stone-700 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 rounded p-2 z-50 relative"
+                className="md:hidden inline-flex items-center justify-center w-11 h-11 text-stone-700 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 rounded-lg z-50 relative"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>

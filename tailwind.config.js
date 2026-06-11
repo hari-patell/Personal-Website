@@ -2,6 +2,11 @@
 export default {
   darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  future: {
+    // Only apply hover styles on devices that support hover,
+    // so taps on touch screens don't leave a stuck highlight
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       fontFamily: {
