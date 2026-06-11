@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useScrollPosition } from '../hooks/useScrollPosition'
 import { useTheme } from '../contexts/ThemeContext'
-import { Menu, X, Sun, Moon } from 'lucide-react'
+import { Menu, X, Sun, Moon, Terminal } from 'lucide-react'
 
 interface NavigationProps {
   sections: string[]
+  onOpenTerminal?: () => void
 }
 
-export default function Navigation({ sections }: NavigationProps) {
+export default function Navigation({ sections, onOpenTerminal }: NavigationProps) {
   const [activeSection, setActiveSection] = useState('home')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { isScrolled } = useScrollPosition()
@@ -96,6 +97,16 @@ export default function Navigation({ sections }: NavigationProps) {
               ))}
             </div>
             <div className="flex items-center gap-1">
+              {onOpenTerminal && (
+                <button
+                  onClick={onOpenTerminal}
+                  aria-label="Open terminal"
+                  title="Open terminal (press `)"
+                  className="inline-flex items-center justify-center w-11 h-11 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10 transition-colors duration-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg"
+                >
+                  <Terminal className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={toggleTheme}
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}

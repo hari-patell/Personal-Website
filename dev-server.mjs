@@ -38,8 +38,8 @@ const server = createServer(async (req, res) => {
     req.on('data', chunk => { body += chunk.toString(); });
     req.on('end', async () => {
       try {
-        const { question, context } = JSON.parse(body);
-        
+        const { question, context, history = [] } = JSON.parse(body);
+
         if (!question || !context) {
           console.error('Missing required fields');
           res.statusCode = 400;
@@ -68,8 +68,10 @@ const server = createServer(async (req, res) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000);
 
+        let streamStarted = false;
+
         try {
-          const completion = await client.chat.completions.create({
+          const stream = await client.chat.completions.create({
             model: 'meta-llama/Llama-3.2-3B-Instruct',
             messages: [
               {
@@ -91,6 +93,10 @@ CRITICAL RULES - DO NOT VIOLATE THESE UNDER ANY CIRCUMSTANCES:
 
 Remember: You are answering questions about Hari-Krishna Patel (Hari) and ONLY Hari-Krishna Patel. No exceptions.`,
               },
+              ...history.slice(1).map((msg) => ({
+                role: msg.role,
+                content: msg.content,
+              })),
               {
                 role: 'user',
                 content: `Based on the following resume information, answer this question: ${question}\n\nResume Information:\n${context}`,
@@ -98,27 +104,50 @@ Remember: You are answering questions about Hari-Krishna Patel (Hari) and ONLY H
             ],
             max_tokens: 300,
             temperature: 0.7,
+            stream: true,
           }, {
             signal: controller.signal,
           });
 
+          for await (const chunk of stream) {
+            const delta = chunk.choices[0]?.delta?.content;
+            if (!delta) continue;
+
+            if (!streamStarted) {
+              streamStarted = true;
+              res.writeHead(200, {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Cache-Control': 'no-cache, no-transform',
+                'Access-Control-Allow-Origin': '*',
+              });
+            }
+
+            res.write(delta);
+          }
+
           clearTimeout(timeoutId);
 
-          const answer = completion.choices[0]?.message?.content || 'I apologize, but I could not generate an answer to that question.';
+          if (!streamStarted) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              answer: 'I apologize, but I could not generate an answer to that question.',
+            }));
+            return;
+          }
 
-          console.log('Successfully got response from Hugging Face');
-          
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ 
-            answer: answer,
-            model: completion.model,
-          }));
+          console.log('Successfully streamed response from Hugging Face');
+          res.end();
         } catch (fetchError) {
           clearTimeout(timeoutId);
-          
+
           console.error('Hugging Face API error:', fetchError.message);
-          
+
+          if (streamStarted) {
+            res.end();
+            return;
+          }
+
           if (fetchError.name === 'AbortError' || fetchError.message?.includes('timeout')) {
             res.statusCode = 504;
             res.setHeader('Content-Type', 'application/json');

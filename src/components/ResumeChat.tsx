@@ -19,6 +19,7 @@ export default function ResumeChat() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreamingReply, setIsStreamingReply] = useState(false);
   const isInitialMount = useRef(true);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const { ref, hasIntersected } = useIntersectionObserver();
@@ -56,33 +57,75 @@ export default function ResumeChat() {
         signal: controller.signal,
       });
 
+      // Headers have arrived; from here the stream manages its own pace
       clearTimeout(timeoutId);
 
-      let data: { answer?: string; error?: string; retry?: boolean } = {};
-      try {
-        data = await response.json();
-      } catch {
-        // Non-JSON response; fall through to the generic error below
-      }
+      const contentType = response.headers.get('content-type') ?? '';
 
-      if (!response.ok || data.error) {
-        if (data.retry) {
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: 'The assistant is warming up. Please try again in a moment.' },
-          ]);
-          return;
+      // Errors (and empty answers) come back as JSON; real answers stream as plain text
+      if (!response.ok || contentType.includes('application/json')) {
+        let data: { answer?: string; error?: string; retry?: boolean } = {};
+        try {
+          data = await response.json();
+        } catch {
+          // Non-JSON response; fall through to the generic error below
         }
-        throw new Error(data.error || `Request failed (${response.status})`);
+
+        if (!response.ok || data.error) {
+          if (data.retry) {
+            setMessages((prev) => [
+              ...prev,
+              { role: 'assistant', content: 'The assistant is warming up. Please try again in a moment.' },
+            ]);
+            return;
+          }
+          throw new Error(data.error || `Request failed (${response.status})`);
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: data.answer || 'I could not generate an answer to that question. Please try rephrasing it.',
+          },
+        ]);
+        return;
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: data.answer || 'I could not generate an answer to that question. Please try rephrasing it.',
-        },
-      ]);
+      if (!response.body) {
+        throw new Error('Streaming is not supported by this browser');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let answer = '';
+      let started = false;
+
+      const showAnswer = (content: string, replaceLast: boolean) => {
+        setMessages((prev) => {
+          const next = replaceLast ? prev.slice(0, -1) : [...prev];
+          next.push({ role: 'assistant', content });
+          return next;
+        });
+      };
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        answer += decoder.decode(value, { stream: true });
+        showAnswer(answer, started);
+        if (!started) {
+          started = true;
+          setIsStreamingReply(true);
+        }
+      }
+      answer += decoder.decode();
+
+      if (!answer.trim()) {
+        showAnswer('I could not generate an answer to that question. Please try rephrasing it.', started);
+      } else if (started) {
+        showAnswer(answer, true);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       const content =
@@ -92,6 +135,7 @@ export default function ResumeChat() {
       setMessages((prev) => [...prev, { role: 'assistant', content }]);
     } finally {
       setIsLoading(false);
+      setIsStreamingReply(false);
     }
   };
 
@@ -210,7 +254,7 @@ export default function ResumeChat() {
                   ))}
                 </div>
               )}
-              {isLoading && (
+              {isLoading && !isStreamingReply && (
                 <div className="flex gap-2.5 sm:gap-3 justify-start">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-darkBg" />
