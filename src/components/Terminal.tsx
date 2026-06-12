@@ -292,6 +292,7 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
   const [sparkTick, setSparkTick] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [streamText, setStreamText] = useState<string | null>(null);
+  const [queue, setQueue] = useState<string[]>([]);
   const thinkingTimer = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   // Mirrors the shape ResumeChat sends: the API drops the first (greeting) entry
@@ -321,6 +322,16 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
       abortRef.current?.abort();
     };
   }, []);
+
+  // Run queued prompts in order once the current turn finishes
+  useEffect(() => {
+    if (!isOpen || isBusy || queue.length === 0) return;
+    const [next, ...rest] = queue;
+    setQueue(rest);
+    runCommand(next);
+    // runCommand is recreated each render; the guards above keep this safe
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isBusy, queue]);
 
   // Drive the spark frames and elapsed-seconds counter while thinking
   useEffect(() => {
@@ -598,7 +609,15 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     }
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (isBusy) return;
+      if (isBusy) {
+        // Like Claude Code: messages sent while working queue up for later
+        const line = input.trim();
+        if (line) {
+          setQueue((prev) => [...prev, line]);
+          setLine('');
+        }
+        return;
+      }
       runCommand(input);
       setLine('');
     } else if (e.key === 'ArrowUp') {
@@ -739,6 +758,14 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
               <span className="text-stone-500">({elapsed}s · esc to interrupt)</span>
             </div>
           )}
+
+          {/* Queued prompts, shown dim until their turn comes */}
+          {queue.map((queued, index) => (
+            <div key={`${index}-${queued}`} className="flex gap-2 text-stone-600 break-all whitespace-pre-wrap">
+              <span className="select-none flex-shrink-0">›</span>
+              <span className="min-w-0">{queued}</span>
+            </div>
+          ))}
         </div>
 
         {/* Input box */}
