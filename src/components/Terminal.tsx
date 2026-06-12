@@ -59,6 +59,11 @@ const THINKING_VERBS = [
   'Crunching',
 ];
 
+// Claude Code's spark animation: glyphs cycle in a ping-pong sequence
+const SPARK_FRAMES = ['·', '✢', '✳', '✶', '✻', '✽'];
+const SPARK_SEQUENCE = [0, 1, 2, 3, 4, 5, 4, 3, 2, 1];
+const SPARK_FRAME_MS = 120;
+
 const SOCIALS = [
   { label: 'email', value: 'hari1880patel@gmail.com', href: 'mailto:hari1880patel@gmail.com' },
   { label: 'github', value: 'github.com/hari-patell', href: 'https://github.com/hari-patell' },
@@ -281,6 +286,8 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [thinkingVerb, setThinkingVerb] = useState<string | null>(null);
+  const [sparkTick, setSparkTick] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [streamText, setStreamText] = useState<string | null>(null);
   const thinkingTimer = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -312,6 +319,26 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     };
   }, []);
 
+  // Drive the spark frames and elapsed-seconds counter while thinking
+  useEffect(() => {
+    if (thinkingVerb === null) return;
+    setSparkTick(0);
+    setElapsed(0);
+    const startedAt = Date.now();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const frameTimer = reducedMotion
+      ? null
+      : window.setInterval(() => setSparkTick((t) => t + 1), SPARK_FRAME_MS);
+    const elapsedTimer = window.setInterval(
+      () => setElapsed(Math.floor((Date.now() - startedAt) / 1000)),
+      250,
+    );
+    return () => {
+      if (frameTimer !== null) window.clearInterval(frameTimer);
+      window.clearInterval(elapsedTimer);
+    };
+  }, [thinkingVerb]);
+
   const print = (content: React.ReactNode, kind: HistoryEntry['kind'] = 'output') => {
     setHistory((prev) => [...prev, { id: nextId(), kind, content }]);
   };
@@ -327,7 +354,7 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
       thinkingTimer.current = null;
       setThinkingVerb(null);
       print(content);
-    }, 500 + Math.random() * 600);
+    }, 2000 + Math.random() * 8000);
   };
 
   const interrupt = () => {
@@ -687,8 +714,11 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
 
           {thinkingVerb && (
             <div style={{ color: ACCENT }}>
-              <span className="animate-pulse">✻</span> {thinkingVerb}…{' '}
-              <span className="text-stone-500">(esc to interrupt)</span>
+              <span className="inline-block w-[1ch]">
+                {SPARK_FRAMES[SPARK_SEQUENCE[sparkTick % SPARK_SEQUENCE.length]]}
+              </span>{' '}
+              {thinkingVerb}…{' '}
+              <span className="text-stone-500">({elapsed}s · esc to interrupt)</span>
             </div>
           )}
         </div>
