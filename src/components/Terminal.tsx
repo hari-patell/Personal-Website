@@ -713,7 +713,11 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
             </span>
             <input
               ref={inputRef}
-              type="text"
+              // A search field with a non-credential name keeps browsers and
+              // password managers from treating this as a login form; the
+              // data-* attributes opt out of the major password managers
+              type="search"
+              name="hari-code-command"
               value={input}
               onChange={(e) => {
                 setInput(e.target.value);
@@ -722,11 +726,16 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
               onKeyDown={handleKeyDown}
               onKeyUp={(e) => syncCursor(e.currentTarget)}
               onSelect={(e) => syncCursor(e.currentTarget)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-text"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-text [&::-webkit-search-cancel-button]:hidden"
               autoCapitalize="off"
               autoComplete="off"
               autoCorrect="off"
               spellCheck={false}
+              enterKeyHint="send"
+              data-1p-ignore="true"
+              data-lpignore="true"
+              data-bwignore="true"
+              data-form-type="other"
               aria-label="Terminal input"
             />
           </div>
