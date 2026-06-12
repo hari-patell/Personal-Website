@@ -64,6 +64,9 @@ const SPARK_FRAMES = ['·', '✢', '✳', '✶', '✻', '✽'];
 const SPARK_SEQUENCE = [0, 1, 2, 3, 4, 5, 4, 3, 2, 1];
 const SPARK_FRAME_MS = 120;
 
+// Answers never land before this, so the AI always looks like it thought
+const MIN_THINK_MS = 3000;
+
 const SOCIALS = [
   { label: 'email', value: 'hari1880patel@gmail.com', href: 'mailto:hari1880patel@gmail.com' },
   { label: 'github', value: 'github.com/hari-patell', href: 'https://github.com/hari-patell' },
@@ -354,7 +357,14 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
       thinkingTimer.current = null;
       setThinkingVerb(null);
       print(content);
-    }, 2000 + Math.random() * 8000);
+    }, MIN_THINK_MS + Math.random() * 7000);
+  };
+
+  const waitOutMinThink = async (startedAt: number) => {
+    const remaining = MIN_THINK_MS - (Date.now() - startedAt);
+    if (remaining > 0) {
+      await new Promise((resolve) => setTimeout(resolve, remaining));
+    }
   };
 
   const interrupt = () => {
@@ -373,6 +383,7 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
   // Free-form input goes to the same streaming endpoint as the resume chat
   const askAI = async (question: string) => {
     startThinking();
+    const startedAt = Date.now();
     const controller = new AbortController();
     abortRef.current = controller;
     let answer = '';
@@ -407,14 +418,21 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
           return;
         }
         answer = data.answer ?? '';
+        await waitOutMinThink(startedAt);
       } else {
         if (!response.body) throw new Error('Streaming is not supported by this browser');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+        let firstToken = true;
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
           answer += decoder.decode(value, { stream: true });
+          if (firstToken) {
+            firstToken = false;
+            // Hold the first token back until the minimum think time has passed
+            await waitOutMinThink(startedAt);
+          }
           setThinkingVerb(null);
           setStreamText(answer);
         }
