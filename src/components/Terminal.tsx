@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { experiences } from '../data/experience';
 import { projects } from '../data/projects';
 import { skills } from '../data/skills';
+import { getResumeContext } from '../data/resume';
 
 interface TerminalProps {
   isOpen: boolean;
@@ -16,7 +17,26 @@ interface HistoryEntry {
   content: React.ReactNode;
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 const ACCENT = '#D97757';
+
+const LOGO_LINES = [
+  '█   █  ███  ████  █████',
+  '█   █ █   █ █   █   █  ',
+  '█████ █████ ████    █  ',
+  '█   █ █   █ █  █    █  ',
+  '█   █ █   █ █   █ █████',
+  '',
+  ' ████  ███  ████  █████',
+  '█     █   █ █   █ █    ',
+  '█     █   █ █   █ ████ ',
+  '█     █   █ █   █ █    ',
+  ' ████  ███  ████  █████',
+];
 
 const SECTIONS = ['home', 'about', 'skills', 'experience', 'projects', 'AI'];
 
@@ -34,6 +54,12 @@ const COMMANDS = [
   'clear',
   'exit',
 ];
+
+const HIDDEN_COMMANDS = ['whoami', 'date', 'echo', 'sudo', 'socials', 'quit'];
+
+// Commands that only make sense with an argument; bare words with extra
+// text that aren't one of these get routed to the AI instead
+const COMMANDS_WITH_ARGS = ['goto', 'echo'];
 
 const THINKING_VERBS = [
   'Pondering',
@@ -111,7 +137,9 @@ function HelpOutput() {
           <span className="text-stone-400">{desc}</span>
         </div>
       ))}
-      <div className="pt-1 text-stone-500">The slash is optional. There may be undocumented commands.</div>
+      <div className="pt-1 text-stone-500">
+        Anything else you type goes straight to Hari's resume AI — just ask a question.
+      </div>
     </Response>
   );
 }
@@ -242,9 +270,17 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [thinkingVerb, setThinkingVerb] = useState<string | null>(null);
+  const [streamText, setStreamText] = useState<string | null>(null);
   const thinkingTimer = useRef<number | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  // Mirrors the shape ResumeChat sends: the API drops the first (greeting) entry
+  const aiHistoryRef = useRef<ChatMessage[]>([
+    { role: 'assistant', content: "Hi! I'm an AI assistant that can answer questions about Hari's resume." },
+  ]);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const isBusy = thinkingVerb !== null || streamText !== null;
 
   useEffect(() => {
     if (isOpen) {
@@ -256,11 +292,12 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [history, thinkingVerb]);
+  }, [history, thinkingVerb, streamText]);
 
   useEffect(() => {
     return () => {
       if (thinkingTimer.current !== null) window.clearTimeout(thinkingTimer.current);
+      abortRef.current?.abort();
     };
   }, []);
 
@@ -268,9 +305,13 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     setHistory((prev) => [...prev, { id: nextId(), kind, content }]);
   };
 
-  // Mimic the model "working" before a reply lands
-  const printAfterThinking = (content: React.ReactNode) => {
+  const startThinking = () => {
     setThinkingVerb(THINKING_VERBS[Math.floor(Math.random() * THINKING_VERBS.length)]);
+  };
+
+  // Mimic the model "working" before a canned reply lands
+  const printAfterThinking = (content: React.ReactNode) => {
+    startThinking();
     thinkingTimer.current = window.setTimeout(() => {
       thinkingTimer.current = null;
       setThinkingVerb(null);
@@ -278,13 +319,95 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     }, 500 + Math.random() * 600);
   };
 
-  const interruptThinking = () => {
+  const interrupt = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      return;
+    }
     if (thinkingTimer.current !== null) {
       window.clearTimeout(thinkingTimer.current);
       thinkingTimer.current = null;
     }
     setThinkingVerb(null);
     print(<div className="pl-6 text-red-400">⎿  Interrupted by user</div>);
+  };
+
+  // Free-form input goes to the same streaming endpoint as the resume chat
+  const askAI = async (question: string) => {
+    startThinking();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    let answer = '';
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question,
+          context: getResumeContext(),
+          history: aiHistoryRef.current,
+        }),
+        signal: controller.signal,
+      });
+
+      const contentType = response.headers.get('content-type') ?? '';
+
+      // Errors (and empty answers) come back as JSON; real answers stream as plain text
+      if (!response.ok || contentType.includes('application/json')) {
+        let data: { answer?: string; error?: string; retry?: boolean } = {};
+        try {
+          data = await response.json();
+        } catch {
+          // Non-JSON response; fall through to the generic error below
+        }
+        if (!response.ok || data.error) {
+          const message = data.retry
+            ? 'The model is warming up — try again in a moment.'
+            : data.error || `Request failed (${response.status})`;
+          print(<Response><span className="text-red-400">{message}</span></Response>);
+          return;
+        }
+        answer = data.answer ?? '';
+      } else {
+        if (!response.body) throw new Error('Streaming is not supported by this browser');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          answer += decoder.decode(value, { stream: true });
+          setThinkingVerb(null);
+          setStreamText(answer);
+        }
+        answer += decoder.decode();
+      }
+
+      if (answer.trim()) {
+        aiHistoryRef.current = [
+          ...aiHistoryRef.current,
+          { role: 'user', content: question },
+          { role: 'assistant', content: answer },
+        ];
+        print(<Response><span className="whitespace-pre-wrap break-words">{answer}</span></Response>);
+      } else {
+        print(<Response><span className="text-stone-400">(no response — try rephrasing)</span></Response>);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        if (answer.trim()) {
+          print(<Response><span className="whitespace-pre-wrap break-words">{answer}</span></Response>);
+        }
+        print(<div className="pl-6 text-red-400">⎿  Interrupted by user</div>);
+      } else {
+        console.error('Terminal chat error:', error);
+        print(<Response><span className="text-red-400">Something went wrong talking to the model. Try again in a moment.</span></Response>);
+      }
+    } finally {
+      abortRef.current = null;
+      setThinkingVerb(null);
+      setStreamText(null);
+    }
   };
 
   const setLine = (value: string) => {
@@ -306,8 +429,20 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     setHistoryIndex(-1);
 
     const [rawCommand, ...args] = line.split(/\s+/);
+    const isSlash = rawCommand.startsWith('/');
     const command = rawCommand.replace(/^\//, '').toLowerCase();
     const arg = args.join(' ');
+
+    // Bare words only count as commands when they stand alone (or take args);
+    // everything else reads like a question and goes to the AI
+    const knownCommand = COMMANDS.includes(command) || HIDDEN_COMMANDS.includes(command);
+    const looksLikeCommand =
+      isSlash || (knownCommand && (args.length === 0 || COMMANDS_WITH_ARGS.includes(command)));
+
+    if (!looksLikeCommand) {
+      void askAI(line);
+      return;
+    }
 
     switch (command) {
       case 'help':
@@ -389,8 +524,8 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
       default:
         print(
           <Response>
-            <span className="text-red-400">Unknown command: {rawCommand}</span>
-            <span className="text-stone-500"> · type /help to see what Hari Code can do</span>
+            <span className="text-red-400">Unknown slash command: {rawCommand}</span>
+            <span className="text-stone-500"> · type /help, or drop the slash to ask the AI</span>
           </Response>,
         );
     }
@@ -398,8 +533,8 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
-      if (thinkingVerb) {
-        interruptThinking();
+      if (isBusy) {
+        interrupt();
       } else {
         onClose();
       }
@@ -407,7 +542,7 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
     }
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (thinkingVerb) return;
+      if (isBusy) return;
       runCommand(input);
       setLine('');
     } else if (e.key === 'ArrowUp') {
@@ -485,16 +620,27 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
         {/* Scrollback */}
         <div ref={scrollRef} className="terminal-scrollback flex-1 overflow-y-auto px-3 py-3 text-stone-300 space-y-1.5">
           {/* Welcome box */}
-          <div className="rounded-lg border px-4 py-3" style={{ borderColor: `${ACCENT}99` }}>
-            <div>
-              <span style={{ color: ACCENT }}>✻</span>{' '}
-              <span className="font-bold text-stone-100">Welcome to Hari Code!</span>
-            </div>
-            <div className="text-stone-500 mt-2 pl-4">/help for help, /about for Hari's story</div>
-            <div className="text-stone-500 pl-4">cwd: /Users/guest/hari-patel/portfolio</div>
+          <div className="rounded-lg border px-4 py-2.5" style={{ borderColor: `${ACCENT}99` }}>
+            <span style={{ color: ACCENT }}>✻</span>{' '}
+            <span className="text-stone-300">
+              Welcome to the <span className="font-bold text-stone-100">Hari Code</span> research preview!
+            </span>
+          </div>
+
+          {/* Pixel logo */}
+          <pre
+            className="text-[9px] sm:text-[11px] leading-[1.15] font-bold select-none pt-2 pb-1"
+            style={{ color: ACCENT, textShadow: `2px 2px 0 ${ACCENT}55` }}
+            aria-label="Hari Code"
+          >
+            {LOGO_LINES.join('\n')}
+          </pre>
+
+          <div className="text-stone-400 pb-0.5">
+            🎉 Login successful. You're in as <span className="text-stone-200">guest</span>.
           </div>
           <div className="text-stone-500 pb-1">
-            ※ Tip: Try <span style={{ color: ACCENT }}>/projects</span> to see what Hari has been building
+            ※ Tip: Type <span style={{ color: ACCENT }}>/help</span> for commands, or just ask anything about Hari
           </div>
 
           {history.map((entry) => (
@@ -509,6 +655,15 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
               )}
             </div>
           ))}
+
+          {streamText !== null && (
+            <Response>
+              <span className="whitespace-pre-wrap break-words">
+                {streamText}
+                <span className="terminal-cursor"> </span>
+              </span>
+            </Response>
+          )}
 
           {thinkingVerb && (
             <div style={{ color: ACCENT }}>
@@ -532,7 +687,7 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
               ) : (
                 <>
                   <span className="terminal-cursor"> </span>
-                  <span className="text-stone-600">Try "/projects" or "/about"</span>
+                  <span className="text-stone-600">Try "/projects" or ask anything about Hari</span>
                 </>
               )}
             </span>
