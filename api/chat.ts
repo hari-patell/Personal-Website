@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
 
+// Required for the Node runtime on Vercel to flush chunks as they are written
+export const supportsResponseStreaming = true;
+
 export default async function handler(
   request: VercelRequest,
   response: VercelResponse,
@@ -24,7 +27,7 @@ export default async function handler(
   }
 
   const apiKey = process.env.HUGGING_FACE_API_KEY || process.env.HF_TOKEN;
-  
+
   if (!apiKey) {
     console.error('API key not found in environment variables');
     return response.status(500).json({ error: 'API key not configured' });
@@ -43,13 +46,17 @@ export default async function handler(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
+    // Once the first token is written the status/headers are locked in,
+    // so errors after this point can only end the stream, not change it
+    let streamStarted = false;
+
     try {
       // Use a chat completion model - trying a fast, efficient model
       // You can change the model if needed. Some options:
       // - "meta-llama/Llama-3.2-3B-Instruct" (fast, good quality)
       // - "mistralai/Mistral-7B-Instruct-v0.2" (good balance)
       // - "google/gemma-2-2b-it" (very fast)
-      const completion = await client.chat.completions.create({
+      const stream = await client.chat.completions.create({
         model: 'openai/gpt-oss-120b:groq',
         messages: [
           {
@@ -84,26 +91,50 @@ ${context}`,
         ],
         max_tokens: 450,
         temperature: 0.2,
+        stream: true,
       }, {
         signal: controller.signal,
       });
 
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content;
+        if (!delta) continue;
+
+        if (!streamStarted) {
+          streamStarted = true;
+          response.writeHead(200, {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'no-cache, no-transform',
+            'X-Accel-Buffering': 'no',
+          });
+        }
+
+        response.write(delta);
+      }
+
       clearTimeout(timeoutId);
 
-      const answer = completion.choices[0]?.message?.content || 'I apologize, but I could not generate an answer to that question. Please try rephrasing your question.';
+      if (!streamStarted) {
+        return response.status(200).json({
+          answer: 'I apologize, but I could not generate an answer to that question. Please try rephrasing your question.',
+        });
+      }
 
-      console.log('Successfully got response from Hugging Face');
-      return response.status(200).json({ 
-        answer: answer,
-        model: completion.model,
-      });
+      console.log('Successfully streamed response from Hugging Face');
+      return response.end();
     } catch (error) {
       clearTimeout(timeoutId);
+
+      if (streamStarted) {
+        // Headers are already sent; the client keeps whatever arrived
+        console.error('Stream interrupted:', error);
+        return response.end();
+      }
 
       const fetchError = error as { name?: string; message?: string; status?: number };
 
       if (fetchError.name === 'AbortError' || fetchError.message?.includes('timeout')) {
-        return response.status(504).json({ 
+        return response.status(504).json({
           error: 'Request timed out after 60 seconds. The AI model may still be loading. Please wait 10-20 seconds and try again.',
           retry: true
         });
@@ -111,7 +142,7 @@ ${context}`,
 
       // Handle model loading or rate limiting
       if (fetchError.status === 503 || fetchError.status === 429) {
-        return response.status(503).json({ 
+        return response.status(503).json({
           error: 'AI model is loading or rate limited. Please try again in 10-20 seconds.',
           retry: true
         });
@@ -121,10 +152,9 @@ ${context}`,
     }
   } catch (error) {
     console.error('Error calling Hugging Face API:', error);
-    return response.status(500).json({ 
+    return response.status(500).json({
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }
-

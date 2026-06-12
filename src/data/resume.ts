@@ -29,7 +29,7 @@ export function getResumeContext(): string {
 PERSONAL BACKGROUND:
 Name: Hari-Krishna Patel
 Role: Software Engineer & Developer
-Location: Currently working in Fort Mill, SC (Honeywell)
+Location: Currently interning at Capital One in McLean, VA
 Email: hari1880patel@gmail.com
 LinkedIn: https://www.linkedin.com/in/hari-krishna-patel
 GitHub: https://github.com/hari-patell
@@ -37,7 +37,7 @@ Twitter/X: https://x.com/hari_patell
 Instagram: https://instagram.com/hari_patell
 
 PROFESSIONAL SUMMARY:
-I'm a Computer Science student at the University of Florida with a passion for creating high-performance solutions. I completed a Software Engineering Internship at Honeywell (Summer 2025), am an Incoming Full Stack Software Engineering Intern at Capital One (Summer 2026), and am an Incoming Software Development Engineer Intern at Amazon on the Within Stores team in Bellevue, WA (Fall 2026). My expertise spans full-stack development, machine learning, mobile applications, and financial systems (limit order books, market microstructure). I thrive on solving complex problems through clean code and systematic optimization. Whether it's reducing execution time from 4.5 seconds to 150ms, achieving 94.2% accuracy with custom neural networks, building a limit order book engine processing ~50,000 orders/sec, or leading teams to build innovative solutions, I'm driven by measurable impact and continuous learning.
+I'm a Computer Science student at the University of Florida with a passion for creating high-performance solutions. I am currently a Full Stack Software Engineering Intern at Capital One (Summer 2026, my current internship), previously completed a Software Engineering Internship at Honeywell (Summer 2025), and am an Incoming Software Development Engineer Intern at Amazon on the Within Stores team in Bellevue, WA (Fall 2026). My expertise spans full-stack development, machine learning, mobile applications, and financial systems (limit order books, market microstructure). I thrive on solving complex problems through clean code and systematic optimization. Whether it's reducing execution time from 4.5 seconds to 150ms, achieving 94.2% accuracy with custom neural networks, building a limit order book engine processing ~50,000 orders/sec, or leading teams to build innovative solutions, I'm driven by measurable impact and continuous learning.
 
 CORE VALUES & WORK PHILOSOPHY:
 - Clean Code: Writing maintainable, scalable, and well-documented code is a priority. I believe code should be readable and maintainable for future developers.
