@@ -81,18 +81,10 @@ body {
   }
 }
 
-/* Terminal easter egg: blinking block cursor (solid block when reduced motion) */
+/* Terminal easter egg: steady block cursor */
 .terminal-cursor {
   background-color: #d6d3d1;
   color: #0a0a0a;
-  animation: terminalBlink 1.06s step-end infinite;
-}
-
-@keyframes terminalBlink {
-  50%, 100% {
-    background-color: transparent;
-    color: inherit;
-  }
 }
 
 /* Terminal easter egg: dark scrollbar regardless of site theme */

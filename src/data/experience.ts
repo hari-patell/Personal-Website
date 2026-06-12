@@ -16,13 +16,12 @@ export const experiences: Experience[] = [
   {
     id: '2',
     company: 'Capital One',
-    position: 'Incoming Full Stack Software Engineering Intern',
-    incoming: true,
+    position: 'Full Stack Software Engineering Intern',
     location: 'McLean, VA',
     startDate: 'Jun. 2026',
     endDate: 'Aug. 2026',
-    description: 'I will be working at Capital One as part of the Technology Internship Program.',
-    achievements: ['Incoming Summer 2026 – Technology Internship Program'],
+    description: 'Currently working at Capital One as part of the Technology Internship Program.',
+    achievements: ['Current internship, Summer 2026 – Technology Internship Program'],
     technologies: ['Summer 2026'],
   },
   {
