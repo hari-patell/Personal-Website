@@ -23,20 +23,7 @@ interface ChatMessage {
 }
 
 const ACCENT = '#D97757';
-
-const LOGO_LINES = [
-  '█   █  ███  ████  █████',
-  '█   █ █   █ █   █   █  ',
-  '█████ █████ ████    █  ',
-  '█   █ █   █ █  █    █  ',
-  '█   █ █   █ █   █ █████',
-  '',
-  ' ████  ███  ████  █████',
-  '█     █   █ █   █ █    ',
-  '█     █   █ █   █ ████ ',
-  '█     █   █ █   █ █    ',
-  ' ████  ███  ████  █████',
-];
+const BG = '#0a0a0a';
 
 const SECTIONS = ['home', 'about', 'skills', 'experience', 'projects', 'AI'];
 
@@ -88,28 +75,41 @@ const SKILL_CATEGORIES: Record<string, string> = {
   tools: 'Tools',
 };
 
-/* Claude Code-style assistant bullet: ⏺ followed by the response */
+/* Pixel mascot in the style of the Claude Code splash creature */
+function Mascot() {
+  return (
+    <svg viewBox="0 0 14 10" className="w-12 sm:w-14 h-auto" aria-hidden="true">
+      <g fill={ACCENT}>
+        <rect x="2" y="0" width="2" height="2" />
+        <rect x="10" y="0" width="2" height="2" />
+        <rect x="1" y="2" width="12" height="6" />
+        <rect x="3" y="8" width="2" height="2" />
+        <rect x="9" y="8" width="2" height="2" />
+      </g>
+      <rect x="4" y="3.5" width="1.4" height="2.4" fill={BG} />
+      <rect x="8.6" y="3.5" width="1.4" height="2.4" fill={BG} />
+    </svg>
+  );
+}
+
+/* Assistant text bullet: white ● followed by the response */
 function Response({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex gap-2">
-      <span style={{ color: ACCENT }} className="select-none flex-shrink-0">⏺</span>
+      <span className="text-stone-200 select-none flex-shrink-0">●</span>
       <div className="min-w-0 flex-1 text-stone-300">{children}</div>
     </div>
   );
 }
 
-/* Claude Code-style tool call: ⏺ Read(file) with a ⎿ result line */
-function ToolCall({ name, arg, result }: { name: string; arg: string; result: string }) {
+/* Collapsed tool activity line: green ● Searched for N patterns, read M files */
+function ToolSummary({ children }: { children: React.ReactNode }) {
   return (
-    <div className="pb-1.5">
-      <div className="flex gap-2">
-        <span className="text-green-500 select-none flex-shrink-0">⏺</span>
-        <div className="min-w-0">
-          <span className="text-stone-200 font-semibold">{name}</span>
-          <span className="text-stone-400">({arg})</span>
-        </div>
+    <div className="flex gap-2 pb-1.5">
+      <span className="text-green-500 select-none flex-shrink-0">●</span>
+      <div className="min-w-0 flex-1 text-stone-300">
+        {children} <span className="text-stone-600">(ctrl+o to expand)</span>
       </div>
-      <div className="pl-6 text-stone-500">⎿  {result}</div>
     </div>
   );
 }
@@ -147,7 +147,9 @@ function HelpOutput() {
 function AboutOutput() {
   return (
     <div>
-      <ToolCall name="Read" arg="hari/README.md" result="Read 42 lines" />
+      <ToolSummary>
+        Read <strong className="text-stone-100">1</strong> file
+      </ToolSummary>
       <Response>
         <div className="space-y-2">
           <p>
@@ -172,7 +174,10 @@ function AboutOutput() {
 function ProjectsOutput() {
   return (
     <div>
-      <ToolCall name="Glob" arg="hari/projects/**" result={`Found ${projects.length} projects`} />
+      <ToolSummary>
+        Searched for <strong className="text-stone-100">1</strong> pattern, read{' '}
+        <strong className="text-stone-100">{projects.length}</strong> files
+      </ToolSummary>
       <Response>
         <div className="space-y-2">
           {projects.map((project) => (
@@ -193,7 +198,10 @@ function ProjectsOutput() {
 function ExperienceOutput() {
   return (
     <div>
-      <ToolCall name="Grep" arg='pattern: "internship", path: hari/career' result={`${experiences.length} matches`} />
+      <ToolSummary>
+        Searched for <strong className="text-stone-100">2</strong> patterns, read{' '}
+        <strong className="text-stone-100">{experiences.length}</strong> files
+      </ToolSummary>
       <Response>
         <div className="space-y-2">
           {experiences.map((exp) => (
@@ -224,7 +232,10 @@ function SkillsOutput() {
   }, {});
   return (
     <div>
-      <ToolCall name="Read" arg="hari/skills.json" result={`Parsed ${skills.length} skills`} />
+      <ToolSummary>
+        Read <strong className="text-stone-100">1</strong> file, parsed{' '}
+        <strong className="text-stone-100">{skills.length}</strong> skills
+      </ToolSummary>
       <Response>
         {Object.entries(SKILL_CATEGORIES).map(([key, label]) =>
           grouped[key] ? (
@@ -618,40 +629,49 @@ export default function Terminal({ isOpen, onClose }: TerminalProps) {
         </div>
 
         {/* Scrollback */}
-        <div ref={scrollRef} className="terminal-scrollback flex-1 overflow-y-auto px-3 py-3 text-stone-300 space-y-1.5">
-          {/* Welcome box */}
-          <div className="rounded-lg border px-4 py-2.5" style={{ borderColor: `${ACCENT}99` }}>
-            <span style={{ color: ACCENT }}>✻</span>{' '}
-            <span className="text-stone-300">
-              Welcome to the <span className="font-bold text-stone-100">Hari Code</span> research preview!
+        <div ref={scrollRef} className="terminal-scrollback flex-1 overflow-y-auto px-3 py-4 text-stone-300 space-y-1.5">
+          {/* Splash: titled border box with welcome panel + tips panel */}
+          <div className="relative rounded-md border mt-1 mb-3" style={{ borderColor: ACCENT }}>
+            <span
+              className="absolute -top-2.5 left-3 px-1.5 text-sm font-bold select-none"
+              style={{ color: ACCENT, backgroundColor: BG }}
+            >
+              Hari Code v1.0.0
             </span>
-          </div>
-
-          {/* Pixel logo */}
-          <pre
-            className="text-[9px] sm:text-[11px] leading-[1.15] font-bold select-none pt-2 pb-1"
-            style={{ color: ACCENT, textShadow: `2px 2px 0 ${ACCENT}55` }}
-            aria-label="Hari Code"
-          >
-            {LOGO_LINES.join('\n')}
-          </pre>
-
-          <div className="text-stone-400 pb-0.5">
-            🎉 Login successful. You're in as <span className="text-stone-200">guest</span>.
-          </div>
-          <div className="text-stone-500 pb-1">
-            ※ Tip: Type <span style={{ color: ACCENT }}>/help</span> for commands, or just ask anything about Hari
+            <div className="flex">
+              {/* Left: welcome */}
+              <div className="flex-1 min-w-0 flex flex-col items-center text-center gap-2.5 px-3 py-4">
+                <div className="font-bold text-stone-100">Welcome back guest!</div>
+                <Mascot />
+                <div className="text-stone-400">
+                  hari-1.0 · Hari Pro · guest@hari-patel's Organization
+                </div>
+                <div className="text-stone-500">/Users/guest/hari-patel/portfolio</div>
+              </div>
+              {/* Right: tips */}
+              <div
+                className="hidden sm:block w-56 flex-shrink-0 border-l px-3 py-4"
+                style={{ borderColor: ACCENT }}
+              >
+                <div className="font-bold" style={{ color: ACCENT }}>Tips for getting started</div>
+                <div className="text-stone-400 pb-3">Run /help to see what Hari Code can do</div>
+                <div className="border-t pt-3" style={{ borderColor: `${ACCENT}66` }}>
+                  <div className="font-bold" style={{ color: ACCENT }}>Recent activity</div>
+                  <div className="text-stone-400">No recent activity</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {history.map((entry) => (
             <div key={entry.id}>
               {entry.kind === 'command' ? (
-                <div className="text-stone-500 break-all whitespace-pre-wrap pt-1">
-                  <span className="select-none">&gt; </span>
-                  {entry.content}
+                <div className="flex gap-2 bg-stone-800/70 rounded px-2.5 py-1.5 mt-1 break-all whitespace-pre-wrap">
+                  <span className="text-stone-500 select-none flex-shrink-0">›</span>
+                  <span className="text-stone-200 min-w-0">{entry.content}</span>
                 </div>
               ) : (
-                <div className="break-words">{entry.content}</div>
+                <div className="break-words py-0.5">{entry.content}</div>
               )}
             </div>
           ))}
