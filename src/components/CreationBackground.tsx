@@ -44,7 +44,7 @@ export default function CreationBackground() {
       document.body.appendChild(probe)
       const ratio = probe.getBoundingClientRect().width / 10 / 100
       document.body.removeChild(probe)
-      pre.style.fontSize = `${container.clientWidth / (ratio * CREATION_COLS)}px`
+      pre.style.fontSize = `${(container.clientWidth / (ratio * CREATION_COLS)) * 1.4}px`
     }
 
     fit()
