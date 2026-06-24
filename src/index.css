@@ -69,6 +69,50 @@ body {
   animation-delay: 0.4s;
 }
 
+/* Creation-of-Adam dot-hands background (hero) */
+@keyframes cbReachRight {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(9px, -5px) rotate(-1.1deg); }
+}
+
+@keyframes cbReachLeft {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-9px, -5px) rotate(1.1deg); }
+}
+
+@keyframes cbDrift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes cbSpark {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.35); }
+}
+
+.cb-drift {
+  transform-box: view-box;
+  animation: cbDrift 18s ease-in-out infinite;
+}
+
+.cb-human {
+  transform-box: view-box;
+  transform-origin: 360px 700px;
+  animation: cbReachRight 7s ease-in-out infinite;
+}
+
+.cb-robot {
+  transform-box: view-box;
+  transform-origin: 1240px 700px;
+  animation: cbReachLeft 7s ease-in-out infinite;
+}
+
+.cb-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cbSpark 2.8s ease-in-out infinite;
+}
+
 /* Fade in up animation for cards */
 @keyframes fadeInUp {
   from {

@@ -1,6 +1,7 @@
 import { Github, Mail, Instagram, Linkedin, ArrowDown } from "lucide-react"
 import { SocialLink } from '../types'
 import XIcon from './XIcon'
+import CreationBackground from './CreationBackground'
 import profileImage from '../profile.jpg'
 
 const socialLinks: SocialLink[] = [
@@ -14,6 +15,7 @@ const socialLinks: SocialLink[] = [
 export default function Hero() {
   return (
     <section id="home" className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg overflow-hidden flex items-center justify-center">
+      <CreationBackground />
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom">
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
