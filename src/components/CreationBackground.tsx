@@ -18,26 +18,50 @@ const DRIFT_PERIOD = 9000  // ms
 // Localized flex points placed on the fingertips of both hands. Each one nudges
 // only the glyphs around it (Gaussian falloff), so the fingers curl/twitch while
 // the arms and palms stay put. Coordinates are in art rows/cols (123 x 400).
-// sx/sy are the influence radii; phase/period stagger the motion per finger.
-// robotic fingers use a stepped, period-locked waveform (the right hand = AI),
-// while the left hand uses smooth organic sine motion.
+// sx/sy are the influence radii.
+//
+// The left (human) hand uses smooth sine motion (phase/period). The right hand
+// is the AI: instead of oscillating, it holds dead still, then jerks quickly to
+// a new small offset and freezes again — slow, mechanical, never waving.
+// seed/timeOffset drive that per-finger hold-and-jerk schedule.
 type Flex = {
   r: number; c: number; amp: number; sx: number; sy: number
-  phase: number; period: number; robotic?: boolean
+  phase: number; period: number
+  robotic?: boolean; seed?: number; timeOffset?: number
 }
-// Robot fingers snap between this many discrete positions per direction,
-// giving a quantised servo motion instead of a smooth curl.
-const ROBOT_STEPS = 2
-const ROBOT_PERIOD = 2200 // shared, so the mechanical fingers stay in lockstep
+const ROBOT_HOLD_MS = 2100      // how long a robot finger holds a pose before jerking
+const ROBOT_TRANSITION_MS = 150 // duration of the jerk itself (~2 frames @ 12fps)
 const FLEX_POINTS: Flex[] = [
-  // God's hand (right) = AI / robot: stepped, lock-stepped servo motion
-  { r: 88, c: 230, amp: 3.4, sx: 13, sy: 18, phase: 0.0, period: ROBOT_PERIOD, robotic: true },
-  { r: 87, c: 256, amp: 3.4, sx: 13, sy: 18, phase: 0.6, period: ROBOT_PERIOD, robotic: true },
-  { r: 70, c: 324, amp: 2.4, sx: 19, sy: 13, phase: 1.2, period: ROBOT_PERIOD, robotic: true },
+  // God's hand (right) = AI / robot: hold-then-jerk, staggered per finger
+  { r: 88, c: 230, amp: 2.0, sx: 13, sy: 18, phase: 0, period: 0, robotic: true, seed: 11, timeOffset: 0 },
+  { r: 87, c: 256, amp: 2.0, sx: 13, sy: 18, phase: 0, period: 0, robotic: true, seed: 29, timeOffset: 760 },
+  { r: 70, c: 324, amp: 1.6, sx: 19, sy: 13, phase: 0, period: 0, robotic: true, seed: 47, timeOffset: 1340 },
   // Adam's hand (left): dangling fingers + the iconic reaching index fingertip
   { r: 70, c: 165, amp: 2.8, sx: 14, sy: 16, phase: 2.3, period: 3200 },
   { r: 58, c: 210, amp: 2.6, sx: 20, sy: 13, phase: 4.2, period: 2500 },
 ]
+
+// Deterministic pseudo-random pose level in { -1, -0.5, 0, 0.5, 1 } for a given
+// finger seed and time slot — lets a robot finger pick a fresh small offset each
+// hold without any per-frame randomness.
+function robotLevel(seed: number, slot: number): number {
+  let x = (Math.imul(seed, 374761393) + Math.imul(slot, 668265263)) >>> 0
+  x = Math.imul(x ^ (x >>> 13), 1274126177) >>> 0
+  return Math.round((x / 4294967295) * 4) / 2 - 1
+}
+
+// Hold-then-jerk waveform: flat for most of each hold, then a quick eased snap
+// to the next pose. Returns a value in [-1, 1].
+function robotStep(elapsed: number, seed: number, timeOffset: number): number {
+  const t = elapsed + timeOffset
+  const slot = Math.floor(t / ROBOT_HOLD_MS)
+  const prev = robotLevel(seed, slot - 1)
+  const target = robotLevel(seed, slot)
+  const into = t - slot * ROBOT_HOLD_MS
+  const k = Math.min(1, into / ROBOT_TRANSITION_MS)
+  const eased = k * k * (3 - 2 * k) // smoothstep — fast but not an instant teleport
+  return prev + (target - prev) * eased
+}
 
 export default function CreationBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -109,9 +133,11 @@ export default function CreationBackground() {
       return {
         idx: Int32Array.from(idx),
         wts: Float32Array.from(wts),
-        omega: (Math.PI * 2) / f.period,
+        omega: f.period ? (Math.PI * 2) / f.period : 0,
         phase: f.phase,
         robotic: f.robotic ?? false,
+        seed: f.seed ?? 0,
+        timeOffset: f.timeOffset ?? 0,
       }
     })
 
@@ -122,10 +148,9 @@ export default function CreationBackground() {
       const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
       dyField.fill(drift)
       for (const fld of fields) {
-        let s = Math.sin(elapsed * fld.omega + fld.phase)
-        // Robot fingers quantise to discrete positions: they snap and hold
-        // instead of gliding, reading as servo-driven mechanical motion.
-        if (fld.robotic) s = Math.round(s * ROBOT_STEPS) / ROBOT_STEPS
+        const s = fld.robotic
+          ? robotStep(elapsed, fld.seed, fld.timeOffset)
+          : Math.sin(elapsed * fld.omega + fld.phase)
         const { idx, wts } = fld
         for (let j = 0; j < idx.length; j++) dyField[idx[j]] += wts[j] * s
       }
