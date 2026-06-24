@@ -15,33 +15,37 @@ const MS_PER_FRAME = 1000 / FPS
 const DRIFT_AMP = 0.45     // rows
 const DRIFT_PERIOD = 9000  // ms
 
-// Localized flex points placed on the fingertips of both hands. Each one nudges
-// only the glyphs around it (Gaussian falloff), so the fingers curl/twitch while
-// the arms and palms stay put. Coordinates are in art rows/cols (123 x 400).
-// sx/sy are the influence radii.
-//
-// The left (human) hand uses a smooth, one-directional curl: each finger eases
-// from its rest pose into a curl and gently back, so the tips bend rather than
-// bob up and down. The right hand is the AI: instead of oscillating, it holds
-// dead still, then jerks quickly to a new small offset and freezes again — slow,
-// mechanical, never waving. seed/timeOffset drive that hold-and-jerk schedule.
+// The right hand is the AI: each fingertip holds dead still, then jerks quickly
+// to a new small offset and freezes again — slow, mechanical, never waving.
+// These are localized vertical nudges with Gaussian falloff (art rows/cols, on a
+// 123 x 400 grid); sx/sy are the influence radii. seed/timeOffset stagger the
+// per-finger hold-and-jerk schedule.
 type Flex = {
   r: number; c: number; amp: number; sx: number; sy: number
-  phase: number; period: number
-  robotic?: boolean; seed?: number; timeOffset?: number
-  curl?: boolean; dir?: number // dir: +1 curls the tip down, -1 curls it up toward the palm
+  seed: number; timeOffset: number
 }
 const ROBOT_HOLD_MS = 2100      // how long a robot finger holds a pose before jerking
 const ROBOT_TRANSITION_MS = 150 // duration of the jerk itself (~2 frames @ 12fps)
-const FLEX_POINTS: Flex[] = [
-  // God's hand (right) = AI / robot: hold-then-jerk, staggered per finger
-  { r: 88, c: 230, amp: 2.0, sx: 13, sy: 18, phase: 0, period: 0, robotic: true, seed: 11, timeOffset: 0 },
-  { r: 87, c: 256, amp: 2.0, sx: 13, sy: 18, phase: 0, period: 0, robotic: true, seed: 29, timeOffset: 760 },
-  { r: 70, c: 324, amp: 1.6, sx: 19, sy: 13, phase: 0, period: 0, robotic: true, seed: 47, timeOffset: 1340 },
-  // Adam's hand (left) = human: slow smooth finger curl. Influence is elongated
-  // along each finger and centred near the tip, so the tip travels most.
-  { r: 69, c: 165, amp: 2.6, sx: 9, sy: 15, phase: 0.0, period: 4200, curl: true, dir: -1 },
-  { r: 58, c: 212, amp: 2.2, sx: 17, sy: 8, phase: 2.1, period: 4800, curl: true, dir: 1 },
+const ROBOT_FINGERS: Flex[] = [
+  { r: 88, c: 230, amp: 2.0, sx: 13, sy: 18, seed: 11, timeOffset: 0 },
+  { r: 87, c: 256, amp: 2.0, sx: 13, sy: 18, seed: 29, timeOffset: 760 },
+  { r: 70, c: 324, amp: 1.6, sx: 19, sy: 13, seed: 47, timeOffset: 1340 },
+]
+
+// The left hand is human: each finger curls by ROTATING about its knuckle, so the
+// tip swings through an arc while the finger keeps its length (no stretching).
+// pivot = knuckle, tip = fingertip; width is the finger's half-width; amp is the
+// peak curl angle in radians; the motion eases in and out one-directionally.
+type Finger = {
+  pr: number; pc: number   // pivot / knuckle (art row, col)
+  tr: number; tc: number   // fingertip (art row, col)
+  width: number            // perpendicular half-width of the finger
+  amp: number              // peak curl angle (radians)
+  period: number; phase: number
+}
+const HUMAN_FINGERS: Finger[] = [
+  { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, period: 4200, phase: 0.0 },
+  { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, period: 4800, phase: 2.0 },
 ]
 
 // Deterministic pseudo-random pose level in { -1, -0.5, 0, 0.5, 1 } for a given
@@ -113,10 +117,8 @@ export default function CreationBackground() {
     const max = CREATION_RAMP.length - 1
     const N = CREATION_ROWS * CREATION_COLS
 
-    // Precompute each flex point's influence as a sparse list of (cell, weight)
-    // pairs, so a frame only touches the few hundred glyphs near each fingertip
-    // instead of the whole grid.
-    const fields = FLEX_POINTS.map((f) => {
+    // Robot fingertips: sparse (cell, weight) lists for a localized vertical nudge.
+    const robotFields = ROBOT_FINGERS.map((f) => {
       const idx: number[] = []
       const wts: number[] = []
       const rMin = Math.max(0, Math.floor(f.r - 3 * f.sy))
@@ -136,51 +138,121 @@ export default function CreationBackground() {
       return {
         idx: Int32Array.from(idx),
         wts: Float32Array.from(wts),
-        omega: f.period ? (Math.PI * 2) / f.period : 0,
-        phase: f.phase,
-        robotic: f.robotic ?? false,
-        seed: f.seed ?? 0,
-        timeOffset: f.timeOffset ?? 0,
-        curl: f.curl ?? false,
-        dir: f.dir ?? 1,
+        seed: f.seed,
+        timeOffset: f.timeOffset,
       }
     })
 
-    // Per-cell vertical displacement, rebuilt each frame.
-    const dyField = new Float32Array(N)
+    // Human fingers: for each, precompute the cells along the finger plus, for
+    // each cell, its offset from the knuckle (relRow/relCol) and a membership
+    // weight. At render time we rotate those offsets about the knuckle, which
+    // swings the fingertip through an arc without changing the finger's length.
+    const KNEE = 4 // rows over which the curl ramps in from the static knuckle
+    const fingerFields = HUMAN_FINGERS.map((f) => {
+      const ar = f.tr - f.pr
+      const ac = f.tc - f.pc
+      const len = Math.hypot(ar, ac) || 1
+      const ur = ar / len
+      const uc = ac / len
+      const idx: number[] = []
+      const relRow: number[] = []
+      const relCol: number[] = []
+      const wts: number[] = []
+      const margin = 3 * f.width + 2
+      const rMin = Math.max(0, Math.floor(Math.min(f.pr, f.tr) - margin))
+      const rMax = Math.min(CREATION_ROWS - 1, Math.ceil(Math.max(f.pr, f.tr) + margin))
+      const cMin = Math.max(0, Math.floor(Math.min(f.pc, f.tc) - margin))
+      const cMax = Math.min(CREATION_COLS - 1, Math.ceil(Math.max(f.pc, f.tc) + margin))
+      for (let r = rMin; r <= rMax; r++) {
+        for (let c = cMin; c <= cMax; c++) {
+          const rr = r - f.pr
+          const cc = c - f.pc
+          const along = rr * ur + cc * uc           // distance from knuckle along finger
+          const perp = Math.abs(rr * uc - cc * ur)   // distance off the finger axis
+          if (along < 0) continue                    // nothing above the knuckle moves
+          // ramp in over the knee, full along the finger, fade just past the tip
+          const wIn = Math.min(1, along / KNEE)
+          const wOut = 1 - Math.max(0, Math.min(1, (along - len) / 6))
+          const wPerp = Math.exp(-(perp / f.width) * (perp / f.width))
+          const w = wIn * wOut * wPerp
+          if (w < 0.05) continue
+          idx.push(r * CREATION_COLS + c)
+          relRow.push(rr)
+          relCol.push(cc)
+          wts.push(w)
+        }
+      }
+      return {
+        idx: Int32Array.from(idx),
+        relRow: Float32Array.from(relRow),
+        relCol: Float32Array.from(relCol),
+        wts: Float32Array.from(wts),
+        omega: (Math.PI * 2) / f.period,
+        phase: f.phase,
+        amp: f.amp,
+      }
+    })
+
+    // Per-cell sampling offset (row + column), rebuilt each frame.
+    const dRow = new Float32Array(N)
+    const dCol = new Float32Array(N)
+    const lastRow = CREATION_ROWS - 1
+    const lastCol = CREATION_COLS - 1
 
     const render = (elapsed: number) => {
       const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
-      dyField.fill(drift)
-      for (const fld of fields) {
-        let s: number
-        if (fld.robotic) {
-          s = robotStep(elapsed, fld.seed, fld.timeOffset)
-        } else if (fld.curl) {
-          // One-directional eased curl: 0 (rest) -> 1 (curled) -> 0, smoothly.
-          s = fld.dir * (0.5 - 0.5 * Math.cos(elapsed * fld.omega + fld.phase))
-        } else {
-          s = Math.sin(elapsed * fld.omega + fld.phase)
-        }
+      dRow.fill(drift)
+      dCol.fill(0)
+
+      // Robot fingertips: vertical jerk.
+      for (const fld of robotFields) {
+        const s = robotStep(elapsed, fld.seed, fld.timeOffset)
         const { idx, wts } = fld
-        for (let j = 0; j < idx.length; j++) dyField[idx[j]] += wts[j] * s
+        for (let j = 0; j < idx.length; j++) dRow[idx[j]] += wts[j] * s
+      }
+
+      // Human fingers: rotate each finger's cells about its knuckle by an eased,
+      // one-directional curl angle (0 -> amp -> 0). Per cell, the rotation maps
+      // to a (dRow, dCol) sampling offset, so the tip arcs while length holds.
+      for (const fld of fingerFields) {
+        const phi = fld.amp * (0.5 - 0.5 * Math.cos(elapsed * fld.omega + fld.phase))
+        const { idx, relRow, relCol, wts } = fld
+        for (let j = 0; j < idx.length; j++) {
+          const a = phi * wts[j]
+          const ca1 = 1 - Math.cos(a)
+          const sa = Math.sin(a)
+          const y = relRow[j]
+          const x = relCol[j]
+          dCol[idx[j]] += x * ca1 - y * sa
+          dRow[idx[j]] += x * sa + y * ca1
+        }
       }
 
       let out = ''
       for (let r = 0; r < CREATION_ROWS; r++) {
         const base = r * CREATION_COLS
         for (let c = 0; c < CREATION_COLS; c++) {
-          const src = r - dyField[base + c]
-          let r0 = Math.floor(src)
-          const w = src - r0
-          if (r0 < 0) r0 = 0
-          else if (r0 > CREATION_ROWS - 1) r0 = CREATION_ROWS - 1
-          let r1 = r0 + 1
-          if (r1 > CREATION_ROWS - 1) r1 = CREATION_ROWS - 1
-          const lvl = grid[r0 * CREATION_COLS + c] * (1 - w) + grid[r1 * CREATION_COLS + c] * w
-          let i = (lvl + 0.5) | 0
-          if (i > max) i = max
-          out += CREATION_RAMP[i]
+          const i = base + c
+          let sr = r - dRow[i]
+          let sc = c - dCol[i]
+          if (sr < 0) sr = 0
+          else if (sr > lastRow) sr = lastRow
+          if (sc < 0) sc = 0
+          else if (sc > lastCol) sc = lastCol
+          const r0 = sr | 0
+          const c0 = sc | 0
+          const wr = sr - r0
+          const wc = sc - c0
+          const r1 = r0 < lastRow ? r0 + 1 : r0
+          const c1 = c0 < lastCol ? c0 + 1 : c0
+          const o0 = r0 * CREATION_COLS
+          const o1 = r1 * CREATION_COLS
+          // bilinear sample of the brightness grid
+          const top = grid[o0 + c0] * (1 - wc) + grid[o0 + c1] * wc
+          const bot = grid[o1 + c0] * (1 - wc) + grid[o1 + c1] * wc
+          let k = (top * (1 - wr) + bot * wr + 0.5) | 0
+          if (k > max) k = max
+          out += CREATION_RAMP[k]
         }
         if (r < CREATION_ROWS - 1) out += '\n'
       }
