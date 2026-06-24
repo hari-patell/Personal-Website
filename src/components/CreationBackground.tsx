@@ -9,10 +9,29 @@ import {
 
 const FPS = 12
 const MS_PER_FRAME = 1000 / FPS
-const TWIST_AMP = 4    // max row shift at the extreme edges (twist)
-const FLEX_AMP = 2     // extra row shift at fingertips (flex)
-const TWIST_PERIOD = 6000  // ms per full twist cycle (slow, whole-hand rotation)
-const FLEX_PERIOD = 2400   // ms per full flex cycle (faster, finger curl)
+
+// A barely-there global drift keeps the whole image alive without reading as
+// the arms sliding up and down.
+const DRIFT_AMP = 0.45     // rows
+const DRIFT_PERIOD = 9000  // ms
+
+// Localized flex points placed on the fingertips of both hands. Each one nudges
+// only the glyphs around it (Gaussian falloff), so the fingers curl/twitch while
+// the arms and palms stay put. Coordinates are in art rows/cols (123 x 400).
+// sx/sy are the influence radii; phase/period stagger the motion per finger.
+type Flex = {
+  r: number; c: number; amp: number; sx: number; sy: number
+  phase: number; period: number
+}
+const FLEX_POINTS: Flex[] = [
+  // God's hand (right): two dangling fingers + the fingers reaching right
+  { r: 88, c: 230, amp: 3.4, sx: 13, sy: 18, phase: 0.0, period: 2600 },
+  { r: 87, c: 256, amp: 3.4, sx: 13, sy: 18, phase: 1.7, period: 3000 },
+  { r: 70, c: 324, amp: 2.4, sx: 19, sy: 13, phase: 3.0, period: 2800 },
+  // Adam's hand (left): dangling fingers + the iconic reaching index fingertip
+  { r: 70, c: 165, amp: 2.8, sx: 14, sy: 16, phase: 2.3, period: 3200 },
+  { r: 58, c: 210, amp: 2.6, sx: 20, sy: 13, phase: 4.2, period: 2500 },
+]
 
 export default function CreationBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -59,26 +78,53 @@ export default function CreationBackground() {
     const pre = preRef.current
     if (!pre) return
     const max = CREATION_RAMP.length - 1
-    // Reusable per-column displacement buffer — avoids allocation each frame.
-    const colDy = new Float32Array(CREATION_COLS)
+    const N = CREATION_ROWS * CREATION_COLS
+
+    // Precompute each flex point's influence as a sparse list of (cell, weight)
+    // pairs, so a frame only touches the few hundred glyphs near each fingertip
+    // instead of the whole grid.
+    const fields = FLEX_POINTS.map((f) => {
+      const idx: number[] = []
+      const wts: number[] = []
+      const rMin = Math.max(0, Math.floor(f.r - 3 * f.sy))
+      const rMax = Math.min(CREATION_ROWS - 1, Math.ceil(f.r + 3 * f.sy))
+      const cMin = Math.max(0, Math.floor(f.c - 3 * f.sx))
+      const cMax = Math.min(CREATION_COLS - 1, Math.ceil(f.c + 3 * f.sx))
+      for (let r = rMin; r <= rMax; r++) {
+        for (let c = cMin; c <= cMax; c++) {
+          const dr = (r - f.r) / f.sy
+          const dc = (c - f.c) / f.sx
+          const w = f.amp * Math.exp(-(dr * dr + dc * dc))
+          if (w < 0.02) continue
+          idx.push(r * CREATION_COLS + c)
+          wts.push(w)
+        }
+      }
+      return {
+        idx: Int32Array.from(idx),
+        wts: Float32Array.from(wts),
+        omega: (Math.PI * 2) / f.period,
+        phase: f.phase,
+      }
+    })
+
+    // Per-cell vertical displacement, rebuilt each frame.
+    const dyField = new Float32Array(N)
 
     const render = (elapsed: number) => {
-      const sinTwist = Math.sin((elapsed / TWIST_PERIOD) * Math.PI * 2)
-      const sinFlex  = Math.sin((elapsed / FLEX_PERIOD)  * Math.PI * 2)
-
-      // Precompute vertical displacement for each column.
-      // cn ∈ [-1, +1]: left edge = -1, right edge = +1.
-      // Twist: linear — left goes up while right goes down (opposing shear).
-      // Flex: quadratic — fingertips (|cn| ≈ 1) curl more than the palm centre.
-      for (let c = 0; c < CREATION_COLS; c++) {
-        const cn = (c / (CREATION_COLS - 1)) * 2 - 1
-        colDy[c] = TWIST_AMP * sinTwist * cn + FLEX_AMP * sinFlex * cn * Math.abs(cn)
+      const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
+      dyField.fill(drift)
+      for (const fld of fields) {
+        const s = Math.sin(elapsed * fld.omega + fld.phase)
+        const { idx, wts } = fld
+        for (let j = 0; j < idx.length; j++) dyField[idx[j]] += wts[j] * s
       }
 
       let out = ''
       for (let r = 0; r < CREATION_ROWS; r++) {
+        const base = r * CREATION_COLS
         for (let c = 0; c < CREATION_COLS; c++) {
-          const src = r - colDy[c]
+          const src = r - dyField[base + c]
           let r0 = Math.floor(src)
           const w = src - r0
           if (r0 < 0) r0 = 0
@@ -125,7 +171,7 @@ export default function CreationBackground() {
         style={{ fontFamily: '"Courier New", Courier, monospace', lineHeight: 1 }}
         className={[
           'm-0 p-0 whitespace-pre',
-          isDark ? 'text-stone-300 opacity-[0.20]' : 'text-stone-500 opacity-[0.16]',
+          isDark ? 'text-stone-200 opacity-[0.34]' : 'text-stone-700 opacity-[0.32]',
         ].join(' ')}
       />
     </div>
