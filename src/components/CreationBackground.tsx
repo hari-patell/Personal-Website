@@ -15,37 +15,32 @@ const MS_PER_FRAME = 1000 / FPS
 const DRIFT_AMP = 0.45     // rows
 const DRIFT_PERIOD = 9000  // ms
 
-// The right hand is the AI: each fingertip holds dead still, then jerks quickly
-// to a new small offset and freezes again — slow, mechanical, never waving.
-// These are localized vertical nudges with Gaussian falloff (art rows/cols, on a
-// 123 x 400 grid); sx/sy are the influence radii. seed/timeOffset stagger the
-// per-finger hold-and-jerk schedule.
-type Flex = {
-  r: number; c: number; amp: number; sx: number; sy: number
-  seed: number; timeOffset: number
-}
 const ROBOT_HOLD_MS = 2100      // how long a robot finger holds a pose before jerking
 const ROBOT_TRANSITION_MS = 150 // duration of the jerk itself (~2 frames @ 12fps)
-const ROBOT_FINGERS: Flex[] = [
-  { r: 88, c: 230, amp: 2.0, sx: 13, sy: 18, seed: 11, timeOffset: 0 },
-  { r: 87, c: 256, amp: 2.0, sx: 13, sy: 18, seed: 29, timeOffset: 760 },
-  { r: 70, c: 324, amp: 1.6, sx: 19, sy: 13, seed: 47, timeOffset: 1340 },
-]
 
-// The left hand is human: each finger curls by ROTATING about its knuckle, so the
-// tip swings through an arc while the finger keeps its length (no stretching).
-// pivot = knuckle, tip = fingertip; width is the finger's half-width; amp is the
-// peak curl angle in radians; the motion eases in and out one-directionally.
+// Every finger curls by ROTATING about its knuckle, so the tip swings through an
+// arc while the finger keeps its length (no stretching). pivot = knuckle,
+// tip = fingertip; width is the finger's half-width; amp is the peak angle (rad).
+//   - 'curl' (human/left hand): a smooth, one-directional ease in and out.
+//   - 'jerk' (robot/right hand): holds dead still, then snaps to a new angle and
+//     freezes again — same rotation, but mechanical. seed/timeOffset stagger it.
 type Finger = {
   pr: number; pc: number   // pivot / knuckle (art row, col)
   tr: number; tc: number   // fingertip (art row, col)
   width: number            // perpendicular half-width of the finger
-  amp: number              // peak curl angle (radians)
-  period: number; phase: number
+  amp: number              // peak rotation angle (radians)
+  motion: 'curl' | 'jerk'
+  period?: number; phase?: number      // 'curl'
+  seed?: number; timeOffset?: number    // 'jerk'
 }
-const HUMAN_FINGERS: Finger[] = [
-  { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, period: 4200, phase: 0.0 },
-  { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, period: 4800, phase: 2.0 },
+const FINGERS: Finger[] = [
+  // Adam's hand (left) = human: smooth curl
+  { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, motion: 'curl', period: 4200, phase: 0.0 },
+  { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, motion: 'curl', period: 4800, phase: 2.0 },
+  // God's hand (right) = AI / robot: three dangling fingers, jerky rotation
+  { pr: 71, pc: 237, tr: 88, tc: 236, width: 4.5, amp: 0.22, motion: 'jerk', seed: 11, timeOffset: 0 },
+  { pr: 73, pc: 248, tr: 87, tc: 247, width: 4.0, amp: 0.20, motion: 'jerk', seed: 29, timeOffset: 760 },
+  { pr: 77, pc: 263, tr: 88, tc: 262, width: 3.5, amp: 0.18, motion: 'jerk', seed: 47, timeOffset: 1340 },
 ]
 
 // Deterministic pseudo-random pose level in { -1, -0.5, 0, 0.5, 1 } for a given
@@ -117,38 +112,13 @@ export default function CreationBackground() {
     const max = CREATION_RAMP.length - 1
     const N = CREATION_ROWS * CREATION_COLS
 
-    // Robot fingertips: sparse (cell, weight) lists for a localized vertical nudge.
-    const robotFields = ROBOT_FINGERS.map((f) => {
-      const idx: number[] = []
-      const wts: number[] = []
-      const rMin = Math.max(0, Math.floor(f.r - 3 * f.sy))
-      const rMax = Math.min(CREATION_ROWS - 1, Math.ceil(f.r + 3 * f.sy))
-      const cMin = Math.max(0, Math.floor(f.c - 3 * f.sx))
-      const cMax = Math.min(CREATION_COLS - 1, Math.ceil(f.c + 3 * f.sx))
-      for (let r = rMin; r <= rMax; r++) {
-        for (let c = cMin; c <= cMax; c++) {
-          const dr = (r - f.r) / f.sy
-          const dc = (c - f.c) / f.sx
-          const w = f.amp * Math.exp(-(dr * dr + dc * dc))
-          if (w < 0.02) continue
-          idx.push(r * CREATION_COLS + c)
-          wts.push(w)
-        }
-      }
-      return {
-        idx: Int32Array.from(idx),
-        wts: Float32Array.from(wts),
-        seed: f.seed,
-        timeOffset: f.timeOffset,
-      }
-    })
-
-    // Human fingers: for each, precompute the cells along the finger plus, for
-    // each cell, its offset from the knuckle (relRow/relCol) and a membership
-    // weight. At render time we rotate those offsets about the knuckle, which
-    // swings the fingertip through an arc without changing the finger's length.
-    const KNEE = 4 // rows over which the curl ramps in from the static knuckle
-    const fingerFields = HUMAN_FINGERS.map((f) => {
+    // For each finger, precompute the cells along it plus, per cell, its offset
+    // from the knuckle (relRow/relCol) and a membership weight. At render time we
+    // rotate those offsets about the knuckle, which swings the fingertip through
+    // an arc without changing the finger's length. Works for both hands; only the
+    // angle waveform differs (smooth curl vs. mechanical jerk).
+    const KNEE = 4 // rows over which the rotation ramps in from the static knuckle
+    const fingerFields = FINGERS.map((f) => {
       const ar = f.tr - f.pr
       const ac = f.tc - f.pc
       const len = Math.hypot(ar, ac) || 1
@@ -187,9 +157,12 @@ export default function CreationBackground() {
         relRow: Float32Array.from(relRow),
         relCol: Float32Array.from(relCol),
         wts: Float32Array.from(wts),
-        omega: (Math.PI * 2) / f.period,
-        phase: f.phase,
         amp: f.amp,
+        jerk: f.motion === 'jerk',
+        omega: f.period ? (Math.PI * 2) / f.period : 0,
+        phase: f.phase ?? 0,
+        seed: f.seed ?? 0,
+        timeOffset: f.timeOffset ?? 0,
       }
     })
 
@@ -204,18 +177,14 @@ export default function CreationBackground() {
       dRow.fill(drift)
       dCol.fill(0)
 
-      // Robot fingertips: vertical jerk.
-      for (const fld of robotFields) {
-        const s = robotStep(elapsed, fld.seed, fld.timeOffset)
-        const { idx, wts } = fld
-        for (let j = 0; j < idx.length; j++) dRow[idx[j]] += wts[j] * s
-      }
-
-      // Human fingers: rotate each finger's cells about its knuckle by an eased,
-      // one-directional curl angle (0 -> amp -> 0). Per cell, the rotation maps
-      // to a (dRow, dCol) sampling offset, so the tip arcs while length holds.
+      // Rotate each finger's cells about its knuckle. Human fingers use a smooth
+      // one-directional curl (0 -> amp -> 0); robot fingers use the hold-then-jerk
+      // schedule, so they snap between angles and freeze. Either way the rotation
+      // maps to a (dRow, dCol) sampling offset, so the tip arcs while length holds.
       for (const fld of fingerFields) {
-        const phi = fld.amp * (0.5 - 0.5 * Math.cos(elapsed * fld.omega + fld.phase))
+        const phi = fld.jerk
+          ? fld.amp * robotStep(elapsed, fld.seed, fld.timeOffset)
+          : fld.amp * (0.5 - 0.5 * Math.cos(elapsed * fld.omega + fld.phase))
         const { idx, relRow, relCol, wts } = fld
         for (let j = 0; j < idx.length; j++) {
           const a = phi * wts[j]
