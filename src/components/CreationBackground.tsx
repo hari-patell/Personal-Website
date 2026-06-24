@@ -19,15 +19,21 @@ const DRIFT_PERIOD = 9000  // ms
 // only the glyphs around it (Gaussian falloff), so the fingers curl/twitch while
 // the arms and palms stay put. Coordinates are in art rows/cols (123 x 400).
 // sx/sy are the influence radii; phase/period stagger the motion per finger.
+// robotic fingers use a stepped, period-locked waveform (the right hand = AI),
+// while the left hand uses smooth organic sine motion.
 type Flex = {
   r: number; c: number; amp: number; sx: number; sy: number
-  phase: number; period: number
+  phase: number; period: number; robotic?: boolean
 }
+// Robot fingers snap between this many discrete positions per direction,
+// giving a quantised servo motion instead of a smooth curl.
+const ROBOT_STEPS = 2
+const ROBOT_PERIOD = 2200 // shared, so the mechanical fingers stay in lockstep
 const FLEX_POINTS: Flex[] = [
-  // God's hand (right): two dangling fingers + the fingers reaching right
-  { r: 88, c: 230, amp: 3.4, sx: 13, sy: 18, phase: 0.0, period: 2600 },
-  { r: 87, c: 256, amp: 3.4, sx: 13, sy: 18, phase: 1.7, period: 3000 },
-  { r: 70, c: 324, amp: 2.4, sx: 19, sy: 13, phase: 3.0, period: 2800 },
+  // God's hand (right) = AI / robot: stepped, lock-stepped servo motion
+  { r: 88, c: 230, amp: 3.4, sx: 13, sy: 18, phase: 0.0, period: ROBOT_PERIOD, robotic: true },
+  { r: 87, c: 256, amp: 3.4, sx: 13, sy: 18, phase: 0.6, period: ROBOT_PERIOD, robotic: true },
+  { r: 70, c: 324, amp: 2.4, sx: 19, sy: 13, phase: 1.2, period: ROBOT_PERIOD, robotic: true },
   // Adam's hand (left): dangling fingers + the iconic reaching index fingertip
   { r: 70, c: 165, amp: 2.8, sx: 14, sy: 16, phase: 2.3, period: 3200 },
   { r: 58, c: 210, amp: 2.6, sx: 20, sy: 13, phase: 4.2, period: 2500 },
@@ -105,6 +111,7 @@ export default function CreationBackground() {
         wts: Float32Array.from(wts),
         omega: (Math.PI * 2) / f.period,
         phase: f.phase,
+        robotic: f.robotic ?? false,
       }
     })
 
@@ -115,7 +122,10 @@ export default function CreationBackground() {
       const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
       dyField.fill(drift)
       for (const fld of fields) {
-        const s = Math.sin(elapsed * fld.omega + fld.phase)
+        let s = Math.sin(elapsed * fld.omega + fld.phase)
+        // Robot fingers quantise to discrete positions: they snap and hold
+        // instead of gliding, reading as servo-driven mechanical motion.
+        if (fld.robotic) s = Math.round(s * ROBOT_STEPS) / ROBOT_STEPS
         const { idx, wts } = fld
         for (let j = 0; j < idx.length; j++) dyField[idx[j]] += wts[j] * s
       }
