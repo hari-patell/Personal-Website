@@ -9,8 +9,10 @@ import {
 
 const FPS = 12
 const MS_PER_FRAME = 1000 / FPS
-const BOB_ROWS = 3 // how many rows the arms travel up/down
-const PERIOD_MS = 5500 // one full up-down cycle
+const TWIST_AMP = 4    // max row shift at the extreme edges (twist)
+const FLEX_AMP = 2     // extra row shift at fingertips (flex)
+const TWIST_PERIOD = 6000  // ms per full twist cycle (slow, whole-hand rotation)
+const FLEX_PERIOD = 2400   // ms per full flex cycle (faster, finger curl)
 
 export default function CreationBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -53,27 +55,37 @@ export default function CreationBackground() {
     return () => ro.disconnect()
   }, [])
 
-  // Render a frame at a fractional vertical offset, interpolating between rows
-  // so glyphs morph rather than just jump by whole lines.
   useEffect(() => {
     const pre = preRef.current
     if (!pre) return
     const max = CREATION_RAMP.length - 1
+    // Reusable per-column displacement buffer — avoids allocation each frame.
+    const colDy = new Float32Array(CREATION_COLS)
 
-    const render = (dy: number) => {
+    const render = (elapsed: number) => {
+      const sinTwist = Math.sin((elapsed / TWIST_PERIOD) * Math.PI * 2)
+      const sinFlex  = Math.sin((elapsed / FLEX_PERIOD)  * Math.PI * 2)
+
+      // Precompute vertical displacement for each column.
+      // cn ∈ [-1, +1]: left edge = -1, right edge = +1.
+      // Twist: linear — left goes up while right goes down (opposing shear).
+      // Flex: quadratic — fingertips (|cn| ≈ 1) curl more than the palm centre.
+      for (let c = 0; c < CREATION_COLS; c++) {
+        const cn = (c / (CREATION_COLS - 1)) * 2 - 1
+        colDy[c] = TWIST_AMP * sinTwist * cn + FLEX_AMP * sinFlex * cn * Math.abs(cn)
+      }
+
       let out = ''
       for (let r = 0; r < CREATION_ROWS; r++) {
-        const src = r - dy
-        let r0 = Math.floor(src)
-        const w = src - r0
-        if (r0 < 0) r0 = 0
-        else if (r0 > CREATION_ROWS - 1) r0 = CREATION_ROWS - 1
-        let r1 = r0 + 1
-        if (r1 > CREATION_ROWS - 1) r1 = CREATION_ROWS - 1
-        const o0 = r0 * CREATION_COLS
-        const o1 = r1 * CREATION_COLS
         for (let c = 0; c < CREATION_COLS; c++) {
-          const lvl = grid[o0 + c] * (1 - w) + grid[o1 + c] * w
+          const src = r - colDy[c]
+          let r0 = Math.floor(src)
+          const w = src - r0
+          if (r0 < 0) r0 = 0
+          else if (r0 > CREATION_ROWS - 1) r0 = CREATION_ROWS - 1
+          let r1 = r0 + 1
+          if (r1 > CREATION_ROWS - 1) r1 = CREATION_ROWS - 1
+          const lvl = grid[r0 * CREATION_COLS + c] * (1 - w) + grid[r1 * CREATION_COLS + c] * w
           let i = (lvl + 0.5) | 0
           if (i > max) i = max
           out += i < 2 ? ' ' : CREATION_RAMP[i]
@@ -95,8 +107,7 @@ export default function CreationBackground() {
       raf = requestAnimationFrame(tick)
       if (t - last < MS_PER_FRAME) return
       last = t
-      const dy = BOB_ROWS * Math.sin(((t - start) / PERIOD_MS) * Math.PI * 2)
-      render(dy)
+      render(t - start)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
