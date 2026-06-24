@@ -20,14 +20,16 @@ const DRIFT_PERIOD = 9000  // ms
 // the arms and palms stay put. Coordinates are in art rows/cols (123 x 400).
 // sx/sy are the influence radii.
 //
-// The left (human) hand uses smooth sine motion (phase/period). The right hand
-// is the AI: instead of oscillating, it holds dead still, then jerks quickly to
-// a new small offset and freezes again — slow, mechanical, never waving.
-// seed/timeOffset drive that per-finger hold-and-jerk schedule.
+// The left (human) hand uses a smooth, one-directional curl: each finger eases
+// from its rest pose into a curl and gently back, so the tips bend rather than
+// bob up and down. The right hand is the AI: instead of oscillating, it holds
+// dead still, then jerks quickly to a new small offset and freezes again — slow,
+// mechanical, never waving. seed/timeOffset drive that hold-and-jerk schedule.
 type Flex = {
   r: number; c: number; amp: number; sx: number; sy: number
   phase: number; period: number
   robotic?: boolean; seed?: number; timeOffset?: number
+  curl?: boolean; dir?: number // dir: +1 curls the tip down, -1 curls it up toward the palm
 }
 const ROBOT_HOLD_MS = 2100      // how long a robot finger holds a pose before jerking
 const ROBOT_TRANSITION_MS = 150 // duration of the jerk itself (~2 frames @ 12fps)
@@ -36,9 +38,10 @@ const FLEX_POINTS: Flex[] = [
   { r: 88, c: 230, amp: 2.0, sx: 13, sy: 18, phase: 0, period: 0, robotic: true, seed: 11, timeOffset: 0 },
   { r: 87, c: 256, amp: 2.0, sx: 13, sy: 18, phase: 0, period: 0, robotic: true, seed: 29, timeOffset: 760 },
   { r: 70, c: 324, amp: 1.6, sx: 19, sy: 13, phase: 0, period: 0, robotic: true, seed: 47, timeOffset: 1340 },
-  // Adam's hand (left): dangling fingers + the iconic reaching index fingertip
-  { r: 70, c: 165, amp: 2.8, sx: 14, sy: 16, phase: 2.3, period: 3200 },
-  { r: 58, c: 210, amp: 2.6, sx: 20, sy: 13, phase: 4.2, period: 2500 },
+  // Adam's hand (left) = human: slow smooth finger curl. Influence is elongated
+  // along each finger and centred near the tip, so the tip travels most.
+  { r: 69, c: 165, amp: 2.6, sx: 9, sy: 15, phase: 0.0, period: 4200, curl: true, dir: -1 },
+  { r: 58, c: 212, amp: 2.2, sx: 17, sy: 8, phase: 2.1, period: 4800, curl: true, dir: 1 },
 ]
 
 // Deterministic pseudo-random pose level in { -1, -0.5, 0, 0.5, 1 } for a given
@@ -138,6 +141,8 @@ export default function CreationBackground() {
         robotic: f.robotic ?? false,
         seed: f.seed ?? 0,
         timeOffset: f.timeOffset ?? 0,
+        curl: f.curl ?? false,
+        dir: f.dir ?? 1,
       }
     })
 
@@ -148,9 +153,15 @@ export default function CreationBackground() {
       const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
       dyField.fill(drift)
       for (const fld of fields) {
-        const s = fld.robotic
-          ? robotStep(elapsed, fld.seed, fld.timeOffset)
-          : Math.sin(elapsed * fld.omega + fld.phase)
+        let s: number
+        if (fld.robotic) {
+          s = robotStep(elapsed, fld.seed, fld.timeOffset)
+        } else if (fld.curl) {
+          // One-directional eased curl: 0 (rest) -> 1 (curled) -> 0, smoothly.
+          s = fld.dir * (0.5 - 0.5 * Math.cos(elapsed * fld.omega + fld.phase))
+        } else {
+          s = Math.sin(elapsed * fld.omega + fld.phase)
+        }
         const { idx, wts } = fld
         for (let j = 0; j < idx.length; j++) dyField[idx[j]] += wts[j] * s
       }
