@@ -1,94 +1,138 @@
+import { useEffect, useRef } from 'react'
+import { useTheme } from '../contexts/ThemeContext'
+import {
+  CREATION_DOTS,
+  CREATION_DESIGN_W,
+  CREATION_DESIGN_H,
+  CREATION_GAP_X,
+} from '../data/creationDots'
+
 /**
- * Decorative hero background: the "Creation of Adam" reaching hands, rendered as
- * a dot-matrix (à la a tiled-dot wallpaper). The left hand is human; the right
- * hand is robotic — panel seams and articulated knuckle joints — a nod to the
- * human/AI theme. Both hands gently breathe and reach toward each other, with a
- * pulsing spark where the fingertips almost touch.
+ * Hero background: a halftone dot rendering of the "Creation of Adam" reaching
+ * hands. The left hand is human (a halftone of the fresco); the right hand is a
+ * robot hand — segmented fingers and articulated knuckle joints — for a human/AI
+ * motif. The two hands gently breathe and reach toward each other, the dots
+ * shimmer faintly, and a soft spark pulses in the gap where the fingertips meet.
  *
- * Purely decorative: aria-hidden, pointer-events-none, sits behind hero content.
- * Honors prefers-reduced-motion via the global rule in index.css.
- *
- * Hand silhouettes are Font Awesome Free pointing-hand icons (CC BY 4.0),
- * positioned so the extended index fingers nearly meet in the centre.
+ * Style and composition follow github.com/RayhaanFay/xfce-creation-of-adam.
+ * Rendered to <canvas>; decorative only (aria-hidden, pointer-events-none) and
+ * static when the user prefers reduced motion.
  */
-
-// Font Awesome "hand-point-right" / "hand-point-left" (512×512), used as the
-// human (left) and robot (right) silhouettes respectively.
-const HAND_RIGHT =
-  'M480 96c17.7 0 32 14.3 32 32s-14.3 32-32 32l-208 0 0-64 208 0zM320 288c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0zm64-64c0 17.7-14.3 32-32 32l-48 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l48 0c17.7 0 32 14.3 32 32zM288 384c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0zm-88-96l.6 0c-5.4 9.4-8.6 20.3-8.6 32c0 13.2 4 25.4 10.8 35.6C177.9 364.3 160 388.1 160 416c0 11.7 3.1 22.6 8.6 32l-8.6 0C71.6 448 0 376.4 0 288l0-61.7c0-42.4 16.9-83.1 46.9-113.1l11.6-11.6C82.5 77.5 115.1 64 149 64l27 0c35.3 0 64 28.7 64 64l0 88c0 22.1-17.9 40-40 40s-40-17.9-40-40l0-56c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 56c0 39.8 32.2 72 72 72z'
-
-const HAND_LEFT =
-  'M32 96C14.3 96 0 110.3 0 128s14.3 32 32 32l208 0 0-64L32 96zM192 288c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0zm-64-64c0 17.7 14.3 32 32 32l48 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-48 0c-17.7 0-32 14.3-32 32zm96 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0zm88-96l-.6 0c5.4 9.4 8.6 20.3 8.6 32c0 13.2-4 25.4-10.8 35.6c24.9 8.7 42.8 32.5 42.8 60.4c0 11.7-3.1 22.6-8.6 32l8.6 0c88.4 0 160-71.6 160-160l0-61.7c0-42.4-16.9-83.1-46.9-113.1l-11.6-11.6C429.5 77.5 396.9 64 363 64l-27 0c-35.3 0-64 28.7-64 64l0 88c0 22.1 17.9 40 40 40s40-17.9 40-40l0-56c0-8.8 7.2-16 16-16s16 7.2 16 16l0 56c0 39.8-32.2 72-72 72z'
-
-const HUMAN_TRANSFORM = 'translate(324,315) scale(0.9)'
-const ROBOT_TRANSFORM = 'translate(820,315) scale(0.9)'
-
 export default function CreationBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const { isDark } = useTheme()
+  // Read the live theme inside the animation loop without re-subscribing it.
+  const isDarkRef = useRef(isDark)
+  isDarkRef.current = isDark
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    // Spark sits in the gap where the two index fingertips reach toward each other.
+    const SPARK_X = CREATION_GAP_X - 4
+    const SPARK_Y = 440
+    const REACH_AMP = 7 // design-space px the fingertips travel as the hands breathe
+
+    let raf = 0
+    let cssW = 0
+    let cssH = 0
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      cssW = canvas.clientWidth
+      cssH = canvas.clientHeight
+      canvas.width = Math.round(cssW * dpr)
+      canvas.height = Math.round(cssH * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+
+    const draw = (t: number) => {
+      // "cover" mapping of the 1600×900 design space onto the canvas
+      const scale = Math.max(cssW / CREATION_DESIGN_W, cssH / CREATION_DESIGN_H)
+      const ox = (cssW - CREATION_DESIGN_W * scale) / 2
+      const oy = (cssH - CREATION_DESIGN_H * scale) / 2
+
+      ctx.clearRect(0, 0, cssW, cssH)
+
+      const dark = isDarkRef.current
+      ctx.fillStyle = dark ? 'rgb(245,240,232)' : 'rgb(68,64,60)'
+      ctx.globalAlpha = dark ? 0.6 : 0.42
+
+      const breathe = reduceMotion ? 0 : Math.sin(t * 0.0006)
+
+      const dots = CREATION_DOTS
+      for (let i = 0; i < dots.length; i += 3) {
+        const dx = dots[i]
+        const dy = dots[i + 1]
+        let r = dots[i + 2]
+
+        let x = dx
+        let y = dy
+        if (!reduceMotion) {
+          // Reaching: dots near the central gap move most, forearms stay anchored.
+          const human = dx < CREATION_GAP_X
+          const f = human
+            ? dx / CREATION_GAP_X
+            : (CREATION_DESIGN_W - dx) / (CREATION_DESIGN_W - CREATION_GAP_X)
+          const dir = human ? 1 : -1
+          x += dir * REACH_AMP * breathe * f
+          y += -REACH_AMP * 0.45 * breathe * f
+          // Faint per-dot shimmer
+          r *= 1 + 0.16 * Math.sin(t * 0.002 + dx * 0.045 + dy * 0.05)
+        }
+
+        ctx.beginPath()
+        ctx.arc(ox + x * scale, oy + y * scale, r * scale, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
+      // Soft pulsing spark in the gap between the fingertips
+      const pulse = reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(t * 0.0024)
+      const sx = ox + SPARK_X * scale
+      const sy = oy + SPARK_Y * scale
+      const sr = (10 + 14 * pulse) * scale
+      const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr)
+      const core = dark ? '255,250,240' : '120,110,100'
+      grad.addColorStop(0, `rgba(${core},${(dark ? 0.5 : 0.4) * (0.5 + pulse)})`)
+      grad.addColorStop(1, `rgba(${core},0)`)
+      ctx.globalAlpha = 1
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2)
+      ctx.fill()
+
+      if (!reduceMotion) raf = requestAnimationFrame(draw)
+    }
+
+    const onResize = () => {
+      resize()
+      if (reduceMotion) draw(0)
+    }
+
+    resize()
+    if (reduceMotion) {
+      draw(0)
+    } else {
+      raf = requestAnimationFrame(draw)
+    }
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
+
   return (
-    <div
+    <canvas
+      ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 select-none text-stone-400 dark:text-cream-200 opacity-[0.45] dark:opacity-[0.13]"
-    >
-      <svg
-        className="h-full w-full"
-        viewBox="0 0 1600 900"
-        preserveAspectRatio="xMidYMid slice"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          {/* The dot grid that fills each hand */}
-          <pattern id="cb-dots" width="16" height="16" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="2.1" fill="currentColor" />
-          </pattern>
-
-          <mask id="cb-human-mask">
-            <rect width="1600" height="900" fill="black" />
-            <path d={HAND_RIGHT} transform={HUMAN_TRANSFORM} fill="white" />
-          </mask>
-
-          <mask id="cb-robot-mask">
-            <rect width="1600" height="900" fill="black" />
-            <path d={HAND_LEFT} transform={ROBOT_TRANSFORM} fill="white" />
-          </mask>
-
-          <clipPath id="cb-robot-clip">
-            <path d={HAND_LEFT} transform={ROBOT_TRANSFORM} />
-          </clipPath>
-        </defs>
-
-        {/* slow overall drift so the whole scene feels alive */}
-        <g className="cb-drift">
-          {/* Human hand — dot fill */}
-          <g className="cb-human">
-            <rect width="1600" height="900" fill="url(#cb-dots)" mask="url(#cb-human-mask)" />
-          </g>
-
-          {/* Robot hand — dot fill + mechanical panels and knuckle joints */}
-          <g className="cb-robot">
-            <rect width="1600" height="900" fill="url(#cb-dots)" mask="url(#cb-robot-mask)" />
-            <g
-              clipPath="url(#cb-robot-clip)"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              opacity="0.7"
-            >
-              {/* panel seams */}
-              <path d="M900 360 L900 720 M980 360 L980 720 M1060 360 L1060 720 M1140 360 L1140 720 M1220 360 L1220 720" />
-              <path d="M800 470 L1300 470 M800 540 L1300 540 M800 620 L1300 620" />
-            </g>
-            {/* articulated knuckle joints along the extended finger */}
-            <g clipPath="url(#cb-robot-clip)" fill="currentColor" opacity="0.85">
-              <circle cx="885" cy="430" r="7" />
-              <circle cx="955" cy="430" r="7" />
-              <circle cx="1025" cy="430" r="7" />
-            </g>
-          </g>
-
-          {/* spark where the fingertips almost touch */}
-          <circle className="cb-spark" cx="802" cy="430" r="6" fill="currentColor" />
-        </g>
-      </svg>
-    </div>
+      className="pointer-events-none absolute inset-0 z-0 h-full w-full select-none"
+    />
   )
 }
