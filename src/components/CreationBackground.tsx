@@ -88,7 +88,7 @@ export default function CreationBackground() {
           const lvl = grid[r0 * CREATION_COLS + c] * (1 - w) + grid[r1 * CREATION_COLS + c] * w
           let i = (lvl + 0.5) | 0
           if (i > max) i = max
-          out += i < 2 ? ' ' : CREATION_RAMP[i]
+          out += CREATION_RAMP[i]
         }
         if (r < CREATION_ROWS - 1) out += '\n'
       }
