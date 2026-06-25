@@ -106,7 +106,6 @@ export default function CreationBackground() {
     pre.style.transition = 'opacity 0.6s ease-out'
     pre.style.transform = ''
     pre.style.opacity = ''
-    pre.style.filter = ''
     const id = setTimeout(() => { pre.style.transition = '' }, 700)
     return () => clearTimeout(id)
   }, [phase])
@@ -207,6 +206,35 @@ export default function CreationBackground() {
       }
     })
 
+    // Precompute per-cell distance from the swirl origin once at setup — avoids
+    // ~49k sqrt calls per frame during the smoke phase.
+    const distGrid = new Float32Array(N)
+    for (let r = 0; r < CREATION_ROWS; r++) {
+      for (let c = 0; c < CREATION_COLS; c++) {
+        const dr = r - SWIRL_ORIGIN_R
+        const dc = c - SWIRL_ORIGIN_C
+        distGrid[r * CREATION_COLS + c] = Math.sqrt(dr * dr + dc * dc)
+      }
+    }
+
+    // Per-frame trig lookup arrays for swirl turbulence. Each of the three trig
+    // terms depends on only one axis (col, row, or col+row diagonal), so we fill
+    // these arrays before the inner loop (~1k calls) instead of calling
+    // sin/cos/sqrt per cell (~197k calls at 49k cells × 4 ops).
+    const colSin = new Float32Array(CREATION_COLS)
+    const rowCos = new Float32Array(CREATION_ROWS)
+    const diagSin = new Float32Array(CREATION_ROWS + CREATION_COLS)
+
+    // Output as a typed byte buffer decoded once per frame — eliminates the GC
+    // pressure from 49k string concatenations. Newlines are pre-filled once.
+    const RAMP_CODES = Uint8Array.from(CREATION_RAMP, ch => ch.charCodeAt(0))
+    const SPACE_CODE = 32
+    const decoder = new TextDecoder()
+    const LINE_STRIDE = CREATION_COLS + 1      // chars per row + newline
+    const outBuf = new Uint8Array(CREATION_ROWS * LINE_STRIDE - 1)
+    for (let r = 0; r < CREATION_ROWS - 1; r++)
+      outBuf[(r + 1) * LINE_STRIDE - 1] = 10  // '\n'
+
     // Per-cell sampling offset (row + column), rebuilt each frame.
     const dRow = new Float32Array(N)
     const dCol = new Float32Array(N)
@@ -220,10 +248,9 @@ export default function CreationBackground() {
         swirlStartRef.current = elapsed
         // Drift the whole plume up and out while blurring + fading — sells the
         // billowing-smoke feel on top of the per-cell turbulence below.
-        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-out, opacity ${SWIRL_CSS_MS}ms ease-in, filter ${SWIRL_CSS_MS}ms ease-in`
+        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-out, opacity ${SWIRL_CSS_MS}ms ease-in`
         pre.style.transform = 'translateY(-9%) scale(1.18)'
         pre.style.opacity = '0'
-        pre.style.filter = 'blur(7px)'
         setTimeout(() => completeIntroRef.current(), SWIRL_CSS_MS + 60)
       }
 
@@ -258,24 +285,32 @@ export default function CreationBackground() {
       const grow = swirling ? Math.min(1, swirlT / SWIRL_LIFETIME) ** 2 : 0
       const tt = swirlT / 1000
 
-      let out = ''
+      // Fill per-axis trig lookup arrays once per swirl frame (~923 calls)
+      // instead of per cell (~197k calls). Only computed when actually swirling.
+      if (swirling) {
+        for (let c = 0; c < CREATION_COLS; c++)
+          colSin[c] = Math.sin(c * 0.10 + tt * 2.2) * SWIRL_TURB * grow
+        for (let r = 0; r < CREATION_ROWS; r++)
+          rowCos[r] = Math.cos(r * 0.12 + tt * 1.8) * SWIRL_TURB * grow
+        for (let d = 0; d < CREATION_ROWS + CREATION_COLS; d++)
+          diagSin[d] = Math.sin(d * 0.05 + tt * 3.0) * SWIRL_TURB * 0.6 * grow
+      }
+
       for (let r = 0; r < CREATION_ROWS; r++) {
         const base = r * CREATION_COLS
+        const lineBase = r * LINE_STRIDE
         for (let c = 0; c < CREATION_COLS; c++) {
           const i = base + c
           let sr = r - dRow[i]
           let sc = c - dCol[i]
 
           if (swirling) {
-            // Billow the texture upward (sample from below) and churn it with a
-            // couple of out-of-phase sine fields so it roils like rising smoke.
             sr += SWIRL_RISE * grow
-            sr += Math.sin(c * 0.10 + tt * 2.2) * SWIRL_TURB * grow
-            sc += Math.cos(r * 0.12 + tt * 1.8) * SWIRL_TURB * grow
-            sc += Math.sin((r + c) * 0.05 + tt * 3.0) * SWIRL_TURB * 0.6 * grow
-            // Anything that rises off the grid leaves emptiness behind it.
+            sr += colSin[c]
+            sc += rowCos[r]
+            sc += diagSin[r + c]
             if (sr < 0 || sr > lastRow || sc < 0 || sc > lastCol) {
-              out += ' '
+              outBuf[lineBase + c] = SPACE_CODE
               continue
             }
           } else {
@@ -293,17 +328,12 @@ export default function CreationBackground() {
           const c1 = c0 < lastCol ? c0 + 1 : c0
           const o0 = r0 * CREATION_COLS
           const o1 = r1 * CREATION_COLS
-          // bilinear sample of the brightness grid
           const top = grid[o0 + c0] * (1 - wc) + grid[o0 + c1] * wc
           const bot = grid[o1 + c0] * (1 - wc) + grid[o1 + c1] * wc
           let kf = top * (1 - wr) + bot * wr
 
           if (swirling) {
-            // Fade each cell to nothing, with a delay that grows with distance
-            // from the spark so the dissipation radiates outward.
-            const dr = r - SWIRL_ORIGIN_R
-            const dc = c - SWIRL_ORIGIN_C
-            const dist = Math.sqrt(dr * dr + dc * dc)
+            const dist = distGrid[i]
             const cellDelay = (dist / SWIRL_MAX_DIST) * SWIRL_SPREAD_MS
             const fade = Math.max(0, Math.min(1, (swirlT - cellDelay) / SWIRL_FADE_MS))
             kf *= 1 - fade
@@ -311,11 +341,10 @@ export default function CreationBackground() {
 
           let k = (kf + 0.5) | 0
           if (k > max) k = max
-          out += CREATION_RAMP[k]
+          outBuf[lineBase + c] = RAMP_CODES[k]
         }
-        if (r < CREATION_ROWS - 1) out += '\n'
       }
-      pre.textContent = out
+      pre.textContent = decoder.decode(outBuf)
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
