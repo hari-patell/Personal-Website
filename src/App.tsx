@@ -8,6 +8,7 @@ import Skills from './components/Skills'
 import Experience from './components/Experience'
 import Projects from './components/Projects'
 import Footer from './components/Footer'
+import { IntroProvider, useIntro } from './contexts/IntroContext'
 
 // Below the fold and pulls in markdown rendering — load it in its own chunk
 const ResumeChat = lazy(() => import('./components/ResumeChat'))
@@ -16,10 +17,12 @@ const Terminal = lazy(() => import('./components/Terminal'))
 
 const sections = ['home', 'about', 'skills', 'experience', 'projects', 'AI']
 
-function App() {
+function AppContent() {
   const [isTerminalOpen, setIsTerminalOpen] = useState(false)
   // Keep the terminal mounted after first open so its scrollback survives closing
   const [terminalLoaded, setTerminalLoaded] = useState(false)
+  const { phase } = useIntro()
+  const introActive = phase === 'enter' || phase === 'swirl'
 
   const openTerminal = useCallback(() => {
     // Desktop-only easter egg; matches the md breakpoint that shows the nav icon
@@ -46,9 +49,18 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [openTerminal])
 
+  // Lock body scroll during the intro so users can't peek at sections below
+  useEffect(() => {
+    document.body.style.overflow = introActive ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [introActive])
+
   return (
     <div className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg text-stone-900 dark:text-cream-100 font-sans overflow-x-hidden">
-      <Navigation sections={sections} onOpenTerminal={openTerminal} />
+      {/* Hide nav during intro (display:none on wrapper suppresses fixed children) */}
+      <div className={introActive ? 'hidden' : ''}>
+        <Navigation sections={sections} onOpenTerminal={openTerminal} />
+      </div>
       <main>
         <Hero />
         <About />
@@ -71,4 +83,10 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <IntroProvider>
+      <AppContent />
+    </IntroProvider>
+  )
+}

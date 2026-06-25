@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react'
 import { Github, Mail, Instagram, Linkedin, ArrowDown } from "lucide-react"
 import { SocialLink } from '../types'
 import XIcon from './XIcon'
 import CreationBackground from './CreationBackground'
 import profileImage from '../profile.jpg'
+import { useIntro } from '../contexts/IntroContext'
+import { useTheme } from '../contexts/ThemeContext'
 
 const socialLinks: SocialLink[] = [
   { icon: Mail, href: "mailto:hari1880patel@gmail.com", label: "Email" },
@@ -13,10 +16,77 @@ const socialLinks: SocialLink[] = [
 ]
 
 export default function Hero() {
+  const { phase, startSwirl } = useIntro()
+  const { isDark } = useTheme()
+  const introActive = phase === 'enter' || phase === 'swirl'
+  const entering = phase === 'enter'
+
+  // Fade in the "begin" hint after a short pause so it doesn't compete with the
+  // art on first load.
+  const [showHint, setShowHint] = useState(false)
+  useEffect(() => {
+    if (!entering) { setShowHint(false); return }
+    const t = setTimeout(() => setShowHint(true), 2200)
+    return () => clearTimeout(t)
+  }, [entering])
+
   return (
     <section id="home" className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg overflow-hidden flex items-center justify-center">
       <CreationBackground />
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom">
+
+      {/* Divine spark — shown only on desktop during the enter phase.
+          Positioned to sit in the gap between Adam's and God's fingertips. */}
+      {entering && (
+        <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex items-center justify-center">
+          <button
+            onClick={startSwirl}
+            aria-label="Enter"
+            className="pointer-events-auto relative flex cursor-pointer flex-col items-center focus:outline-none"
+            style={{ marginTop: '15vh' }}
+          >
+            <div className="relative flex items-center justify-center">
+              {/* Expanding ping ring */}
+              <span
+                className="absolute h-4 w-4 animate-ping rounded-full"
+                style={{
+                  background: isDark
+                    ? 'rgba(255,220,130,0.35)'
+                    : 'rgba(160,120,50,0.28)',
+                }}
+              />
+              {/* Centre glow dot */}
+              <span
+                className="block h-3 w-3 animate-pulse rounded-full"
+                style={{
+                  background: isDark
+                    ? 'rgba(255,235,160,0.95)'
+                    : 'rgba(155,115,35,0.9)',
+                  boxShadow: isDark
+                    ? '0 0 18px 7px rgba(255,200,80,0.45), 0 0 45px 20px rgba(220,160,50,0.18)'
+                    : '0 0 14px 5px rgba(160,115,30,0.55), 0 0 35px 15px rgba(140,95,20,0.22)',
+                }}
+              />
+            </div>
+            {/* Delayed hint label */}
+            <span
+              className="mt-7 block text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
+              style={{
+                color: isDark ? 'rgba(168,162,158,0.55)' : 'rgba(120,113,108,0.5)',
+                opacity: showHint ? 1 : 0,
+              }}
+            >
+              begin
+            </span>
+          </button>
+        </div>
+      )}
+
+      <div className={[
+        'relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
+        introActive
+          ? 'pointer-events-none select-none opacity-0'
+          : 'transition-opacity duration-700 opacity-100',
+      ].join(' ')}>
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
           <div className="relative mb-8 inline-block hero-animate hero-animate-delay-1">

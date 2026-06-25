@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useTheme } from '../contexts/ThemeContext'
+import { useIntro } from '../contexts/IntroContext'
 import {
   CREATION_ART,
   CREATION_COLS,
@@ -65,10 +66,47 @@ function robotStep(elapsed: number, seed: number, timeOffset: number): number {
   return prev + (target - prev) * eased
 }
 
+// Swirl dissolve: chars progress from dense to empty, radiating from the finger
+// gap (art row 79, col 200) so the dissolve appears to originate at the spark.
+const SWIRL_DISSOLVE = '@#%*+=~^:- ' // 11 steps dense → space
+const SWIRL_ORIGIN_R = 79
+const SWIRL_ORIGIN_C = 200
+// Max distance from origin to any art corner ≈ 215 art-cells; characters
+// finish dissolving at SWIRL_SPREAD_MS from origin.
+const SWIRL_MAX_DIST = 215
+const SWIRL_SPREAD_MS = 650  // ms for the wavefront to reach the far corners
+const SWIRL_STEP_MS = 120    // ms per dissolve step (dense→space in 11×120=1320ms)
+const SWIRL_CSS_MS = 1350    // CSS rotation + fade duration
+
 export default function CreationBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
   const preRef = useRef<HTMLPreElement>(null)
   const { isDark } = useTheme()
+  const { phase, completeIntro } = useIntro()
+
+  // Refs so the render loop (inside a [grid]-dep useEffect) can read latest values
+  // without being recreated on phase changes.
+  const phaseRef = useRef(phase)
+  const completeIntroRef = useRef(completeIntro)
+  const swirlStartRef = useRef<number | null>(null)
+
+  useEffect(() => { phaseRef.current = phase }, [phase])
+  useEffect(() => { completeIntroRef.current = completeIntro }, [completeIntro])
+
+  // When the intro finishes, snap the pre back to its normal style (it will be
+  // hidden behind the hero content as the hero content fades in, so the snap
+  // is invisible). Fade opacity back in gently so it doesn't flash.
+  useEffect(() => {
+    if (phase !== 'done') return
+    swirlStartRef.current = null
+    const pre = preRef.current
+    if (!pre) return
+    pre.style.transition = 'opacity 0.6s ease-out'
+    pre.style.transform = ''
+    pre.style.opacity = ''
+    const id = setTimeout(() => { pre.style.transition = '' }, 700)
+    return () => clearTimeout(id)
+  }, [phase])
 
   // Parse the art into a numeric brightness grid once.
   const grid = useMemo(() => {
@@ -173,6 +211,16 @@ export default function CreationBackground() {
     const lastCol = CREATION_COLS - 1
 
     const render = (elapsed: number) => {
+      // --- Swirl trigger (fires once when phase first becomes 'swirl') ---
+      const curPhase = phaseRef.current
+      if (curPhase === 'swirl' && swirlStartRef.current === null) {
+        swirlStartRef.current = elapsed
+        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-in, opacity ${SWIRL_CSS_MS}ms ease-in`
+        pre.style.transform = 'rotate(540deg) scale(3.5)'
+        pre.style.opacity = '0'
+        setTimeout(() => completeIntroRef.current(), SWIRL_CSS_MS + 60)
+      }
+
       const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
       dRow.fill(drift)
       dCol.fill(0)
@@ -197,10 +245,30 @@ export default function CreationBackground() {
         }
       }
 
+      // Time since swirl started (negative = not swirling)
+      const swirlT = swirlStartRef.current !== null ? elapsed - swirlStartRef.current : -1
+
       let out = ''
       for (let r = 0; r < CREATION_ROWS; r++) {
         const base = r * CREATION_COLS
         for (let c = 0; c < CREATION_COLS; c++) {
+          // Swirl dissolve: chars advance dense→space based on distance from the
+          // finger-gap origin, so the dissolve radiates outward from the spark.
+          if (swirlT >= 0) {
+            const dr = r - SWIRL_ORIGIN_R
+            const dc = c - SWIRL_ORIGIN_C
+            const dist = Math.sqrt(dr * dr + dc * dc)
+            const cellDelay = (dist / SWIRL_MAX_DIST) * SWIRL_SPREAD_MS
+            if (swirlT >= cellDelay) {
+              const step = Math.min(
+                SWIRL_DISSOLVE.length - 1,
+                Math.floor((swirlT - cellDelay) / SWIRL_STEP_MS),
+              )
+              out += SWIRL_DISSOLVE[step]
+              continue
+            }
+          }
+
           const i = base + c
           let sr = r - dRow[i]
           let sc = c - dCol[i]
