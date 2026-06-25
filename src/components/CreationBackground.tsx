@@ -31,10 +31,8 @@ type Finger = {
 }
 const FINGERS: Finger[] = [
   // Wrists — rotate the whole hand about the wrist joint
-  // Adam: pivot moved left of palm centre so all hand cells are in front of it (along>0)
-  { pr: 47, pc: 140, tr: 75, tc: 170, width: 12, amp: 0.17, motion: 'curl', period: 5000, phase: 1.0 },
-  // God: seed=73 → robotLevel(73,0)=-0.5 so wrist starts at a visible non-zero angle immediately
-  { pr: 62, pc: 253, tr: 90, tc: 246, width: 12, amp: 0.15, motion: 'jerk', seed: 73, timeOffset: 0 },
+  { pr: 47, pc: 155, tr: 75, tc: 169, width: 11, amp: 0.08, motion: 'curl', period: 8500, phase: 1.5 },   // Adam's wrist: slow smooth bend
+  { pr: 62, pc: 253, tr: 90, tc: 246, width: 11, amp: 0.07, motion: 'jerk', seed: 7, timeOffset: 400 },   // God's wrist: jerky snap
   // Adam's hand (left) = human: smooth curl
   { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, motion: 'curl', period: 4200, phase: 0.0 },
   { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, motion: 'curl', period: 4800, phase: 2.0 },
