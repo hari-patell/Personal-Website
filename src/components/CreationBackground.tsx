@@ -95,21 +95,6 @@ export default function CreationBackground() {
   useEffect(() => { phaseRef.current = phase }, [phase])
   useEffect(() => { completeIntroRef.current = completeIntro }, [completeIntro])
 
-  // When the intro finishes, snap the pre back to its normal style (it will be
-  // hidden behind the hero content as the hero content fades in, so the snap
-  // is invisible). Fade opacity back in gently so it doesn't flash.
-  useEffect(() => {
-    if (phase !== 'done') return
-    swirlStartRef.current = null
-    const pre = preRef.current
-    if (!pre) return
-    pre.style.transition = 'opacity 0.6s ease-out'
-    pre.style.transform = ''
-    pre.style.opacity = ''
-    const id = setTimeout(() => { pre.style.transition = '' }, 700)
-    return () => clearTimeout(id)
-  }, [phase])
-
   // Parse the art into a numeric brightness grid once.
   const grid = useMemo(() => {
     const g = new Int8Array(CREATION_ROWS * CREATION_COLS)
@@ -364,6 +349,10 @@ export default function CreationBackground() {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [grid])
+
+  // Unmount entirely once the intro is done — cancels the RAF loop and frees
+  // the DOM element. Mobile always skips intro so this is a no-op there too.
+  if (phase === 'done') return null
 
   return (
     // Hidden on mobile (below the md breakpoint).
