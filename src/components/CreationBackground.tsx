@@ -66,17 +66,19 @@ function robotStep(elapsed: number, seed: number, timeOffset: number): number {
   return prev + (target - prev) * eased
 }
 
-// Swirl dissolve: chars progress from dense to empty, radiating from the finger
-// gap (art row 79, col 200) so the dissolve appears to originate at the spark.
-const SWIRL_DISSOLVE = '@#%*+=~^:- ' // 11 steps dense → space
+// Swirl-to-smoke dissolve: when the spark is clicked the whole image billows
+// apart like smoke. A turbulent displacement field grows over time (the texture
+// rises and curls), and every cell fades to empty — radiating outward from the
+// finger-gap origin so the dissipation appears to start at the spark.
 const SWIRL_ORIGIN_R = 79
 const SWIRL_ORIGIN_C = 200
-// Max distance from origin to any art corner ≈ 215 art-cells; characters
-// finish dissolving at SWIRL_SPREAD_MS from origin.
-const SWIRL_MAX_DIST = 215
-const SWIRL_SPREAD_MS = 650  // ms for the wavefront to reach the far corners
-const SWIRL_STEP_MS = 120    // ms per dissolve step (dense→space in 11×120=1320ms)
-const SWIRL_CSS_MS = 1350    // CSS rotation + fade duration
+const SWIRL_MAX_DIST = 215   // origin → far corner, in art cells
+const SWIRL_SPREAD_MS = 500  // ms for the dissolve wavefront to reach the corners
+const SWIRL_FADE_MS = 1000   // per-cell fade-to-nothing duration
+const SWIRL_LIFETIME = 1400  // ms over which the turbulence grows to full strength
+const SWIRL_RISE = 22        // rows of upward billow at full strength
+const SWIRL_TURB = 6.5       // swirling turbulence amplitude (cells)
+const SWIRL_CSS_MS = 1700    // CSS upward drift + blur + fade duration
 
 export default function CreationBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -104,6 +106,7 @@ export default function CreationBackground() {
     pre.style.transition = 'opacity 0.6s ease-out'
     pre.style.transform = ''
     pre.style.opacity = ''
+    pre.style.filter = ''
     const id = setTimeout(() => { pre.style.transition = '' }, 700)
     return () => clearTimeout(id)
   }, [phase])
@@ -215,9 +218,12 @@ export default function CreationBackground() {
       const curPhase = phaseRef.current
       if (curPhase === 'swirl' && swirlStartRef.current === null) {
         swirlStartRef.current = elapsed
-        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-in, opacity ${SWIRL_CSS_MS}ms ease-in`
-        pre.style.transform = 'rotate(540deg) scale(3.5)'
+        // Drift the whole plume up and out while blurring + fading — sells the
+        // billowing-smoke feel on top of the per-cell turbulence below.
+        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-out, opacity ${SWIRL_CSS_MS}ms ease-in, filter ${SWIRL_CSS_MS}ms ease-in`
+        pre.style.transform = 'translateY(-9%) scale(1.18)'
         pre.style.opacity = '0'
+        pre.style.filter = 'blur(7px)'
         setTimeout(() => completeIntroRef.current(), SWIRL_CSS_MS + 60)
       }
 
@@ -245,37 +251,40 @@ export default function CreationBackground() {
         }
       }
 
-      // Time since swirl started (negative = not swirling)
+      // Time since swirl started (negative = not swirling). Precompute the
+      // smoke growth factor and animated phases once per frame.
       const swirlT = swirlStartRef.current !== null ? elapsed - swirlStartRef.current : -1
+      const swirling = swirlT >= 0
+      const grow = swirling ? Math.min(1, swirlT / SWIRL_LIFETIME) ** 2 : 0
+      const tt = swirlT / 1000
 
       let out = ''
       for (let r = 0; r < CREATION_ROWS; r++) {
         const base = r * CREATION_COLS
         for (let c = 0; c < CREATION_COLS; c++) {
-          // Swirl dissolve: chars advance dense→space based on distance from the
-          // finger-gap origin, so the dissolve radiates outward from the spark.
-          if (swirlT >= 0) {
-            const dr = r - SWIRL_ORIGIN_R
-            const dc = c - SWIRL_ORIGIN_C
-            const dist = Math.sqrt(dr * dr + dc * dc)
-            const cellDelay = (dist / SWIRL_MAX_DIST) * SWIRL_SPREAD_MS
-            if (swirlT >= cellDelay) {
-              const step = Math.min(
-                SWIRL_DISSOLVE.length - 1,
-                Math.floor((swirlT - cellDelay) / SWIRL_STEP_MS),
-              )
-              out += SWIRL_DISSOLVE[step]
-              continue
-            }
-          }
-
           const i = base + c
           let sr = r - dRow[i]
           let sc = c - dCol[i]
-          if (sr < 0) sr = 0
-          else if (sr > lastRow) sr = lastRow
-          if (sc < 0) sc = 0
-          else if (sc > lastCol) sc = lastCol
+
+          if (swirling) {
+            // Billow the texture upward (sample from below) and churn it with a
+            // couple of out-of-phase sine fields so it roils like rising smoke.
+            sr += SWIRL_RISE * grow
+            sr += Math.sin(c * 0.10 + tt * 2.2) * SWIRL_TURB * grow
+            sc += Math.cos(r * 0.12 + tt * 1.8) * SWIRL_TURB * grow
+            sc += Math.sin((r + c) * 0.05 + tt * 3.0) * SWIRL_TURB * 0.6 * grow
+            // Anything that rises off the grid leaves emptiness behind it.
+            if (sr < 0 || sr > lastRow || sc < 0 || sc > lastCol) {
+              out += ' '
+              continue
+            }
+          } else {
+            if (sr < 0) sr = 0
+            else if (sr > lastRow) sr = lastRow
+            if (sc < 0) sc = 0
+            else if (sc > lastCol) sc = lastCol
+          }
+
           const r0 = sr | 0
           const c0 = sc | 0
           const wr = sr - r0
@@ -287,7 +296,20 @@ export default function CreationBackground() {
           // bilinear sample of the brightness grid
           const top = grid[o0 + c0] * (1 - wc) + grid[o0 + c1] * wc
           const bot = grid[o1 + c0] * (1 - wc) + grid[o1 + c1] * wc
-          let k = (top * (1 - wr) + bot * wr + 0.5) | 0
+          let kf = top * (1 - wr) + bot * wr
+
+          if (swirling) {
+            // Fade each cell to nothing, with a delay that grows with distance
+            // from the spark so the dissipation radiates outward.
+            const dr = r - SWIRL_ORIGIN_R
+            const dc = c - SWIRL_ORIGIN_C
+            const dist = Math.sqrt(dr * dr + dc * dc)
+            const cellDelay = (dist / SWIRL_MAX_DIST) * SWIRL_SPREAD_MS
+            const fade = Math.max(0, Math.min(1, (swirlT - cellDelay) / SWIRL_FADE_MS))
+            kf *= 1 - fade
+          }
+
+          let k = (kf + 0.5) | 0
           if (k > max) k = max
           out += CREATION_RAMP[k]
         }
