@@ -366,7 +366,7 @@ export default function CreationBackground() {
         style={{ fontFamily: '"Courier New", Courier, monospace', lineHeight: 1 }}
         className={[
           'm-0 p-0 whitespace-pre',
-          isDark ? 'text-cream-100 opacity-[0.34]' : 'text-stone-900 opacity-[0.32]',
+          isDark ? 'text-cream-100' : 'text-stone-900',
         ].join(' ')}
       />
     </div>
