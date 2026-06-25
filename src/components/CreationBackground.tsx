@@ -11,50 +11,35 @@ import {
 const FPS = 12
 const MS_PER_FRAME = 1000 / FPS
 
-// A barely-there global drift keeps the whole image alive without reading as
-// the arms sliding up and down.
-const DRIFT_AMP = 0.45     // rows
-const DRIFT_PERIOD = 9000  // ms
+const DRIFT_AMP = 0.45
+const DRIFT_PERIOD = 9000
 
-const ROBOT_HOLD_MS = 2100      // how long a robot finger holds a pose before jerking
-const ROBOT_TRANSITION_MS = 150 // duration of the jerk itself (~2 frames @ 12fps)
+const ROBOT_HOLD_MS = 2100
+const ROBOT_TRANSITION_MS = 150
 
-// Every finger curls by ROTATING about its knuckle, so the tip swings through an
-// arc while the finger keeps its length (no stretching). pivot = knuckle,
-// tip = fingertip; width is the finger's half-width; amp is the peak angle (rad).
-//   - 'curl' (human/left hand): a smooth, one-directional ease in and out.
-//   - 'jerk' (robot/right hand): holds dead still, then snaps to a new angle and
-//     freezes again — same rotation, but mechanical. seed/timeOffset stagger it.
 type Finger = {
-  pr: number; pc: number   // pivot / knuckle (art row, col)
-  tr: number; tc: number   // fingertip (art row, col)
-  width: number            // perpendicular half-width of the finger
-  amp: number              // peak rotation angle (radians)
+  pr: number; pc: number
+  tr: number; tc: number
+  width: number
+  amp: number
   motion: 'curl' | 'jerk'
-  period?: number; phase?: number      // 'curl'
-  seed?: number; timeOffset?: number    // 'jerk'
+  period?: number; phase?: number
+  seed?: number; timeOffset?: number
 }
 const FINGERS: Finger[] = [
-  // Adam's hand (left) = human: smooth curl
   { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, motion: 'curl', period: 4200, phase: 0.0 },
   { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, motion: 'curl', period: 4800, phase: 2.0 },
-  // God's hand (right) = AI / robot: three dangling fingers, jerky rotation
   { pr: 71, pc: 237, tr: 88, tc: 236, width: 4.5, amp: 0.22, motion: 'jerk', seed: 11, timeOffset: 0 },
   { pr: 73, pc: 248, tr: 87, tc: 247, width: 4.0, amp: 0.20, motion: 'jerk', seed: 29, timeOffset: 760 },
   { pr: 77, pc: 263, tr: 88, tc: 262, width: 3.5, amp: 0.18, motion: 'jerk', seed: 47, timeOffset: 1340 },
 ]
 
-// Deterministic pseudo-random pose level in { -1, -0.5, 0, 0.5, 1 } for a given
-// finger seed and time slot — lets a robot finger pick a fresh small offset each
-// hold without any per-frame randomness.
 function robotLevel(seed: number, slot: number): number {
   let x = (Math.imul(seed, 374761393) + Math.imul(slot, 668265263)) >>> 0
   x = Math.imul(x ^ (x >>> 13), 1274126177) >>> 0
   return Math.round((x / 4294967295) * 4) / 2 - 1
 }
 
-// Hold-then-jerk waveform: flat for most of each hold, then a quick eased snap
-// to the next pose. Returns a value in [-1, 1].
 function robotStep(elapsed: number, seed: number, timeOffset: number): number {
   const t = elapsed + timeOffset
   const slot = Math.floor(t / ROBOT_HOLD_MS)
@@ -62,23 +47,91 @@ function robotStep(elapsed: number, seed: number, timeOffset: number): number {
   const target = robotLevel(seed, slot)
   const into = t - slot * ROBOT_HOLD_MS
   const k = Math.min(1, into / ROBOT_TRANSITION_MS)
-  const eased = k * k * (3 - 2 * k) // smoothstep — fast but not an instant teleport
+  const eased = k * k * (3 - 2 * k)
   return prev + (target - prev) * eased
 }
 
-// Swirl-to-smoke dissolve: when the spark is clicked the whole image billows
-// apart like smoke. A turbulent displacement field grows over time (the texture
-// rises and curls), and every cell fades to empty — radiating outward from the
-// finger-gap origin so the dissipation appears to start at the spark.
-const SWIRL_ORIGIN_R = 79
-const SWIRL_ORIGIN_C = 200
-const SWIRL_MAX_DIST = 215   // origin → far corner, in art cells
-const SWIRL_SPREAD_MS = 500  // ms for the dissolve wavefront to reach the corners
-const SWIRL_FADE_MS = 1000   // per-cell fade-to-nothing duration
-const SWIRL_LIFETIME = 1400  // ms over which the turbulence grows to full strength
-const SWIRL_RISE = 22        // rows of upward billow at full strength
-const SWIRL_TURB = 6.5       // swirling turbulence amplitude (cells)
-const SWIRL_CSS_MS = 1700    // CSS upward drift + blur + fade duration
+// How fast the pre element fades out when swirl begins.
+const SWIRL_PRE_FADE_MS = 350
+
+// Full-screen canvas smoke overlay. Runs its own 60fps RAF loop independently
+// of the pre's 12fps animation, so the two never contend. The canvas is appended
+// directly to document.body so it truly covers everything (nav, hero, all).
+function startSmoke(isDark: boolean, onComplete: () => void): () => void {
+  const FONT = 18
+  const CW = FONT * 0.601   // Courier New char width / font-size ratio
+  const CH = FONT * 1.15    // line height
+  const CHARS = ' .:-~+=*#@'
+  const NC = CHARS.length
+  const BG = isDark ? '#171717' : '#FAF7F2'
+  const FG = isDark ? '215,205,185' : '60,52,42'
+  const TOTAL = 1700
+  const FADE_IN = 380
+  const FADE_OUT_START = 950
+
+  const cv = document.createElement('canvas')
+  cv.style.cssText = 'position:fixed;inset:0;z-index:999;pointer-events:none;'
+  document.body.appendChild(cv)
+  const ctx = cv.getContext('2d')!
+  cv.width = window.innerWidth
+  cv.height = window.innerHeight
+
+  let startT = 0
+  let raf = 0
+
+  function frame(now: number) {
+    if (startT === 0) startT = now
+    const t = now - startT
+    if (t >= TOTAL) {
+      cancelAnimationFrame(raf)
+      cv.remove()
+      onComplete()
+      return
+    }
+    raf = requestAnimationFrame(frame)
+
+    const alpha =
+      t < FADE_IN
+        ? t / FADE_IN
+        : t > FADE_OUT_START
+          ? 1 - (t - FADE_OUT_START) / (TOTAL - FADE_OUT_START)
+          : 1.0
+
+    const cols = Math.ceil(cv.width / CW) + 1
+    const rows = Math.ceil(cv.height / CH) + 1
+    const tt = t / 1000
+
+    // Solid background — one fillRect, no per-cell cost
+    ctx.globalAlpha = 1
+    ctx.fillStyle = BG
+    ctx.fillRect(0, 0, cv.width, cv.height)
+
+    // Smoke chars — fillStyle and font set once per frame
+    ctx.font = `${FONT}px "Courier New", Courier, monospace`
+    ctx.fillStyle = `rgb(${FG})`
+    ctx.globalAlpha = alpha
+
+    for (let row = 0; row < rows; row++) {
+      // Shift the noise sample row upward over time so smoke visually rises
+      const nr = row - tt * 4
+      const y = row * CH + CH
+      for (let col = 0; col < cols; col++) {
+        // Three trig layers at different frequencies and speeds — cheap, turbulent
+        const n1 = Math.sin(col * 0.17 + tt * 2.1) * Math.cos(nr * 0.22 + tt * 1.8)
+        const n2 = Math.sin((col * 0.11 - nr * 0.09) + tt * 3.0) * 0.62
+        const n3 = Math.cos(col * 0.08 + nr * 0.15 + tt * 4.3) * 0.38
+        const noise = Math.max(0, Math.min(1, (n1 + n2 + n3 + 2) / 4))
+        if (noise < 0.08) continue
+        const ch = CHARS[Math.min(NC - 1, Math.floor(noise * NC))]
+        if (ch === ' ') continue
+        ctx.fillText(ch, col * CW, y)
+      }
+    }
+  }
+
+  raf = requestAnimationFrame(frame)
+  return () => { cancelAnimationFrame(raf); cv.remove() }
+}
 
 export default function CreationBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -86,32 +139,34 @@ export default function CreationBackground() {
   const { isDark } = useTheme()
   const { phase, completeIntro } = useIntro()
 
-  // Refs so the render loop (inside a [grid]-dep useEffect) can read latest values
-  // without being recreated on phase changes.
+  // Refs so the 12fps render loop can read current values without being rebuilt
   const phaseRef = useRef(phase)
   const completeIntroRef = useRef(completeIntro)
+  const isDarkRef = useRef(isDark)
   const swirlStartRef = useRef<number | null>(null)
+  const smokeCleanupRef = useRef<(() => void) | null>(null)
 
   useEffect(() => { phaseRef.current = phase }, [phase])
   useEffect(() => { completeIntroRef.current = completeIntro }, [completeIntro])
+  useEffect(() => { isDarkRef.current = isDark }, [isDark])
 
-  // When the intro finishes, snap the pre back to its normal style (it will be
-  // hidden behind the hero content as the hero content fades in, so the snap
-  // is invisible). Fade opacity back in gently so it doesn't flash.
+  // When the intro finishes, reset the pre element back to its normal style.
+  // It will be invisible behind the fading-in hero content, so the instant
+  // transform snap is unnoticeable.
   useEffect(() => {
     if (phase !== 'done') return
     swirlStartRef.current = null
+    smokeCleanupRef.current?.()
+    smokeCleanupRef.current = null
     const pre = preRef.current
     if (!pre) return
     pre.style.transition = 'opacity 0.6s ease-out'
     pre.style.transform = ''
     pre.style.opacity = ''
-    pre.style.filter = ''
     const id = setTimeout(() => { pre.style.transition = '' }, 700)
     return () => clearTimeout(id)
   }, [phase])
 
-  // Parse the art into a numeric brightness grid once.
   const grid = useMemo(() => {
     const g = new Int8Array(CREATION_ROWS * CREATION_COLS)
     for (let r = 0; r < CREATION_ROWS; r++) {
@@ -124,41 +179,13 @@ export default function CreationBackground() {
     return g
   }, [])
 
-  // Size the font so all CREATION_COLS columns span the container width.
-  useEffect(() => {
-    const pre = preRef.current
-    const container = containerRef.current
-    if (!pre || !container) return
-
-    const fit = () => {
-      const probe = document.createElement('span')
-      probe.style.cssText =
-        'position:absolute;visibility:hidden;font-family:"Courier New",Courier,monospace;font-size:100px;white-space:pre;'
-      probe.textContent = 'X'.repeat(10)
-      document.body.appendChild(probe)
-      const ratio = probe.getBoundingClientRect().width / 10 / 100
-      document.body.removeChild(probe)
-      pre.style.fontSize = `${(container.clientWidth / (ratio * CREATION_COLS)) * 1.4}px`
-    }
-
-    fit()
-    const ro = new ResizeObserver(fit)
-    ro.observe(container)
-    return () => ro.disconnect()
-  }, [])
-
   useEffect(() => {
     const pre = preRef.current
     if (!pre) return
     const max = CREATION_RAMP.length - 1
     const N = CREATION_ROWS * CREATION_COLS
 
-    // For each finger, precompute the cells along it plus, per cell, its offset
-    // from the knuckle (relRow/relCol) and a membership weight. At render time we
-    // rotate those offsets about the knuckle, which swings the fingertip through
-    // an arc without changing the finger's length. Works for both hands; only the
-    // angle waveform differs (smooth curl vs. mechanical jerk).
-    const KNEE = 4 // rows over which the rotation ramps in from the static knuckle
+    const KNEE = 4
     const fingerFields = FINGERS.map((f) => {
       const ar = f.tr - f.pr
       const ac = f.tc - f.pc
@@ -178,10 +205,9 @@ export default function CreationBackground() {
         for (let c = cMin; c <= cMax; c++) {
           const rr = r - f.pr
           const cc = c - f.pc
-          const along = rr * ur + cc * uc           // distance from knuckle along finger
-          const perp = Math.abs(rr * uc - cc * ur)   // distance off the finger axis
-          if (along < 0) continue                    // nothing above the knuckle moves
-          // ramp in over the knee, full along the finger, fade just past the tip
+          const along = rr * ur + cc * uc
+          const perp = Math.abs(rr * uc - cc * ur)
+          if (along < 0) continue
           const wIn = Math.min(1, along / KNEE)
           const wOut = 1 - Math.max(0, Math.min(1, (along - len) / 6))
           const wPerp = Math.exp(-(perp / f.width) * (perp / f.width))
@@ -207,34 +233,32 @@ export default function CreationBackground() {
       }
     })
 
-    // Per-cell sampling offset (row + column), rebuilt each frame.
     const dRow = new Float32Array(N)
     const dCol = new Float32Array(N)
     const lastRow = CREATION_ROWS - 1
     const lastCol = CREATION_COLS - 1
 
     const render = (elapsed: number) => {
-      // --- Swirl trigger (fires once when phase first becomes 'swirl') ---
       const curPhase = phaseRef.current
-      if (curPhase === 'swirl' && swirlStartRef.current === null) {
-        swirlStartRef.current = elapsed
-        // Drift the whole plume up and out while blurring + fading — sells the
-        // billowing-smoke feel on top of the per-cell turbulence below.
-        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-out, opacity ${SWIRL_CSS_MS}ms ease-in, filter ${SWIRL_CSS_MS}ms ease-in`
-        pre.style.transform = 'translateY(-9%) scale(1.18)'
-        pre.style.opacity = '0'
-        pre.style.filter = 'blur(7px)'
-        setTimeout(() => completeIntroRef.current(), SWIRL_CSS_MS + 60)
+
+      // During swirl: fire the canvas overlay once, then stop touching the pre.
+      // The canvas handles all the visible smoke; the pre just CSS-fades away.
+      if (curPhase === 'swirl') {
+        if (swirlStartRef.current === null) {
+          swirlStartRef.current = elapsed
+          pre.style.transition = `opacity ${SWIRL_PRE_FADE_MS}ms ease-in`
+          pre.style.opacity = '0'
+          smokeCleanupRef.current = startSmoke(isDarkRef.current, () =>
+            completeIntroRef.current(),
+          )
+        }
+        return
       }
 
       const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
       dRow.fill(drift)
       dCol.fill(0)
 
-      // Rotate each finger's cells about its knuckle. Human fingers use a smooth
-      // one-directional curl (0 -> amp -> 0); robot fingers use the hold-then-jerk
-      // schedule, so they snap between angles and freeze. Either way the rotation
-      // maps to a (dRow, dCol) sampling offset, so the tip arcs while length holds.
       for (const fld of fingerFields) {
         const phi = fld.jerk
           ? fld.amp * robotStep(elapsed, fld.seed, fld.timeOffset)
@@ -251,13 +275,6 @@ export default function CreationBackground() {
         }
       }
 
-      // Time since swirl started (negative = not swirling). Precompute the
-      // smoke growth factor and animated phases once per frame.
-      const swirlT = swirlStartRef.current !== null ? elapsed - swirlStartRef.current : -1
-      const swirling = swirlT >= 0
-      const grow = swirling ? Math.min(1, swirlT / SWIRL_LIFETIME) ** 2 : 0
-      const tt = swirlT / 1000
-
       let out = ''
       for (let r = 0; r < CREATION_ROWS; r++) {
         const base = r * CREATION_COLS
@@ -265,26 +282,10 @@ export default function CreationBackground() {
           const i = base + c
           let sr = r - dRow[i]
           let sc = c - dCol[i]
-
-          if (swirling) {
-            // Billow the texture upward (sample from below) and churn it with a
-            // couple of out-of-phase sine fields so it roils like rising smoke.
-            sr += SWIRL_RISE * grow
-            sr += Math.sin(c * 0.10 + tt * 2.2) * SWIRL_TURB * grow
-            sc += Math.cos(r * 0.12 + tt * 1.8) * SWIRL_TURB * grow
-            sc += Math.sin((r + c) * 0.05 + tt * 3.0) * SWIRL_TURB * 0.6 * grow
-            // Anything that rises off the grid leaves emptiness behind it.
-            if (sr < 0 || sr > lastRow || sc < 0 || sc > lastCol) {
-              out += ' '
-              continue
-            }
-          } else {
-            if (sr < 0) sr = 0
-            else if (sr > lastRow) sr = lastRow
-            if (sc < 0) sc = 0
-            else if (sc > lastCol) sc = lastCol
-          }
-
+          if (sr < 0) sr = 0
+          else if (sr > lastRow) sr = lastRow
+          if (sc < 0) sc = 0
+          else if (sc > lastCol) sc = lastCol
           const r0 = sr | 0
           const c0 = sc | 0
           const wr = sr - r0
@@ -293,23 +294,9 @@ export default function CreationBackground() {
           const c1 = c0 < lastCol ? c0 + 1 : c0
           const o0 = r0 * CREATION_COLS
           const o1 = r1 * CREATION_COLS
-          // bilinear sample of the brightness grid
           const top = grid[o0 + c0] * (1 - wc) + grid[o0 + c1] * wc
           const bot = grid[o1 + c0] * (1 - wc) + grid[o1 + c1] * wc
-          let kf = top * (1 - wr) + bot * wr
-
-          if (swirling) {
-            // Fade each cell to nothing, with a delay that grows with distance
-            // from the spark so the dissipation radiates outward.
-            const dr = r - SWIRL_ORIGIN_R
-            const dc = c - SWIRL_ORIGIN_C
-            const dist = Math.sqrt(dr * dr + dc * dc)
-            const cellDelay = (dist / SWIRL_MAX_DIST) * SWIRL_SPREAD_MS
-            const fade = Math.max(0, Math.min(1, (swirlT - cellDelay) / SWIRL_FADE_MS))
-            kf *= 1 - fade
-          }
-
-          let k = (kf + 0.5) | 0
+          let k = (top * (1 - wr) + bot * wr + 0.5) | 0
           if (k > max) k = max
           out += CREATION_RAMP[k]
         }
@@ -333,11 +320,14 @@ export default function CreationBackground() {
       render(t - start)
     }
     raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(raf)
+      smokeCleanupRef.current?.()
+      smokeCleanupRef.current = null
+    }
   }, [grid])
 
   return (
-    // Hidden on mobile (below the md breakpoint).
     <div
       ref={containerRef}
       aria-hidden="true"
