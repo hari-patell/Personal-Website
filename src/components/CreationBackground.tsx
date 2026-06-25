@@ -11,11 +11,6 @@ import {
 const FPS = 12
 const MS_PER_FRAME = 1000 / FPS
 
-// A barely-there global drift keeps the whole image alive without reading as
-// the arms sliding up and down.
-const DRIFT_AMP = 0.45     // rows
-const DRIFT_PERIOD = 9000  // ms
-
 const ROBOT_HOLD_MS = 2100      // how long a robot finger holds a pose before jerking
 const ROBOT_TRANSITION_MS = 150 // duration of the jerk itself (~2 frames @ 12fps)
 
@@ -35,6 +30,9 @@ type Finger = {
   seed?: number; timeOffset?: number    // 'jerk'
 }
 const FINGERS: Finger[] = [
+  // Wrists — rotate the whole hand about the wrist joint
+  { pr: 47, pc: 155, tr: 75, tc: 169, width: 11, amp: 0.08, motion: 'curl', period: 8500, phase: 1.5 },   // Adam's wrist: slow smooth bend
+  { pr: 62, pc: 253, tr: 90, tc: 246, width: 11, amp: 0.07, motion: 'jerk', seed: 7, timeOffset: 400 },   // God's wrist: jerky snap
   // Adam's hand (left) = human: smooth curl
   { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, motion: 'curl', period: 4200, phase: 0.0 },
   { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, motion: 'curl', period: 4800, phase: 2.0 },
@@ -239,8 +237,7 @@ export default function CreationBackground() {
         setTimeout(() => completeIntroRef.current(), SWIRL_CSS_MS + 60)
       }
 
-      const drift = DRIFT_AMP * Math.sin((elapsed / DRIFT_PERIOD) * Math.PI * 2)
-      dRow.fill(drift)
+      dRow.fill(0)
       dCol.fill(0)
 
       // Rotate each finger's cells about its knuckle. Human fingers use a smooth
