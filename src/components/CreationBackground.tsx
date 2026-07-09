@@ -32,24 +32,24 @@ type Finger = {
   seed?: number; timeOffset?: number    // 'jerk'
 }
 const FINGERS: Finger[] = [
-  // Wrists — a resting hand doesn't wave around: it hinges at the wrist by a
-  // barely-perceptible angle. Rotation displacement grows with distance from
-  // the pivot, so the palm shifts fractions of a cell while the fingertips
-  // drift ~1.5-2 cells — motion concentrates at the tips like a real hand.
+  // Wrists — the DOMINANT motion. The whole hand hinges rigidly about the
+  // wrist joint: the palm and hand silhouette visibly tilt (~1.5 cells) with
+  // displacement growing toward the tips (~2.5), so the rotation clearly
+  // originates at the wrist rather than reading as fingers wiggling.
   // Adam: pivot at the forearm/hand junction; slow organic drift.
-  { pr: 50, pc: 128, tr: 76, tc: 172, width: 18, amp: 0.04, motion: 'sway', period: 7200, phase: 0.8 },
-  // God: small precise servo ticks. seed 19 changes pose on EVERY 2.1s hold
-  // and starts non-zero, so it reads as mechanical from the first seconds.
-  { pr: 62, pc: 288, tr: 87, tc: 233, width: 16, amp: 0.028, motion: 'jerk', seed: 19, timeOffset: 500 },
-  // Adam's hand (left) = human: smooth curl. Kept subtle — the finger strands
-  // in the art sit only a few columns apart, so tip swing must stay ~1.5 cols
-  // and each field must hug its own strand or the fingers smear together.
-  { pr: 56, pc: 167, tr: 71, tc: 170, width: 3.0, amp: 0.08, motion: 'curl', period: 4200, phase: 0.0 },
-  { pr: 58, pc: 152, tr: 70, tc: 150, width: 2.8, amp: 0.08, motion: 'curl', period: 4800, phase: 2.0 },
-  // God's hand (right) = AI / robot: three dangling fingers, jerky rotation
-  { pr: 71, pc: 237, tr: 88, tc: 236, width: 4.5, amp: 0.22, motion: 'jerk', seed: 11, timeOffset: 0 },
-  { pr: 73, pc: 248, tr: 87, tc: 247, width: 4.0, amp: 0.20, motion: 'jerk', seed: 29, timeOffset: 760 },
-  { pr: 77, pc: 263, tr: 88, tc: 262, width: 3.5, amp: 0.18, motion: 'jerk', seed: 47, timeOffset: 1340 },
+  { pr: 50, pc: 128, tr: 76, tc: 172, width: 26, amp: 0.06, motion: 'sway', period: 7200, phase: 0.8 },
+  // God: precise servo ticks of the whole hand. seed 19 changes pose on EVERY
+  // 2.1s hold and starts non-zero, so it reads as mechanical from the start.
+  { pr: 62, pc: 288, tr: 87, tc: 233, width: 24, amp: 0.045, motion: 'jerk', seed: 19, timeOffset: 500 },
+  // Fingers — SECONDARY articulation layered on the wrist hinge, kept smaller
+  // than the wrist's contribution so the hand reads as one rigid unit with a
+  // little finger flex, not as fingers shifting on a static hand. (Adam's
+  // strands also sit only a few columns apart — big swings smear them.)
+  { pr: 56, pc: 167, tr: 71, tc: 170, width: 3.0, amp: 0.05, motion: 'curl', period: 4200, phase: 0.0 },
+  { pr: 58, pc: 152, tr: 70, tc: 150, width: 2.8, amp: 0.05, motion: 'curl', period: 4800, phase: 2.0 },
+  { pr: 71, pc: 237, tr: 88, tc: 236, width: 4.5, amp: 0.11, motion: 'jerk', seed: 11, timeOffset: 0 },
+  { pr: 73, pc: 248, tr: 87, tc: 247, width: 4.0, amp: 0.10, motion: 'jerk', seed: 29, timeOffset: 760 },
+  { pr: 77, pc: 263, tr: 88, tc: 262, width: 3.5, amp: 0.09, motion: 'jerk', seed: 47, timeOffset: 1340 },
 ]
 
 // Deterministic pseudo-random pose level in { -1, -0.5, 0, 0.5, 1 } for a given
