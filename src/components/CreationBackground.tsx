@@ -18,11 +18,10 @@ const ROBOT_TRANSITION_MS = 150 // duration of the jerk itself (~2 frames @ 12fp
 // arc while the finger keeps its length (no stretching). pivot = knuckle,
 // tip = fingertip; width is the finger's half-width; amp is the peak angle (rad).
 //   - 'curl' (human fingers): a smooth, one-directional ease in and out.
-//   - 'sway' (human wrist): a smooth symmetric ± swing about neutral.
+//   - 'sway' (human wrist): a slow drifting ± tilt about neutral, built from
+//     two incommensurate sine harmonics so it never reads as a metronome.
 //   - 'jerk' (robot): holds dead still, then snaps to a new angle and
 //     freezes again — same rotation, but mechanical. seed/timeOffset stagger it.
-// flat: use a flat-topped perp falloff so the whole hand rotates as a rigid
-// unit about the wrist instead of bending like jelly (wrists only).
 type Finger = {
   pr: number; pc: number   // pivot / knuckle (art row, col)
   tr: number; tc: number   // fingertip (art row, col)
@@ -31,19 +30,17 @@ type Finger = {
   motion: 'curl' | 'jerk' | 'sway'
   period?: number; phase?: number      // 'curl' / 'sway'
   seed?: number; timeOffset?: number    // 'jerk'
-  flat?: boolean
 }
 const FINGERS: Finger[] = [
-  // Wrists — hinge the whole hand about the anatomical wrist joint. Axis runs
-  // from the pivot through the middle of the hand's wedge so every fingertip
-  // sits inside the rotation field (verified numerically against the art grid).
-  // Adam: pivot at the forearm/hand junction (forearm enters from upper-left);
-  // relaxed smooth ± sway.
-  { pr: 50, pc: 128, tr: 76, tc: 172, width: 22, amp: 0.09, motion: 'sway', period: 6500, phase: 0.8, flat: true },
-  // God: pivot deep at the forearm junction on the right (shrinks the hand's
-  // angular spread so one axis covers all three dangling fingers). seed 19 gives
-  // robotLevel sequence [1,-0.5,1,0,1,0,-1,...] — non-zero start, new pose EVERY hold.
-  { pr: 60, pc: 300, tr: 82, tc: 234, width: 20, amp: 0.06, motion: 'jerk', seed: 19, timeOffset: 500, flat: true },
+  // Wrists — a resting hand doesn't wave around: it hinges at the wrist by a
+  // barely-perceptible angle. Rotation displacement grows with distance from
+  // the pivot, so the palm shifts fractions of a cell while the fingertips
+  // drift ~1.5-2 cells — motion concentrates at the tips like a real hand.
+  // Adam: pivot at the forearm/hand junction; slow organic drift.
+  { pr: 50, pc: 128, tr: 76, tc: 172, width: 18, amp: 0.04, motion: 'sway', period: 7200, phase: 0.8 },
+  // God: small precise servo ticks. seed 19 changes pose on EVERY 2.1s hold
+  // and starts non-zero, so it reads as mechanical from the first seconds.
+  { pr: 62, pc: 288, tr: 87, tc: 233, width: 16, amp: 0.028, motion: 'jerk', seed: 19, timeOffset: 500 },
   // Adam's hand (left) = human: smooth curl
   { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, motion: 'curl', period: 4200, phase: 0.0 },
   { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, motion: 'curl', period: 4800, phase: 2.0 },
@@ -177,10 +174,7 @@ export default function CreationBackground() {
           // ramp in over the knee, full along the finger, fade just past the tip
           const wIn = Math.min(1, along / KNEE)
           const wOut = 1 - Math.max(0, Math.min(1, (along - len) / 6))
-          const q = perp / f.width
-          // flat: super-Gaussian (flat top, smooth quartic edge) so the hand
-          // moves as one rigid unit; default: Gaussian for individual fingers
-          const wPerp = f.flat ? Math.exp(-q * q * q * q) : Math.exp(-q * q)
+          const wPerp = Math.exp(-(perp / f.width) * (perp / f.width))
           const w = wIn * wOut * wPerp
           if (w < 0.05) continue
           idx.push(r * CREATION_COLS + c)
@@ -260,11 +254,13 @@ export default function CreationBackground() {
       // between angles and freezing. Either way the rotation maps to a
       // (dRow, dCol) sampling offset, so the tip arcs while length holds.
       for (const fld of fingerFields) {
+        const a0 = elapsed * fld.omega + fld.phase
         const phi = fld.motion === 'jerk'
           ? fld.amp * robotStep(elapsed, fld.seed, fld.timeOffset)
           : fld.motion === 'sway'
-            ? fld.amp * Math.sin(elapsed * fld.omega + fld.phase)
-            : fld.amp * (0.5 - 0.5 * Math.cos(elapsed * fld.omega + fld.phase))
+            // two incommensurate harmonics -> slow drifting tilt, never metronomic
+            ? fld.amp * (0.72 * Math.sin(a0) + 0.28 * Math.sin(1.73 * a0 + 1.1))
+            : fld.amp * (0.5 - 0.5 * Math.cos(a0))
         const { idx, relRow, relCol, wts } = fld
         for (let j = 0; j < idx.length; j++) {
           const a = phi * wts[j]
