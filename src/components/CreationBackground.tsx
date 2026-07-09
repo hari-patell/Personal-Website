@@ -30,17 +30,22 @@ type Finger = {
   motion: 'curl' | 'jerk' | 'sway'
   period?: number; phase?: number      // 'curl' / 'sway'
   seed?: number; timeOffset?: number    // 'jerk'
+  rigid?: boolean          // wrists: no perp falloff — the hand moves as one slab
+  knee?: number            // hinge softening distance at the pivot (default KNEE)
+  hold?: number            // per-entry robot hold cadence (default ROBOT_HOLD_MS)
 }
 const FINGERS: Finger[] = [
-  // Wrists — the DOMINANT motion. The whole hand hinges rigidly about the
-  // wrist joint: the palm and hand silhouette visibly tilt (~1.5 cells) with
-  // displacement growing toward the tips (~2.5), so the rotation clearly
-  // originates at the wrist rather than reading as fingers wiggling.
-  // Adam: pivot at the forearm/hand junction; slow organic drift.
-  { pr: 50, pc: 128, tr: 76, tc: 172, width: 26, amp: 0.06, motion: 'sway', period: 7200, phase: 0.8 },
-  // God: precise servo ticks of the whole hand. seed 19 changes pose on EVERY
-  // 2.1s hold and starts non-zero, so it reads as mechanical from the start.
-  { pr: 62, pc: 288, tr: 87, tc: 233, width: 24, amp: 0.045, motion: 'jerk', seed: 19, timeOffset: 500 },
+  // Wrists — the DOMINANT motion. The whole hand rotates about the wrist as
+  // one truly rigid slab (rigid: no perp falloff): the entire silhouette
+  // sweeps together, so the rotation legibly originates at the wrist. The
+  // angle is generous (~6 deg) but slow, so the sweep is graceful: the
+  // fingertip end travels ~5 cells while the wrist line stays planted.
+  // Adam: pivot at the forearm/hand junction; slow organic drooping sway.
+  { pr: 50, pc: 128, tr: 76, tc: 172, width: 26, amp: 0.11, motion: 'sway', period: 9500, phase: 0.8, rigid: true, knee: 10 },
+  // God: whole-hand servo repositions every 3.4s — slower than his fingers'
+  // 2.1s ticks so the hand tick reads as the primary event. seed 19 changes
+  // pose on every hold and starts non-zero.
+  { pr: 62, pc: 288, tr: 87, tc: 233, width: 24, amp: 0.075, motion: 'jerk', seed: 19, timeOffset: 700, rigid: true, knee: 10, hold: 3400 },
   // Fingers — SECONDARY articulation layered on the wrist hinge, kept smaller
   // than the wrist's contribution so the hand reads as one rigid unit with a
   // little finger flex, not as fingers shifting on a static hand. (Adam's
@@ -63,12 +68,12 @@ function robotLevel(seed: number, slot: number): number {
 
 // Hold-then-jerk waveform: flat for most of each hold, then a quick eased snap
 // to the next pose. Returns a value in [-1, 1].
-function robotStep(elapsed: number, seed: number, timeOffset: number): number {
+function robotStep(elapsed: number, seed: number, timeOffset: number, holdMs: number): number {
   const t = elapsed + timeOffset
-  const slot = Math.floor(t / ROBOT_HOLD_MS)
+  const slot = Math.floor(t / holdMs)
   const prev = robotLevel(seed, slot - 1)
   const target = robotLevel(seed, slot)
-  const into = t - slot * ROBOT_HOLD_MS
+  const into = t - slot * holdMs
   const k = Math.min(1, into / ROBOT_TRANSITION_MS)
   const eased = k * k * (3 - 2 * k) // smoothstep — fast but not an instant teleport
   return prev + (target - prev) * eased
@@ -161,6 +166,7 @@ export default function CreationBackground() {
       const relRow: number[] = []
       const relCol: number[] = []
       const wts: number[] = []
+      const knee = f.knee ?? KNEE
       const margin = 3 * f.width + 2
       const rMin = Math.max(0, Math.floor(Math.min(f.pr, f.tr) - margin))
       const rMax = Math.min(CREATION_ROWS - 1, Math.ceil(Math.max(f.pr, f.tr) + margin))
@@ -173,10 +179,12 @@ export default function CreationBackground() {
           const along = rr * ur + cc * uc           // distance from knuckle along finger
           const perp = Math.abs(rr * uc - cc * ur)   // distance off the finger axis
           if (along < 0) continue                    // nothing above the knuckle moves
-          // ramp in over the knee, full along the finger, fade just past the tip
-          const wIn = Math.min(1, along / KNEE)
+          // ramp in over the knee, full along the finger, fade just past the tip.
+          // rigid entries (wrists) skip the perp falloff entirely so the whole
+          // hand slab — silhouette included — rotates coherently.
+          const wIn = Math.min(1, along / knee)
           const wOut = 1 - Math.max(0, Math.min(1, (along - len) / 6))
-          const wPerp = Math.exp(-(perp / f.width) * (perp / f.width))
+          const wPerp = f.rigid ? 1 : Math.exp(-(perp / f.width) * (perp / f.width))
           const w = wIn * wOut * wPerp
           if (w < 0.05) continue
           idx.push(r * CREATION_COLS + c)
@@ -196,6 +204,7 @@ export default function CreationBackground() {
         phase: f.phase ?? 0,
         seed: f.seed ?? 0,
         timeOffset: f.timeOffset ?? 0,
+        hold: f.hold ?? ROBOT_HOLD_MS,
       }
     })
 
@@ -258,7 +267,7 @@ export default function CreationBackground() {
       for (const fld of fingerFields) {
         const a0 = elapsed * fld.omega + fld.phase
         const phi = fld.motion === 'jerk'
-          ? fld.amp * robotStep(elapsed, fld.seed, fld.timeOffset)
+          ? fld.amp * robotStep(elapsed, fld.seed, fld.timeOffset, fld.hold)
           : fld.motion === 'sway'
             // two incommensurate harmonics -> slow drifting tilt, never metronomic
             ? fld.amp * (0.72 * Math.sin(a0) + 0.28 * Math.sin(1.73 * a0 + 1.1))
