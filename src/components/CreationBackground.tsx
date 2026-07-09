@@ -35,17 +35,16 @@ type Finger = {
   hold?: number            // per-entry robot hold cadence (default ROBOT_HOLD_MS)
 }
 const FINGERS: Finger[] = [
-  // Wrists — the DOMINANT motion. The whole hand rotates about the wrist as
-  // one truly rigid slab (rigid: no perp falloff): the entire silhouette
-  // sweeps together, so the rotation legibly originates at the wrist. The
-  // angle is generous (~6 deg) but slow, so the sweep is graceful: the
-  // fingertip end travels ~5 cells while the wrist line stays planted.
-  // Adam: pivot at the forearm/hand junction; slow organic drooping sway.
-  { pr: 50, pc: 128, tr: 76, tc: 172, width: 26, amp: 0.11, motion: 'sway', period: 9500, phase: 0.8, rigid: true, knee: 10 },
-  // God: whole-hand servo repositions every 3.4s — slower than his fingers'
-  // 2.1s ticks so the hand tick reads as the primary event. seed 19 changes
-  // pose on every hold and starts non-zero.
-  { pr: 62, pc: 288, tr: 87, tc: 233, width: 24, amp: 0.075, motion: 'jerk', seed: 19, timeOffset: 700, rigid: true, knee: 10, hold: 3400 },
+  // Arms — each pivots at the viewport edge where it enters the frame, so
+  // displacement is zero at the anchor (structurally seam-free: the arm can't
+  // tear away from anything) and grows smoothly along the arm to ~2 cells at
+  // the hand. Reads as the whole arm slowly sweeping like a lever. wOut fades
+  // the last few columns before the fingertip touch-zone (~col 210), pinning
+  // the tips near the spark and keeping the two fields from overlapping.
+  // Adam: the whole arm breathes in a slow organic sway.
+  { pr: 62, pc: 0, tr: 64, tc: 198, width: 9, amp: 0.012, motion: 'sway', period: 10500, phase: 0.8, rigid: true, knee: 30 },
+  // God: the whole arm servo-steps every 3.4s (distinct from the fingers' 2.1s).
+  { pr: 60, pc: 399, tr: 68, tc: 216, width: 9, amp: 0.009, motion: 'jerk', seed: 19, timeOffset: 700, rigid: true, knee: 30, hold: 3400 },
   // Fingers — SECONDARY articulation layered on the wrist hinge, kept smaller
   // than the wrist's contribution so the hand reads as one rigid unit with a
   // little finger flex, not as fingers shifting on a static hand. (Adam's
