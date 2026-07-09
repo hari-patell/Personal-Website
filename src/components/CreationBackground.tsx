@@ -41,9 +41,11 @@ const FINGERS: Finger[] = [
   // God: small precise servo ticks. seed 19 changes pose on EVERY 2.1s hold
   // and starts non-zero, so it reads as mechanical from the first seconds.
   { pr: 62, pc: 288, tr: 87, tc: 233, width: 16, amp: 0.028, motion: 'jerk', seed: 19, timeOffset: 500 },
-  // Adam's hand (left) = human: smooth curl
-  { pr: 56, pc: 167, tr: 71, tc: 170, width: 4.5, amp: 0.24, motion: 'curl', period: 4200, phase: 0.0 },
-  { pr: 58, pc: 152, tr: 70, tc: 150, width: 4.0, amp: 0.20, motion: 'curl', period: 4800, phase: 2.0 },
+  // Adam's hand (left) = human: smooth curl. Kept subtle — the finger strands
+  // in the art sit only a few columns apart, so tip swing must stay ~1.5 cols
+  // and each field must hug its own strand or the fingers smear together.
+  { pr: 56, pc: 167, tr: 71, tc: 170, width: 3.0, amp: 0.08, motion: 'curl', period: 4200, phase: 0.0 },
+  { pr: 58, pc: 152, tr: 70, tc: 150, width: 2.8, amp: 0.08, motion: 'curl', period: 4800, phase: 2.0 },
   // God's hand (right) = AI / robot: three dangling fingers, jerky rotation
   { pr: 71, pc: 237, tr: 88, tc: 236, width: 4.5, amp: 0.22, motion: 'jerk', seed: 11, timeOffset: 0 },
   { pr: 73, pc: 248, tr: 87, tc: 247, width: 4.0, amp: 0.20, motion: 'jerk', seed: 29, timeOffset: 760 },
