@@ -58,6 +58,18 @@ export default function Hero() {
   const introActive = phase === 'enter' || phase === 'swirl'
   const entering = phase === 'enter'
 
+  // Crossfade the site in beneath the dissipating smoke: reveal the hero
+  // partway through the swirl instead of waiting for it to finish, so there's
+  // never a blank frame between the hands and the content. Without an intro
+  // (mobile, returning visitors) reveal immediately, as before.
+  const [revealed, setRevealed] = useState(phase === 'done')
+  useEffect(() => {
+    if (phase === 'done') { setRevealed(true); return }
+    if (phase !== 'swirl') return
+    const t = setTimeout(() => setRevealed(true), 550)
+    return () => clearTimeout(t)
+  }, [phase])
+
   // Fade in the "begin" hint after a short pause so it doesn't compete with the
   // art on first load.
   const [showHint, setShowHint] = useState(false)
@@ -67,10 +79,11 @@ export default function Hero() {
     return () => clearTimeout(t)
   }, [entering])
 
-  // Animate the ASCII orb while the intro is showing.
+  // Animate the ASCII orb while the intro is showing (through the swirl too,
+  // so it keeps living while it fades out instead of freezing mid-fade).
   const orbRef = useRef<HTMLPreElement>(null)
   useEffect(() => {
-    if (!entering) return
+    if (!introActive) return
     const pre = orbRef.current
     if (!pre) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -88,20 +101,31 @@ export default function Hero() {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [entering])
+  }, [introActive])
 
   return (
     <section id="home" className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg overflow-hidden flex items-center justify-center">
       <CreationBackground />
 
-      {/* Divine spark — shown only on desktop during the enter phase.
-          Positioned to sit in the gap between Adam's and God's fingertips. */}
-      {entering && (
-        <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex items-center justify-center">
+      {/* Divine spark — shown only on desktop during the intro. Positioned to
+          sit in the gap between Adam's and God's fingertips. Stays mounted
+          through the swirl and fades out with the smoke rather than vanishing
+          in a single frame on click. */}
+      {introActive && (
+        <div
+          className={[
+            'pointer-events-none absolute inset-0 z-20 hidden md:flex items-center justify-center',
+            'transition-opacity duration-500 ease-out',
+            entering ? 'opacity-100' : 'opacity-0',
+          ].join(' ')}
+        >
           <button
             onClick={startSwirl}
             aria-label="Enter"
-            className="pointer-events-auto relative flex cursor-pointer flex-col items-center focus:outline-none"
+            className={[
+              'relative flex cursor-pointer flex-col items-center focus:outline-none',
+              entering ? 'pointer-events-auto' : 'pointer-events-none',
+            ].join(' ')}
             style={{ marginTop: '15vh' }}
           >
             {/* ASCII starburst — same character medium as the hands, but golden,
@@ -149,9 +173,9 @@ export default function Hero() {
 
       <div className={[
         'relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
-        introActive
-          ? 'pointer-events-none select-none opacity-0'
-          : 'transition-opacity duration-700 opacity-100',
+        revealed
+          ? 'hero-revealed transition-opacity duration-1000 ease-out opacity-100'
+          : 'pointer-events-none select-none opacity-0',
       ].join(' ')}>
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}

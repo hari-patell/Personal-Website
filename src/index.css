@@ -52,8 +52,15 @@ body {
   }
 }
 
+/* Entrance animations only run once the hero is revealed (immediately when
+   there's no intro; partway through the smoke dissolve when there is one) —
+   otherwise they'd play invisibly behind the intro and the reveal would be a
+   single flat fade instead of the staggered rise. */
 .hero-animate {
   opacity: 0;
+}
+
+.hero-revealed .hero-animate {
   animation: heroFadeIn 0.8s ease-out forwards;
 }
 
@@ -65,8 +72,21 @@ body {
 .hero-divider-animate {
   opacity: 0;
   transform-origin: center;
+}
+
+.hero-revealed .hero-divider-animate {
   animation: heroDividerExpand 0.6s ease-out forwards;
   animation-delay: 0.4s;
+}
+
+/* Nav reveal after the intro — starts when the wrapper leaves display:none */
+@keyframes navFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.nav-intro-reveal {
+  animation: navFadeIn 0.9s ease-out both;
 }
 
 /* Fade in up animation for cards */

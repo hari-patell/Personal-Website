@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { Analytics } from '@vercel/analytics/react'
 import Navigation from './components/Navigation'
@@ -23,6 +23,9 @@ function AppContent() {
   const [terminalLoaded, setTerminalLoaded] = useState(false)
   const { phase } = useIntro()
   const introActive = phase === 'enter' || phase === 'swirl'
+  // Whether this page load actually played the intro — if so, the nav fades in
+  // when it appears instead of snapping. Skipped intros keep the nav instant.
+  const introRan = useRef(introActive).current
 
   const openTerminal = useCallback(() => {
     // Desktop-only easter egg; matches the md breakpoint that shows the nav icon
@@ -57,8 +60,12 @@ function AppContent() {
 
   return (
     <div className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg text-stone-900 dark:text-cream-100 font-sans overflow-x-hidden">
-      {/* Hide nav during intro (display:none on wrapper suppresses fixed children) */}
-      <div className={introActive ? 'hidden' : ''}>
+      {/* Hide nav during intro (display:none on wrapper suppresses fixed
+          children); the fade-in animation starts when it leaves display:none.
+          The animated opacity makes the wrapper a stacking context, which
+          would trap the nav's z-50 beneath the page — so the wrapper carries
+          z-50 itself (Terminal overlays it at z-[100]). */}
+      <div className={introActive ? 'hidden' : introRan ? 'nav-intro-reveal relative z-50' : ''}>
         <Navigation sections={sections} onOpenTerminal={openTerminal} />
       </div>
       <main>
