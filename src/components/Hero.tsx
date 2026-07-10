@@ -173,9 +173,10 @@ export default function Hero() {
 
       <div className={[
         'relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
-        revealed
-          ? 'hero-revealed transition-opacity duration-1000 ease-out opacity-100'
-          : 'pointer-events-none select-none opacity-0',
+        // No fade on the container itself — the hero-animate children carry
+        // the staggered fade-in; a container fade on top would double-fade
+        // everything and make the reveal feel sluggish.
+        revealed ? 'hero-revealed' : 'pointer-events-none select-none opacity-0',
       ].join(' ')}>
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
@@ -215,9 +216,14 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ArrowDown className="w-5 h-5 text-stone-400 dark:text-cream-300" />
+        {/* Scroll indicator — entrance fade on its own wrapper (bounce and
+            heroFadeIn both set `animation`, so they can't share an element) */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          <div className="hero-animate hero-animate-delay-5">
+            <div className="animate-bounce">
+              <ArrowDown className="w-5 h-5 text-stone-400 dark:text-cream-300" />
+            </div>
+          </div>
         </div>
       </div>
     </section>

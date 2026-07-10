@@ -362,7 +362,10 @@ export default function CreationBackground() {
     const start = performance.now()
     const tick = (t: number) => {
       raf = requestAnimationFrame(tick)
-      if (t - last < MS_PER_FRAME) return
+      // The idle hands animate at a deliberate 12fps ASCII cadence, but the
+      // smoke dissolve moves fast and stutters at that rate — render the
+      // swirl at full display refresh so it tracks the CSS drift smoothly.
+      if (phaseRef.current !== 'swirl' && t - last < MS_PER_FRAME) return
       last = t
       render(t - start)
     }
@@ -383,7 +386,18 @@ export default function CreationBackground() {
     >
       <pre
         ref={preRef}
-        style={{ fontFamily: '"Courier New", Courier, monospace', lineHeight: 1 }}
+        style={{
+          fontFamily: '"Courier New", Courier, monospace',
+          lineHeight: 1,
+          // Cheapest possible glyph pipeline — this element relays out and
+          // repaints on every animation frame, so skip kerning/ligature work,
+          // and keep it on its own compositor layer so the swirl's CSS
+          // transform/opacity transition stays smooth during repaints.
+          textRendering: 'optimizeSpeed',
+          fontKerning: 'none',
+          fontVariantLigatures: 'none',
+          willChange: 'transform, opacity',
+        }}
         className={[
           'm-0 p-0 whitespace-pre',
           isDark ? 'text-cream-100' : 'text-stone-900',
