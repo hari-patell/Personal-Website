@@ -139,13 +139,20 @@ export default function CreationBackground() {
       // would be ~2px and the art would read as noise; 2.2x keeps the two
       // hands and the fingertip gap filling the screen.
       const zoom = container.clientWidth < 768 ? 2.2 : 1.4
-      pre.style.fontSize = `${(container.clientWidth / (ratio * CREATION_COLS)) * zoom}px`
+      const size = (container.clientWidth / (ratio * CREATION_COLS)) * zoom
+      pre.style.fontSize = `${size}px`
+      // Publish the glyph size so the divine spark (rendered in Hero, outside
+      // this subtree) draws its ASCII starburst at the same scale as the art.
+      document.documentElement.style.setProperty('--creation-glyph-size', `${size}px`)
     }
 
     fit()
     const ro = new ResizeObserver(fit)
     ro.observe(container)
-    return () => ro.disconnect()
+    return () => {
+      ro.disconnect()
+      document.documentElement.style.removeProperty('--creation-glyph-size')
+    }
   }, [])
 
   useEffect(() => {

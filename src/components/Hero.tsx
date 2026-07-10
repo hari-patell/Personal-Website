@@ -134,14 +134,20 @@ export default function Hero() {
             style={{ marginTop: '15vh' }}
           >
             {/* ASCII starburst — same character medium as the hands, but golden,
-                haloed, and set in a soft clearing that dims the art behind it */}
-            <div className="relative flex items-center justify-center">
+                haloed, and set in a soft clearing that dims the art behind it.
+                Glyphs render at --creation-glyph-size (published by
+                CreationBackground) so the star sits at exactly the art's
+                scale; halo and glow are in em so they shrink with it. */}
+            <div
+              className="relative flex items-center justify-center"
+              style={{ fontSize: 'var(--creation-glyph-size, 9px)' }}
+            >
               <span
                 aria-hidden="true"
                 className="absolute rounded-full"
                 style={{
-                  width: '170px',
-                  height: '140px',
+                  width: '19em',
+                  height: '15.5em',
                   background: isDark
                     ? 'radial-gradient(ellipse, rgba(23,23,23,0.95) 0%, rgba(23,23,23,0.6) 45%, transparent 72%)'
                     : 'radial-gradient(ellipse, rgba(250,247,242,0.95) 0%, rgba(250,247,242,0.6) 45%, transparent 72%)',
@@ -153,12 +159,12 @@ export default function Hero() {
                 className="relative m-0 p-0 select-none"
                 style={{
                   fontFamily: '"Courier New", Courier, monospace',
-                  fontSize: '9px',
+                  fontSize: 'inherit',
                   lineHeight: 1,
                   color: isDark ? '#ffdf94' : 'rgba(146,104,22,0.95)',
                   textShadow: isDark
-                    ? '0 0 8px rgba(255,205,90,0.9), 0 0 22px rgba(255,180,60,0.5), 0 0 48px rgba(220,150,40,0.3)'
-                    : '0 0 8px rgba(170,120,30,0.55), 0 0 20px rgba(150,100,20,0.3)',
+                    ? '0 0 0.9em rgba(255,205,90,0.9), 0 0 2.4em rgba(255,180,60,0.5), 0 0 5.3em rgba(220,150,40,0.3)'
+                    : '0 0 0.9em rgba(170,120,30,0.55), 0 0 2.2em rgba(150,100,20,0.3)',
                 }}
               />
             </div>
