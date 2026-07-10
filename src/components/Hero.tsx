@@ -109,14 +109,14 @@ export default function Hero() {
     <section id="home" className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg overflow-hidden flex items-center justify-center">
       <CreationBackground />
 
-      {/* Divine spark — shown only on desktop during the intro. Positioned to
-          sit in the gap between Adam's and God's fingertips. Stays mounted
-          through the swirl and fades out with the smoke rather than vanishing
-          in a single frame on click. */}
+      {/* Divine spark — shown during the intro, positioned to sit in the gap
+          between Adam's and God's fingertips. Stays mounted through the swirl
+          and fades out with the smoke rather than vanishing in a single frame
+          on click. */}
       {introActive && (
         <div
           className={[
-            'pointer-events-none absolute inset-0 z-20 hidden md:flex items-center justify-center',
+            'pointer-events-none absolute inset-0 z-20 flex items-center justify-center',
             'transition-opacity duration-500 ease-out',
             // intro-art-reveal fades the spark in with the hands on load; the
             // class is dropped when the swirl starts (a filled animation would

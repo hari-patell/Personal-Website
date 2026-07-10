@@ -17,8 +17,6 @@ const IntroContext = createContext<IntroCtx>({
 export function IntroProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>(() => {
     if (typeof window === 'undefined') return 'done'
-    // Intro is desktop-only (CreationBackground is hidden on mobile)
-    if (!window.matchMedia('(min-width: 768px)').matches) return 'done'
     return sessionStorage.getItem('introSeen') ? 'done' : 'enter'
   })
 

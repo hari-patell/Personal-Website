@@ -134,7 +134,12 @@ export default function CreationBackground() {
       document.body.appendChild(probe)
       const ratio = probe.getBoundingClientRect().width / 10 / 100
       document.body.removeChild(probe)
-      pre.style.fontSize = `${(container.clientWidth / (ratio * CREATION_COLS)) * 1.4}px`
+      // Zoom past the container width so the hands dominate the frame (the
+      // arms crop at the edges). Phones zoom harder — at 1.4x the glyphs
+      // would be ~2px and the art would read as noise; 2.2x keeps the two
+      // hands and the fingertip gap filling the screen.
+      const zoom = container.clientWidth < 768 ? 2.2 : 1.4
+      pre.style.fontSize = `${(container.clientWidth / (ratio * CREATION_COLS)) * zoom}px`
     }
 
     fit()
@@ -379,15 +384,14 @@ export default function CreationBackground() {
   }, [grid])
 
   // Unmount entirely once the intro is done — cancels the RAF loop and frees
-  // the DOM element. Mobile always skips intro so this is a no-op there too.
+  // the DOM element.
   if (phase === 'done') return null
 
   return (
-    // Hidden on mobile (below the md breakpoint).
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="intro-art-reveal pointer-events-none absolute inset-0 z-0 hidden select-none items-center justify-center overflow-hidden md:flex"
+      className="intro-art-reveal pointer-events-none absolute inset-0 z-0 flex select-none items-center justify-center overflow-hidden"
     >
       <pre
         ref={preRef}
