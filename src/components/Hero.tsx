@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Github, Mail, Instagram, Linkedin, ArrowDown } from "lucide-react"
 import { SocialLink } from '../types'
 import XIcon from './XIcon'
@@ -6,6 +6,38 @@ import CreationBackground from './CreationBackground'
 import profileImage from '../profile.jpg'
 import { useIntro } from '../contexts/IntroContext'
 import { useTheme } from '../contexts/ThemeContext'
+
+// Divine spark rendered as a tiny ASCII orb: a radial glow mapped onto a
+// brightness ramp, breathing on a slow pulse with a gentle per-cell boil so
+// it feels like living light rather than a static blob. Chars are ~2x taller
+// than wide, so dx is scaled to keep the orb round.
+const ORB_ROWS = 9
+const ORB_COLS = 17
+const ORB_RAMP = ' .:-~=+*#%@'
+const ORB_MS_PER_FRAME = 1000 / 12
+
+function orbFrame(t: number): string {
+  const cx = (ORB_COLS - 1) / 2
+  const cy = (ORB_ROWS - 1) / 2
+  const kMax = ORB_RAMP.length - 1
+  const pulse = 0.78 + 0.22 * Math.sin((t / 2200) * Math.PI * 2)
+  let out = ''
+  for (let r = 0; r < ORB_ROWS; r++) {
+    for (let c = 0; c < ORB_COLS; c++) {
+      const dx = (c - cx) * 0.55
+      const dy = r - cy
+      const d = Math.hypot(dx, dy)
+      const boil = 0.16 * Math.sin(t / 260 + c * 1.9 + r * 2.6)
+      const b = (1.18 - d / 4.3) * pulse + boil
+      let k = Math.round(b * kMax)
+      if (k < 0) k = 0
+      else if (k > kMax) k = kMax
+      out += ORB_RAMP[k]
+    }
+    if (r < ORB_ROWS - 1) out += '\n'
+  }
+  return out
+}
 
 const socialLinks: SocialLink[] = [
   { icon: Mail, href: "mailto:hari1880patel@gmail.com", label: "Email" },
@@ -30,6 +62,29 @@ export default function Hero() {
     return () => clearTimeout(t)
   }, [entering])
 
+  // Animate the ASCII orb while the intro is showing.
+  const orbRef = useRef<HTMLPreElement>(null)
+  useEffect(() => {
+    if (!entering) return
+    const pre = orbRef.current
+    if (!pre) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      pre.textContent = orbFrame(550)
+      return
+    }
+    let raf = 0
+    let last = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick)
+      if (now - last < ORB_MS_PER_FRAME) return
+      last = now
+      pre.textContent = orbFrame(now - start)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [entering])
+
   return (
     <section id="home" className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg overflow-hidden flex items-center justify-center">
       <CreationBackground />
@@ -44,29 +99,21 @@ export default function Hero() {
             className="pointer-events-auto relative flex cursor-pointer flex-col items-center focus:outline-none"
             style={{ marginTop: '15vh' }}
           >
-            <div className="relative flex items-center justify-center">
-              {/* Expanding ping ring */}
-              <span
-                className="absolute h-4 w-4 animate-ping rounded-full"
-                style={{
-                  background: isDark
-                    ? 'rgba(255,220,130,0.35)'
-                    : 'rgba(160,120,50,0.28)',
-                }}
-              />
-              {/* Centre glow dot */}
-              <span
-                className="block h-3 w-3 animate-pulse rounded-full"
-                style={{
-                  background: isDark
-                    ? 'rgba(255,235,160,0.95)'
-                    : 'rgba(155,115,35,0.9)',
-                  boxShadow: isDark
-                    ? '0 0 18px 7px rgba(255,200,80,0.45), 0 0 45px 20px rgba(220,160,50,0.18)'
-                    : '0 0 14px 5px rgba(160,115,30,0.55), 0 0 35px 15px rgba(140,95,20,0.22)',
-                }}
-              />
-            </div>
+            {/* ASCII orb — same character-based rendering as the hands */}
+            <pre
+              ref={orbRef}
+              aria-hidden="true"
+              className="m-0 p-0 select-none"
+              style={{
+                fontFamily: '"Courier New", Courier, monospace',
+                fontSize: '8px',
+                lineHeight: 1,
+                color: isDark ? 'rgba(255,228,150,0.95)' : 'rgba(150,110,30,0.9)',
+                textShadow: isDark
+                  ? '0 0 14px rgba(255,200,80,0.5), 0 0 32px rgba(220,160,50,0.25)'
+                  : '0 0 10px rgba(160,115,30,0.4), 0 0 24px rgba(140,95,20,0.2)',
+              }}
+            />
             {/* Delayed hint label */}
             <span
               className="mt-7 block text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
