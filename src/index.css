@@ -33,7 +33,7 @@ body {
 @keyframes heroFadeIn {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -52,9 +52,17 @@ body {
   }
 }
 
+/* Entrance animations only run once the hero is revealed (immediately when
+   there's no intro; partway through the smoke dissolve when there is one) —
+   otherwise they'd play invisibly behind the intro and the reveal would be a
+   single flat fade instead of the staggered rise. */
 .hero-animate {
   opacity: 0;
-  animation: heroFadeIn 0.8s ease-out forwards;
+}
+
+.hero-revealed .hero-animate {
+  /* easeOutExpo-style curve — fast initial response, long silky settle */
+  animation: heroFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .hero-animate-delay-1 { animation-delay: 0.1s; }
@@ -65,8 +73,45 @@ body {
 .hero-divider-animate {
   opacity: 0;
   transform-origin: center;
-  animation: heroDividerExpand 0.6s ease-out forwards;
+}
+
+.hero-revealed .hero-divider-animate {
+  animation: heroDividerExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: 0.4s;
+}
+
+/* Nav reveal after the intro — starts when the wrapper leaves display:none.
+   Opacity only: a transform here would make the wrapper a containing block
+   for the fixed nav and break its positioning. */
+@keyframes navFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.nav-intro-reveal {
+  animation: navFadeIn 1.1s ease-out both;
+}
+
+/* Visible-viewport height for the intro art box — svh tracks the real
+   visible area on mobile (address bar collapse), with a vh fallback */
+.intro-viewport {
+  height: 100vh;
+}
+
+@supports (height: 100svh) {
+  .intro-viewport {
+    height: 100svh;
+  }
+}
+
+/* The ASCII hands fade in on page load instead of popping into place */
+@keyframes introArtReveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.intro-art-reveal {
+  animation: introArtReveal 1.2s ease-out both;
 }
 
 /* Fade in up animation for cards */
@@ -156,6 +201,27 @@ body {
 
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Short viewports (landscape phones, squat windows): the hero content is
+   taller than the screen, so it flows from the top of the page — pad it clear
+   of the fixed nav and give the scroll arrow its own room instead of letting
+   it overlap the social links, and compact the type so the hero doesn't
+   tower several screens tall. */
+@media (max-height: 540px) {
+  .hero-content {
+    padding-top: 5.5rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .hero-content .hero-photo-frame {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+
+  .hero-content h1 {
+    font-size: 3.25rem;
+  }
 }
 
 /* Comfortable touch targets on small screens */

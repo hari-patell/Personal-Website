@@ -58,6 +58,20 @@ export default function Hero() {
   const introActive = phase === 'enter' || phase === 'swirl'
   const entering = phase === 'enter'
 
+  // Crossfade the site in beneath the dissipating smoke: reveal the hero
+  // partway through the swirl instead of waiting for it to finish, so there's
+  // never a blank frame between the hands and the content. Timed so the smoke
+  // is mostly dissipated before the content starts rising — the hands get
+  // their moment to fade, then the site takes over. Without an intro (mobile,
+  // returning visitors) reveal immediately, as before.
+  const [revealed, setRevealed] = useState(phase === 'done')
+  useEffect(() => {
+    if (phase === 'done') { setRevealed(true); return }
+    if (phase !== 'swirl') return
+    const t = setTimeout(() => setRevealed(true), 1000)
+    return () => clearTimeout(t)
+  }, [phase])
+
   // Fade in the "begin" hint after a short pause so it doesn't compete with the
   // art on first load.
   const [showHint, setShowHint] = useState(false)
@@ -67,10 +81,11 @@ export default function Hero() {
     return () => clearTimeout(t)
   }, [entering])
 
-  // Animate the ASCII orb while the intro is showing.
+  // Animate the ASCII orb while the intro is showing (through the swirl too,
+  // so it keeps living while it fades out instead of freezing mid-fade).
   const orbRef = useRef<HTMLPreElement>(null)
   useEffect(() => {
-    if (!entering) return
+    if (!introActive) return
     const pre = orbRef.current
     if (!pre) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -88,31 +103,59 @@ export default function Hero() {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [entering])
+  }, [introActive])
 
   return (
     <section id="home" className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg overflow-hidden flex items-center justify-center">
       <CreationBackground />
 
-      {/* Divine spark — shown only on desktop during the enter phase.
-          Positioned to sit in the gap between Adam's and God's fingertips. */}
-      {entering && (
-        <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex items-center justify-center">
+      {/* Divine spark — shown during the intro, positioned to sit in the gap
+          between Adam's and God's fingertips. Stays mounted through the swirl
+          and fades out with the smoke rather than vanishing in a single frame
+          on click. */}
+      {introActive && (
+        <div
+          className={[
+            'pointer-events-none absolute inset-0 z-20 flex items-center justify-center',
+            'transition-opacity duration-500 ease-out',
+            // intro-art-reveal fades the spark in with the hands on load; the
+            // class is dropped when the swirl starts (a filled animation would
+            // otherwise pin opacity and block the fade-out transition)
+            entering ? 'intro-art-reveal opacity-100' : 'opacity-0',
+          ].join(' ')}
+        >
           <button
             onClick={startSwirl}
             aria-label="Enter"
-            className="pointer-events-auto relative flex cursor-pointer flex-col items-center focus:outline-none"
-            style={{ marginTop: '15vh' }}
+            className={[
+              // Anchored to the fingertip gap published by CreationBackground
+              // (px from the section's top-left), so it lands between the
+              // fingertips at any viewport size or orientation. The hint
+              // hangs below via absolute positioning so it doesn't shift
+              // the starburst off the anchor point.
+              'absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer focus:outline-none',
+              entering ? 'pointer-events-auto' : 'pointer-events-none',
+            ].join(' ')}
+            style={{
+              left: 'var(--creation-gap-x, 50%)',
+              top: 'var(--creation-gap-y, 50%)',
+            }}
           >
             {/* ASCII starburst — same character medium as the hands, but golden,
-                haloed, and set in a soft clearing that dims the art behind it */}
-            <div className="relative flex items-center justify-center">
+                haloed, and set in a soft clearing that dims the art behind it.
+                Glyphs render at --creation-glyph-size (published by
+                CreationBackground) so the star sits at exactly the art's
+                scale; halo and glow are in em so they shrink with it. */}
+            <div
+              className="relative flex items-center justify-center"
+              style={{ fontSize: 'var(--creation-glyph-size, 9px)' }}
+            >
               <span
                 aria-hidden="true"
                 className="absolute rounded-full"
                 style={{
-                  width: '170px',
-                  height: '140px',
+                  width: '19em',
+                  height: '15.5em',
                   background: isDark
                     ? 'radial-gradient(ellipse, rgba(23,23,23,0.95) 0%, rgba(23,23,23,0.6) 45%, transparent 72%)'
                     : 'radial-gradient(ellipse, rgba(250,247,242,0.95) 0%, rgba(250,247,242,0.6) 45%, transparent 72%)',
@@ -124,18 +167,18 @@ export default function Hero() {
                 className="relative m-0 p-0 select-none"
                 style={{
                   fontFamily: '"Courier New", Courier, monospace',
-                  fontSize: '9px',
+                  fontSize: 'inherit',
                   lineHeight: 1,
                   color: isDark ? '#ffdf94' : 'rgba(146,104,22,0.95)',
                   textShadow: isDark
-                    ? '0 0 8px rgba(255,205,90,0.9), 0 0 22px rgba(255,180,60,0.5), 0 0 48px rgba(220,150,40,0.3)'
-                    : '0 0 8px rgba(170,120,30,0.55), 0 0 20px rgba(150,100,20,0.3)',
+                    ? '0 0 0.9em rgba(255,205,90,0.9), 0 0 2.4em rgba(255,180,60,0.5), 0 0 5.3em rgba(220,150,40,0.3)'
+                    : '0 0 0.9em rgba(170,120,30,0.55), 0 0 2.2em rgba(150,100,20,0.3)',
                 }}
               />
             </div>
             {/* Delayed hint label */}
             <span
-              className="mt-7 block text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
+              className="absolute left-1/2 top-full mt-6 -translate-x-1/2 whitespace-nowrap text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
               style={{
                 color: isDark ? 'rgba(168,162,158,0.55)' : 'rgba(120,113,108,0.5)',
                 opacity: showHint ? 1 : 0,
@@ -148,15 +191,16 @@ export default function Hero() {
       )}
 
       <div className={[
-        'relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
-        introActive
-          ? 'pointer-events-none select-none opacity-0'
-          : 'transition-opacity duration-700 opacity-100',
+        'hero-content relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
+        // No fade on the container itself — the hero-animate children carry
+        // the staggered fade-in; a container fade on top would double-fade
+        // everything and make the reveal feel sluggish.
+        revealed ? 'hero-revealed' : 'pointer-events-none select-none opacity-0',
       ].join(' ')}>
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
           <div className="relative mb-8 inline-block hero-animate hero-animate-delay-1">
-            <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 ring-offset-4 ring-offset-cream-100 dark:ring-offset-darkBg">
+            <div className="hero-photo-frame w-28 h-28 sm:w-32 sm:h-32 mx-auto overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 ring-offset-4 ring-offset-cream-100 dark:ring-offset-darkBg">
               <img
                 src={profileImage}
                 alt="Hari-Krishna Patel"
@@ -191,9 +235,14 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ArrowDown className="w-5 h-5 text-stone-400 dark:text-cream-300" />
+        {/* Scroll indicator — entrance fade on its own wrapper (bounce and
+            heroFadeIn both set `animation`, so they can't share an element) */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+          <div className="hero-animate hero-animate-delay-5">
+            <div className="animate-bounce">
+              <ArrowDown className="w-5 h-5 text-stone-400 dark:text-cream-300" />
+            </div>
+          </div>
         </div>
       </div>
     </section>

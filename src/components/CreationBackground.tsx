@@ -85,8 +85,8 @@ function robotStep(elapsed: number, seed: number, timeOffset: number, holdMs: nu
 const SWIRL_ORIGIN_R = 79
 const SWIRL_ORIGIN_C = 200
 const SWIRL_MAX_DIST = 215   // origin → far corner, in art cells
-const SWIRL_SPREAD_MS = 500  // ms for the dissolve wavefront to reach the corners
-const SWIRL_FADE_MS = 1000   // per-cell fade-to-nothing duration
+const SWIRL_SPREAD_MS = 600  // ms for the dissolve wavefront to reach the corners
+const SWIRL_FADE_MS = 1050   // per-cell fade-to-nothing duration
 const SWIRL_LIFETIME = 1400  // ms over which the turbulence grows to full strength
 const SWIRL_RISE = 22        // rows of upward billow at full strength
 const SWIRL_TURB = 6.5       // swirling turbulence amplitude (cells)
@@ -134,13 +134,46 @@ export default function CreationBackground() {
       document.body.appendChild(probe)
       const ratio = probe.getBoundingClientRect().width / 10 / 100
       document.body.removeChild(probe)
-      pre.style.fontSize = `${(container.clientWidth / (ratio * CREATION_COLS)) * 1.4}px`
+      // Zoom past the container width so the hands dominate the frame (the
+      // arms crop at the edges). Phones zoom harder — at 1.4x the glyphs
+      // would be ~2px and the art would read as noise; 2.2x keeps the two
+      // hands and the fingertip gap filling the screen.
+      const zoom = container.clientWidth < 768 ? 2.2 : 1.4
+      let size = (container.clientWidth / (ratio * CREATION_COLS)) * zoom
+      // Height guard for short/landscape viewports: the hands occupy a band
+      // of ~80 art rows, so cap the glyph size to keep that band on screen
+      // (otherwise a sideways phone shows mostly empty arm-crop).
+      size = Math.min(size, container.clientHeight / 80)
+      pre.style.fontSize = `${size}px`
+      // Publish the art geometry so the divine spark (rendered in Hero,
+      // outside this subtree) can draw at the same glyph scale AND anchor
+      // itself to the fingertip gap, whatever the viewport shape. The gap
+      // between Adam's and God's fingertips sits at art cell ~(66.5, 200.5);
+      // the art is centered in the container on both axes.
+      const GAP_R = 66.5
+      const GAP_C = 200.5
+      const root = document.documentElement.style
+      root.setProperty('--creation-glyph-size', `${size}px`)
+      root.setProperty(
+        '--creation-gap-x',
+        `${container.clientWidth / 2 + (GAP_C - CREATION_COLS / 2) * size * ratio}px`,
+      )
+      root.setProperty(
+        '--creation-gap-y',
+        `${container.clientHeight / 2 + (GAP_R - CREATION_ROWS / 2) * size}px`,
+      )
     }
 
     fit()
     const ro = new ResizeObserver(fit)
     ro.observe(container)
-    return () => ro.disconnect()
+    return () => {
+      ro.disconnect()
+      const root = document.documentElement.style
+      root.removeProperty('--creation-glyph-size')
+      root.removeProperty('--creation-gap-x')
+      root.removeProperty('--creation-gap-y')
+    }
   }, [])
 
   useEffect(() => {
@@ -248,8 +281,10 @@ export default function CreationBackground() {
       if (curPhase === 'swirl' && swirlStartRef.current === null) {
         swirlStartRef.current = elapsed
         // Drift the whole plume up and out while blurring + fading — sells the
-        // billowing-smoke feel on top of the per-cell turbulence below.
-        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-out, opacity ${SWIRL_CSS_MS}ms ease-in`
+        // billowing-smoke feel on top of the per-cell turbulence below. The
+        // transform eases in-out so the plume accelerates from rest instead of
+        // jolting to full speed on the click frame.
+        pre.style.transition = `transform ${SWIRL_CSS_MS}ms cubic-bezier(0.45, 0, 0.55, 1), opacity ${SWIRL_CSS_MS}ms ease-in`
         pre.style.transform = 'translateY(-9%) scale(1.18)'
         pre.style.opacity = '0'
         setTimeout(() => completeIntroRef.current(), SWIRL_CSS_MS + 60)
@@ -340,7 +375,10 @@ export default function CreationBackground() {
           if (swirling) {
             const dist = distGrid[i]
             const cellDelay = (dist / SWIRL_MAX_DIST) * SWIRL_SPREAD_MS
-            const fade = Math.max(0, Math.min(1, (swirlT - cellDelay) / SWIRL_FADE_MS))
+            const f = Math.max(0, Math.min(1, (swirlT - cellDelay) / SWIRL_FADE_MS))
+            // smoothstep the per-cell fade — a linear ramp starts and stops
+            // with a visible kink; this eases each cell out gently
+            const fade = f * f * (3 - 2 * f)
             kf *= 1 - fade
           }
 
@@ -362,7 +400,10 @@ export default function CreationBackground() {
     const start = performance.now()
     const tick = (t: number) => {
       raf = requestAnimationFrame(tick)
-      if (t - last < MS_PER_FRAME) return
+      // The idle hands animate at a deliberate 12fps ASCII cadence, but the
+      // smoke dissolve moves fast and stutters at that rate — render the
+      // swirl at full display refresh so it tracks the CSS drift smoothly.
+      if (phaseRef.current !== 'swirl' && t - last < MS_PER_FRAME) return
       last = t
       render(t - start)
     }
@@ -371,19 +412,34 @@ export default function CreationBackground() {
   }, [grid])
 
   // Unmount entirely once the intro is done — cancels the RAF loop and frees
-  // the DOM element. Mobile always skips intro so this is a no-op there too.
+  // the DOM element.
   if (phase === 'done') return null
 
   return (
-    // Hidden on mobile (below the md breakpoint).
+    // Sized to the visible viewport (not inset-0): the hero section can be
+    // taller than the screen when its hidden content overflows (landscape
+    // phones), which would center the hands below the fold.
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 hidden select-none items-center justify-center overflow-hidden md:flex"
+      className="intro-art-reveal intro-viewport pointer-events-none absolute inset-x-0 top-0 z-0 flex select-none items-center justify-center overflow-hidden"
     >
       <pre
         ref={preRef}
-        style={{ fontFamily: '"Courier New", Courier, monospace', lineHeight: 1 }}
+        style={{
+          fontFamily: '"Courier New", Courier, monospace',
+          lineHeight: 1,
+          // Cheapest possible glyph pipeline — this element relays out and
+          // repaints on every animation frame, so skip kerning/ligature work,
+          // and keep it on its own compositor layer so the swirl's CSS
+          // transform/opacity transition stays smooth during repaints.
+          textRendering: 'optimizeSpeed',
+          fontKerning: 'none',
+          fontVariantLigatures: 'none',
+          willChange: 'transform, opacity',
+          // Stop mobile Chrome's font boosting from inflating the tiny glyphs
+          WebkitTextSizeAdjust: '100%',
+        }}
         className={[
           'm-0 p-0 whitespace-pre',
           isDark ? 'text-cream-100' : 'text-stone-900',
