@@ -85,8 +85,8 @@ function robotStep(elapsed: number, seed: number, timeOffset: number, holdMs: nu
 const SWIRL_ORIGIN_R = 79
 const SWIRL_ORIGIN_C = 200
 const SWIRL_MAX_DIST = 215   // origin → far corner, in art cells
-const SWIRL_SPREAD_MS = 500  // ms for the dissolve wavefront to reach the corners
-const SWIRL_FADE_MS = 1000   // per-cell fade-to-nothing duration
+const SWIRL_SPREAD_MS = 600  // ms for the dissolve wavefront to reach the corners
+const SWIRL_FADE_MS = 1050   // per-cell fade-to-nothing duration
 const SWIRL_LIFETIME = 1400  // ms over which the turbulence grows to full strength
 const SWIRL_RISE = 22        // rows of upward billow at full strength
 const SWIRL_TURB = 6.5       // swirling turbulence amplitude (cells)
@@ -248,8 +248,10 @@ export default function CreationBackground() {
       if (curPhase === 'swirl' && swirlStartRef.current === null) {
         swirlStartRef.current = elapsed
         // Drift the whole plume up and out while blurring + fading — sells the
-        // billowing-smoke feel on top of the per-cell turbulence below.
-        pre.style.transition = `transform ${SWIRL_CSS_MS}ms ease-out, opacity ${SWIRL_CSS_MS}ms ease-in`
+        // billowing-smoke feel on top of the per-cell turbulence below. The
+        // transform eases in-out so the plume accelerates from rest instead of
+        // jolting to full speed on the click frame.
+        pre.style.transition = `transform ${SWIRL_CSS_MS}ms cubic-bezier(0.45, 0, 0.55, 1), opacity ${SWIRL_CSS_MS}ms ease-in`
         pre.style.transform = 'translateY(-9%) scale(1.18)'
         pre.style.opacity = '0'
         setTimeout(() => completeIntroRef.current(), SWIRL_CSS_MS + 60)
@@ -340,7 +342,10 @@ export default function CreationBackground() {
           if (swirling) {
             const dist = distGrid[i]
             const cellDelay = (dist / SWIRL_MAX_DIST) * SWIRL_SPREAD_MS
-            const fade = Math.max(0, Math.min(1, (swirlT - cellDelay) / SWIRL_FADE_MS))
+            const f = Math.max(0, Math.min(1, (swirlT - cellDelay) / SWIRL_FADE_MS))
+            // smoothstep the per-cell fade — a linear ramp starts and stops
+            // with a visible kink; this eases each cell out gently
+            const fade = f * f * (3 - 2 * f)
             kf *= 1 - fade
           }
 
@@ -382,7 +387,7 @@ export default function CreationBackground() {
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 z-0 hidden select-none items-center justify-center overflow-hidden md:flex"
+      className="intro-art-reveal pointer-events-none absolute inset-0 z-0 hidden select-none items-center justify-center overflow-hidden md:flex"
     >
       <pre
         ref={preRef}

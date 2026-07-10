@@ -116,7 +116,10 @@ export default function Hero() {
           className={[
             'pointer-events-none absolute inset-0 z-20 hidden md:flex items-center justify-center',
             'transition-opacity duration-500 ease-out',
-            entering ? 'opacity-100' : 'opacity-0',
+            // intro-art-reveal fades the spark in with the hands on load; the
+            // class is dropped when the swirl starts (a filled animation would
+            // otherwise pin opacity and block the fade-out transition)
+            entering ? 'intro-art-reveal opacity-100' : 'opacity-0',
           ].join(' ')}
         >
           <button
