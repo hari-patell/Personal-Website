@@ -128,10 +128,18 @@ export default function Hero() {
             onClick={startSwirl}
             aria-label="Enter"
             className={[
-              'relative flex cursor-pointer flex-col items-center focus:outline-none',
+              // Anchored to the fingertip gap published by CreationBackground
+              // (px from the section's top-left), so it lands between the
+              // fingertips at any viewport size or orientation. The hint
+              // hangs below via absolute positioning so it doesn't shift
+              // the starburst off the anchor point.
+              'absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer focus:outline-none',
               entering ? 'pointer-events-auto' : 'pointer-events-none',
             ].join(' ')}
-            style={{ marginTop: '15vh' }}
+            style={{
+              left: 'var(--creation-gap-x, 50%)',
+              top: 'var(--creation-gap-y, 50%)',
+            }}
           >
             {/* ASCII starburst — same character medium as the hands, but golden,
                 haloed, and set in a soft clearing that dims the art behind it.
@@ -170,7 +178,7 @@ export default function Hero() {
             </div>
             {/* Delayed hint label */}
             <span
-              className="mt-7 block text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
+              className="absolute left-1/2 top-full mt-6 -translate-x-1/2 whitespace-nowrap text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
               style={{
                 color: isDark ? 'rgba(168,162,158,0.55)' : 'rgba(120,113,108,0.5)',
                 opacity: showHint ? 1 : 0,

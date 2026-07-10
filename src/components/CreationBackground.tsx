@@ -139,11 +139,29 @@ export default function CreationBackground() {
       // would be ~2px and the art would read as noise; 2.2x keeps the two
       // hands and the fingertip gap filling the screen.
       const zoom = container.clientWidth < 768 ? 2.2 : 1.4
-      const size = (container.clientWidth / (ratio * CREATION_COLS)) * zoom
+      let size = (container.clientWidth / (ratio * CREATION_COLS)) * zoom
+      // Height guard for short/landscape viewports: the hands occupy a band
+      // of ~80 art rows, so cap the glyph size to keep that band on screen
+      // (otherwise a sideways phone shows mostly empty arm-crop).
+      size = Math.min(size, container.clientHeight / 80)
       pre.style.fontSize = `${size}px`
-      // Publish the glyph size so the divine spark (rendered in Hero, outside
-      // this subtree) draws its ASCII starburst at the same scale as the art.
-      document.documentElement.style.setProperty('--creation-glyph-size', `${size}px`)
+      // Publish the art geometry so the divine spark (rendered in Hero,
+      // outside this subtree) can draw at the same glyph scale AND anchor
+      // itself to the fingertip gap, whatever the viewport shape. The gap
+      // between Adam's and God's fingertips sits at art cell ~(66.5, 200.5);
+      // the art is centered in the container on both axes.
+      const GAP_R = 66.5
+      const GAP_C = 200.5
+      const root = document.documentElement.style
+      root.setProperty('--creation-glyph-size', `${size}px`)
+      root.setProperty(
+        '--creation-gap-x',
+        `${container.clientWidth / 2 + (GAP_C - CREATION_COLS / 2) * size * ratio}px`,
+      )
+      root.setProperty(
+        '--creation-gap-y',
+        `${container.clientHeight / 2 + (GAP_R - CREATION_ROWS / 2) * size}px`,
+      )
     }
 
     fit()
@@ -151,7 +169,10 @@ export default function CreationBackground() {
     ro.observe(container)
     return () => {
       ro.disconnect()
-      document.documentElement.style.removeProperty('--creation-glyph-size')
+      const root = document.documentElement.style
+      root.removeProperty('--creation-glyph-size')
+      root.removeProperty('--creation-gap-x')
+      root.removeProperty('--creation-gap-y')
     }
   }, [])
 
@@ -395,10 +416,13 @@ export default function CreationBackground() {
   if (phase === 'done') return null
 
   return (
+    // Sized to the visible viewport (not inset-0): the hero section can be
+    // taller than the screen when its hidden content overflows (landscape
+    // phones), which would center the hands below the fold.
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="intro-art-reveal pointer-events-none absolute inset-0 z-0 flex select-none items-center justify-center overflow-hidden"
+      className="intro-art-reveal intro-viewport pointer-events-none absolute inset-x-0 top-0 z-0 flex select-none items-center justify-center overflow-hidden"
     >
       <pre
         ref={preRef}
@@ -413,6 +437,8 @@ export default function CreationBackground() {
           fontKerning: 'none',
           fontVariantLigatures: 'none',
           willChange: 'transform, opacity',
+          // Stop mobile Chrome's font boosting from inflating the tiny glyphs
+          WebkitTextSizeAdjust: '100%',
         }}
         className={[
           'm-0 p-0 whitespace-pre',
