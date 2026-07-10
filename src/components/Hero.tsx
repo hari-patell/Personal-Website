@@ -191,7 +191,7 @@ export default function Hero() {
       )}
 
       <div className={[
-        'relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
+        'hero-content relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
         // No fade on the container itself — the hero-animate children carry
         // the staggered fade-in; a container fade on top would double-fade
         // everything and make the reveal feel sluggish.
@@ -200,7 +200,7 @@ export default function Hero() {
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
           <div className="relative mb-8 inline-block hero-animate hero-animate-delay-1">
-            <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 ring-offset-4 ring-offset-cream-100 dark:ring-offset-darkBg">
+            <div className="hero-photo-frame w-28 h-28 sm:w-32 sm:h-32 mx-auto overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 ring-offset-4 ring-offset-cream-100 dark:ring-offset-darkBg">
               <img
                 src={profileImage}
                 alt="Hari-Krishna Patel"

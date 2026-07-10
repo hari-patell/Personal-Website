@@ -203,6 +203,27 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Short viewports (landscape phones, squat windows): the hero content is
+   taller than the screen, so it flows from the top of the page — pad it clear
+   of the fixed nav and give the scroll arrow its own room instead of letting
+   it overlap the social links, and compact the type so the hero doesn't
+   tower several screens tall. */
+@media (max-height: 540px) {
+  .hero-content {
+    padding-top: 5.5rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .hero-content .hero-photo-frame {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+
+  .hero-content h1 {
+    font-size: 3.25rem;
+  }
+}
+
 /* Comfortable touch targets on small screens */
 @media (max-width: 640px) {
   button, a {
