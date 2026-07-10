@@ -60,13 +60,15 @@ export default function Hero() {
 
   // Crossfade the site in beneath the dissipating smoke: reveal the hero
   // partway through the swirl instead of waiting for it to finish, so there's
-  // never a blank frame between the hands and the content. Without an intro
-  // (mobile, returning visitors) reveal immediately, as before.
+  // never a blank frame between the hands and the content. Timed so the smoke
+  // is mostly dissipated before the content starts rising — the hands get
+  // their moment to fade, then the site takes over. Without an intro (mobile,
+  // returning visitors) reveal immediately, as before.
   const [revealed, setRevealed] = useState(phase === 'done')
   useEffect(() => {
     if (phase === 'done') { setRevealed(true); return }
     if (phase !== 'swirl') return
-    const t = setTimeout(() => setRevealed(true), 550)
+    const t = setTimeout(() => setRevealed(true), 1000)
     return () => clearTimeout(t)
   }, [phase])
 
