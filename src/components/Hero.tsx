@@ -7,12 +7,13 @@ import profileImage from '../profile.jpg'
 import { useIntro } from '../contexts/IntroContext'
 import { useTheme } from '../contexts/ThemeContext'
 
-// Divine spark rendered as a tiny ASCII orb: a radial glow mapped onto a
-// brightness ramp, breathing on a slow pulse with a gentle per-cell boil so
-// it feels like living light rather than a static blob. Chars are ~2x taller
-// than wide, so dx is scaled to keep the orb round.
-const ORB_ROWS = 9
-const ORB_COLS = 17
+// Divine spark rendered as a tiny ASCII starburst: a tight radial core plus
+// four rays of light mapped onto a brightness ramp, breathing on a slow pulse
+// with a gentle per-cell boil so it feels like living light. The star shape
+// distinguishes it from the round textured masses of the hands. Chars are
+// ~2x taller than wide, so dx is scaled to keep the shape round.
+const ORB_ROWS = 11
+const ORB_COLS = 21
 const ORB_RAMP = ' .:-~=+*#%@'
 const ORB_MS_PER_FRAME = 1000 / 12
 
@@ -20,15 +21,19 @@ function orbFrame(t: number): string {
   const cx = (ORB_COLS - 1) / 2
   const cy = (ORB_ROWS - 1) / 2
   const kMax = ORB_RAMP.length - 1
-  const pulse = 0.78 + 0.22 * Math.sin((t / 2200) * Math.PI * 2)
+  const pulse = 0.8 + 0.2 * Math.sin((t / 2200) * Math.PI * 2)
+  const twinkle = 0.7 + 0.3 * Math.sin(t / 700)  // rays flare on their own beat
   let out = ''
   for (let r = 0; r < ORB_ROWS; r++) {
     for (let c = 0; c < ORB_COLS; c++) {
       const dx = (c - cx) * 0.55
       const dy = r - cy
       const d = Math.hypot(dx, dy)
-      const boil = 0.16 * Math.sin(t / 260 + c * 1.9 + r * 2.6)
-      const b = (1.18 - d / 4.3) * pulse + boil
+      // four-pointed star: rays along the horizontal/vertical axes
+      const theta = Math.atan2(dy, dx)
+      const rays = Math.abs(Math.cos(theta * 2)) ** 6 * Math.max(0, 1 - d / 5.4) * 0.7 * twinkle
+      const boil = 0.14 * Math.sin(t / 260 + c * 1.9 + r * 2.6)
+      const b = (1.3 - d / 2.9) * pulse + rays * pulse + boil
       let k = Math.round(b * kMax)
       if (k < 0) k = 0
       else if (k > kMax) k = kMax
@@ -99,21 +104,35 @@ export default function Hero() {
             className="pointer-events-auto relative flex cursor-pointer flex-col items-center focus:outline-none"
             style={{ marginTop: '15vh' }}
           >
-            {/* ASCII orb — same character-based rendering as the hands */}
-            <pre
-              ref={orbRef}
-              aria-hidden="true"
-              className="m-0 p-0 select-none"
-              style={{
-                fontFamily: '"Courier New", Courier, monospace',
-                fontSize: '8px',
-                lineHeight: 1,
-                color: isDark ? 'rgba(255,228,150,0.95)' : 'rgba(150,110,30,0.9)',
-                textShadow: isDark
-                  ? '0 0 14px rgba(255,200,80,0.5), 0 0 32px rgba(220,160,50,0.25)'
-                  : '0 0 10px rgba(160,115,30,0.4), 0 0 24px rgba(140,95,20,0.2)',
-              }}
-            />
+            {/* ASCII starburst — same character medium as the hands, but golden,
+                haloed, and set in a soft clearing that dims the art behind it */}
+            <div className="relative flex items-center justify-center">
+              <span
+                aria-hidden="true"
+                className="absolute rounded-full"
+                style={{
+                  width: '170px',
+                  height: '140px',
+                  background: isDark
+                    ? 'radial-gradient(ellipse, rgba(23,23,23,0.95) 0%, rgba(23,23,23,0.6) 45%, transparent 72%)'
+                    : 'radial-gradient(ellipse, rgba(250,247,242,0.95) 0%, rgba(250,247,242,0.6) 45%, transparent 72%)',
+                }}
+              />
+              <pre
+                ref={orbRef}
+                aria-hidden="true"
+                className="relative m-0 p-0 select-none"
+                style={{
+                  fontFamily: '"Courier New", Courier, monospace',
+                  fontSize: '9px',
+                  lineHeight: 1,
+                  color: isDark ? '#ffdf94' : 'rgba(146,104,22,0.95)',
+                  textShadow: isDark
+                    ? '0 0 8px rgba(255,205,90,0.9), 0 0 22px rgba(255,180,60,0.5), 0 0 48px rgba(220,150,40,0.3)'
+                    : '0 0 8px rgba(170,120,30,0.55), 0 0 20px rgba(150,100,20,0.3)',
+                }}
+              />
+            </div>
             {/* Delayed hint label */}
             <span
               className="mt-7 block text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
