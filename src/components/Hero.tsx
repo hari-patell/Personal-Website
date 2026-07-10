@@ -1,7 +1,48 @@
+import { useEffect, useRef, useState } from 'react'
 import { Github, Mail, Instagram, Linkedin, ArrowDown } from "lucide-react"
 import { SocialLink } from '../types'
 import XIcon from './XIcon'
+import CreationBackground from './CreationBackground'
 import profileImage from '../profile.jpg'
+import { useIntro } from '../contexts/IntroContext'
+import { useTheme } from '../contexts/ThemeContext'
+
+// Divine spark rendered as a tiny ASCII starburst: a tight radial core plus
+// four rays of light mapped onto a brightness ramp, breathing on a slow pulse
+// with a gentle per-cell boil so it feels like living light. The star shape
+// distinguishes it from the round textured masses of the hands. Chars are
+// ~2x taller than wide, so dx is scaled to keep the shape round.
+const ORB_ROWS = 11
+const ORB_COLS = 21
+const ORB_RAMP = ' .:-~=+*#%@'
+const ORB_MS_PER_FRAME = 1000 / 12
+
+function orbFrame(t: number): string {
+  const cx = (ORB_COLS - 1) / 2
+  const cy = (ORB_ROWS - 1) / 2
+  const kMax = ORB_RAMP.length - 1
+  const pulse = 0.8 + 0.2 * Math.sin((t / 2200) * Math.PI * 2)
+  const twinkle = 0.7 + 0.3 * Math.sin(t / 700)  // rays flare on their own beat
+  let out = ''
+  for (let r = 0; r < ORB_ROWS; r++) {
+    for (let c = 0; c < ORB_COLS; c++) {
+      const dx = (c - cx) * 0.55
+      const dy = r - cy
+      const d = Math.hypot(dx, dy)
+      // four-pointed star: rays along the horizontal/vertical axes
+      const theta = Math.atan2(dy, dx)
+      const rays = Math.abs(Math.cos(theta * 2)) ** 6 * Math.max(0, 1 - d / 5.4) * 0.7 * twinkle
+      const boil = 0.14 * Math.sin(t / 260 + c * 1.9 + r * 2.6)
+      const b = (1.3 - d / 2.9) * pulse + rays * pulse + boil
+      let k = Math.round(b * kMax)
+      if (k < 0) k = 0
+      else if (k > kMax) k = kMax
+      out += ORB_RAMP[k]
+    }
+    if (r < ORB_ROWS - 1) out += '\n'
+  }
+  return out
+}
 
 const socialLinks: SocialLink[] = [
   { icon: Mail, href: "mailto:hari1880patel@gmail.com", label: "Email" },
@@ -12,9 +53,106 @@ const socialLinks: SocialLink[] = [
 ]
 
 export default function Hero() {
+  const { phase, startSwirl } = useIntro()
+  const { isDark } = useTheme()
+  const introActive = phase === 'enter' || phase === 'swirl'
+  const entering = phase === 'enter'
+
+  // Fade in the "begin" hint after a short pause so it doesn't compete with the
+  // art on first load.
+  const [showHint, setShowHint] = useState(false)
+  useEffect(() => {
+    if (!entering) { setShowHint(false); return }
+    const t = setTimeout(() => setShowHint(true), 2200)
+    return () => clearTimeout(t)
+  }, [entering])
+
+  // Animate the ASCII orb while the intro is showing.
+  const orbRef = useRef<HTMLPreElement>(null)
+  useEffect(() => {
+    if (!entering) return
+    const pre = orbRef.current
+    if (!pre) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      pre.textContent = orbFrame(550)
+      return
+    }
+    let raf = 0
+    let last = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick)
+      if (now - last < ORB_MS_PER_FRAME) return
+      last = now
+      pre.textContent = orbFrame(now - start)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [entering])
+
   return (
     <section id="home" className="relative min-h-screen w-full bg-cream-100 dark:bg-darkBg overflow-hidden flex items-center justify-center">
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom">
+      <CreationBackground />
+
+      {/* Divine spark — shown only on desktop during the enter phase.
+          Positioned to sit in the gap between Adam's and God's fingertips. */}
+      {entering && (
+        <div className="pointer-events-none absolute inset-0 z-20 hidden md:flex items-center justify-center">
+          <button
+            onClick={startSwirl}
+            aria-label="Enter"
+            className="pointer-events-auto relative flex cursor-pointer flex-col items-center focus:outline-none"
+            style={{ marginTop: '15vh' }}
+          >
+            {/* ASCII starburst — same character medium as the hands, but golden,
+                haloed, and set in a soft clearing that dims the art behind it */}
+            <div className="relative flex items-center justify-center">
+              <span
+                aria-hidden="true"
+                className="absolute rounded-full"
+                style={{
+                  width: '170px',
+                  height: '140px',
+                  background: isDark
+                    ? 'radial-gradient(ellipse, rgba(23,23,23,0.95) 0%, rgba(23,23,23,0.6) 45%, transparent 72%)'
+                    : 'radial-gradient(ellipse, rgba(250,247,242,0.95) 0%, rgba(250,247,242,0.6) 45%, transparent 72%)',
+                }}
+              />
+              <pre
+                ref={orbRef}
+                aria-hidden="true"
+                className="relative m-0 p-0 select-none"
+                style={{
+                  fontFamily: '"Courier New", Courier, monospace',
+                  fontSize: '9px',
+                  lineHeight: 1,
+                  color: isDark ? '#ffdf94' : 'rgba(146,104,22,0.95)',
+                  textShadow: isDark
+                    ? '0 0 8px rgba(255,205,90,0.9), 0 0 22px rgba(255,180,60,0.5), 0 0 48px rgba(220,150,40,0.3)'
+                    : '0 0 8px rgba(170,120,30,0.55), 0 0 20px rgba(150,100,20,0.3)',
+                }}
+              />
+            </div>
+            {/* Delayed hint label */}
+            <span
+              className="mt-7 block text-[10px] tracking-[0.4em] uppercase transition-opacity duration-700 select-none"
+              style={{
+                color: isDark ? 'rgba(168,162,158,0.55)' : 'rgba(120,113,108,0.5)',
+                opacity: showHint ? 1 : 0,
+              }}
+            >
+              begin
+            </span>
+          </button>
+        </div>
+      )}
+
+      <div className={[
+        'relative z-10 flex flex-col items-center justify-center min-h-screen w-full px-6 sm:px-8 safe-area-top safe-area-bottom',
+        introActive
+          ? 'pointer-events-none select-none opacity-0'
+          : 'transition-opacity duration-700 opacity-100',
+      ].join(' ')}>
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
           <div className="relative mb-8 inline-block hero-animate hero-animate-delay-1">
