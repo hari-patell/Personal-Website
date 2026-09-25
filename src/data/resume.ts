@@ -34,11 +34,10 @@ Email: hari1880patel@gmail.com
 LinkedIn: https://www.linkedin.com/in/hari-krishna-patel
 GitHub: https://github.com/hari-patell
 Twitter/X: https://x.com/hari_patell
-Instagram: https://instagram.com/hari_patell
 
 EDUCATION:
 University of Florida - Herbert Wertheim College of Engineering (Gainesville, FL), Aug. 2023 - May 2027 (expected graduation)
-Bachelor of Science in Computer Science, Minor in Business & Math. GPA: 3.85/4.0
+Bachelor of Science in Computer Science, Minor in Business & Math
 Relevant Coursework: Data Structures & Algorithms, Operating Systems, Algorithm Abstraction and Design, Databases, Computer Organization, Software Engineering, Intro to Virtual Reality, Programming Language Concepts
 
 PROFESSIONAL SUMMARY:

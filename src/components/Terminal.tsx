@@ -72,7 +72,6 @@ const SOCIALS = [
   { label: 'github', value: 'github.com/hari-patell', href: 'https://github.com/hari-patell' },
   { label: 'linkedin', value: 'linkedin.com/in/hari-krishna-patel', href: 'https://www.linkedin.com/in/hari-krishna-patel' },
   { label: 'x', value: 'x.com/hari_patell', href: 'https://x.com/hari_patell' },
-  { label: 'instagram', value: 'instagram.com/hari_patell', href: 'https://instagram.com/hari_patell' },
 ];
 
 const SKILL_CATEGORIES: Record<string, string> = {
