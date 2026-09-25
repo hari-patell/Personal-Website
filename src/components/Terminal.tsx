@@ -165,8 +165,8 @@ function AboutOutput() {
             making software fast.
           </p>
           <p>
-            Currently a Capital One full stack SWE intern (Summer '26), previously at Honeywell
-            (Summer '25), and incoming Amazon SDE intern on the Within Stores team (Fall '26). He builds across
+            Currently an AWS software development intern on the Applied AI team (Fall '26), building an
+            AI agent evaluation platform; previously at Capital One (Summer '26) and Honeywell (Summer '25). He builds across
             full-stack, ML, mobile, and market microstructure — favorite wins include taking a parser
             from 4.5s to 150ms and an order book engine pushing ~50,000 orders/sec.
           </p>

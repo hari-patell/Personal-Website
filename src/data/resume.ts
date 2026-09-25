@@ -29,15 +29,20 @@ export function getResumeContext(): string {
 PERSONAL BACKGROUND:
 Name: Hari-Krishna Patel
 Role: Software Engineer & Developer
-Location: Currently interning at Capital One in McLean, VA
+Location: Currently interning at Amazon Web Services (AWS) in Bellevue, WA
 Email: hari1880patel@gmail.com
 LinkedIn: https://www.linkedin.com/in/hari-krishna-patel
 GitHub: https://github.com/hari-patell
 Twitter/X: https://x.com/hari_patell
 Instagram: https://instagram.com/hari_patell
 
+EDUCATION:
+University of Florida - Herbert Wertheim College of Engineering (Gainesville, FL), Aug. 2023 - May 2027 (expected graduation)
+Bachelor of Science in Computer Science, Minor in Business & Math. GPA: 3.85/4.0
+Relevant Coursework: Data Structures & Algorithms, Operating Systems, Algorithm Abstraction and Design, Databases, Computer Organization, Software Engineering, Intro to Virtual Reality, Programming Language Concepts
+
 PROFESSIONAL SUMMARY:
-I'm a Computer Science student at the University of Florida with a passion for creating high-performance solutions. I am currently a Full Stack Software Engineering Intern at Capital One (Summer 2026, my current internship), previously completed a Software Engineering Internship at Honeywell (Summer 2025), and am an Incoming Software Development Engineer Intern at Amazon on the Within Stores team in Bellevue, WA (Fall 2026). My expertise spans full-stack development, machine learning, mobile applications, and financial systems (limit order books, market microstructure). I thrive on solving complex problems through clean code and systematic optimization. Whether it's reducing execution time from 4.5 seconds to 150ms, achieving 94.2% accuracy with custom neural networks, building a limit order book engine processing ~50,000 orders/sec, or leading teams to build innovative solutions, I'm driven by measurable impact and continuous learning.
+I'm a Computer Science student at the University of Florida with a passion for creating high-performance solutions. I am currently a Software Development Intern at Amazon Web Services (AWS) on the Applied AI team in Bellevue, WA (Sep. 2026 - Nov. 2026, my current internship), building an AI agent evaluation platform. Before that, I was a Software Engineering Intern at Capital One in McLean, VA (Summer 2026), where I shipped a production TypeScript/AWS Lambda endpoint serving 2.5M daily users, and a Software Engineering Intern at Honeywell (Summer 2025). My expertise spans full-stack development, machine learning, mobile applications, and financial systems (limit order books, market microstructure). I thrive on solving complex problems through clean code and systematic optimization. Whether it's reducing execution time from 4.5 seconds to 150ms, achieving 94.2% accuracy with custom neural networks, building a limit order book engine processing ~50,000 orders/sec, shipping production APIs for 2.5M daily users, or leading teams to build innovative solutions, I'm driven by measurable impact and continuous learning.
 
 CORE VALUES & WORK PHILOSOPHY:
 - Clean Code: Writing maintainable, scalable, and well-documented code is a priority. I believe code should be readable and maintainable for future developers.
@@ -57,6 +62,9 @@ PROJECTS:
 ${projectsText}
 
 KEY ACHIEVEMENTS & METRICS:
+- AI Agent Evaluation (AWS): Building an agent evaluation platform combining 4 evaluation methodologies into a proprietary scoring framework, plus an MCP server and evaluation API that reliably run multi-hour evaluation workloads without orphaned runs
+- Production Scale (Capital One): Shipped a TypeScript/AWS Lambda endpoint for a mobile surface serving 2.5M daily users, collapsing 12 months of paginated transaction data into a single response across three derived views
+- Testing Rigor (Capital One): Deployed via AWS CDK with ~3,200 lines of unit, Pact contract, and E2E tests
 - Performance Optimization: Achieved 96.67% performance improvement (4.5 seconds to 150ms) on TSPL Parser optimization
 - Machine Learning: Built neural network from scratch achieving 94.2% accuracy on MNIST dataset, reducing training time by 60%
 - Financial Systems: Built a limit order book engine processing 3,000+ events at ~50,000 orders/sec with real-time microstructure metrics (bid-ask spread, mid-price, OFI)
@@ -68,10 +76,11 @@ KEY ACHIEVEMENTS & METRICS:
 
 TECHNICAL INTERESTS:
 - Full-stack development with modern frameworks (React, React Native, Node.js)
+- AI agents, agent evaluation, and MCP (Model Context Protocol) servers
 - Machine learning and neural networks (implemented from scratch)
 - Mobile application development (Android, React Native)
 - System optimization and performance engineering
-- Cloud infrastructure and DevOps (AWS, Docker)
+- Cloud infrastructure and DevOps (AWS Lambda, AWS CDK, Docker)
 - Database design and optimization (PostgreSQL, MongoDB)
 - Real-time systems and data processing
 

@@ -26,9 +26,9 @@ export default function About() {
           <div className="grid md:grid-cols-2 gap-6 md:gap-10 mt-10 md:mt-14">
             <div className="space-y-5">
               <p className="text-stone-600 dark:text-cream-200 leading-relaxed text-base sm:text-lg">
-                I'm a Software Engineering Intern at Honeywell with a passion for creating high-performance solutions.
-                I've optimized systems achieving 96.67% performance improvements and built scalable applications
-                serving 100+ teams. My expertise spans full-stack development, machine learning, and mobile applications.
+                I'm a Computer Science student at the University of Florida and a Software Development Intern at
+                Amazon Web Services on the Applied AI team, with a passion for creating high-performance solutions.
+                I've shipped production APIs serving 2.5M daily users at Capital One and optimized systems by 96.67% at Honeywell. My expertise spans full-stack development, machine learning, and mobile applications.
               </p>
               <p className="text-stone-600 dark:text-cream-200 leading-relaxed text-base sm:text-lg">
                 I thrive on solving complex problems through clean code and systematic optimization. Whether it's
