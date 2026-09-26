@@ -143,7 +143,7 @@ export default function ResumeChat() {
     "What's Hari's most recent internship?",
     "What programming languages does he know?",
     "Tell me about his projects",
-    "What's his GPA and major?",
+    "What is he building at AWS?",
   ];
 
   const handleChipClick = (question: string) => {

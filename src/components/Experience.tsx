@@ -44,7 +44,7 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
   return (
     <div
       className={`group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-stone-800/50 border backdrop-blur-sm transition-all duration-500 ${
-        experience.incoming
+        experience.incoming || experience.current
           ? 'border-stone-400/50 dark:border-stone-500/50 shadow-sm hover:shadow-md hover:border-stone-400/70 dark:hover:border-stone-500/70'
           : 'border-stone-200/60 dark:border-stone-600/50 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm hover:bg-white dark:hover:bg-stone-700/60'
       }`}
@@ -66,10 +66,10 @@ function ExperienceCard({ experience, index }: { experience: Experience; index: 
                 <span>{experience.company}</span>
               </div>
             </div>
-            {experience.incoming && (
+            {(experience.incoming || experience.current) && (
               <div className="shrink-0 mt-1">
                 <div className="px-3 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-md bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg">
-                  Incoming
+                  {experience.current ? 'Current' : 'Incoming'}
                 </div>
               </div>
             )}

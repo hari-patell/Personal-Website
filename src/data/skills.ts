@@ -10,6 +10,7 @@ export const skills: Skill[] = [
   { name: 'TypeScript', category: 'frontend', proficiency: 'expert' },
   { name: 'SQL', category: 'database', proficiency: 'advanced' },
   { name: 'HTML/CSS', category: 'frontend', proficiency: 'expert' },
+  { name: 'Rust', category: 'backend', proficiency: 'intermediate' },
   
   // Frontend Technologies
   { name: 'React', category: 'frontend', proficiency: 'expert' },

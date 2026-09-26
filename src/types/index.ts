@@ -36,4 +36,5 @@ export interface Experience {
   achievements: string[]
   technologies: string[]
   incoming?: boolean
+  current?: boolean
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Github, Mail, Instagram, Linkedin, ArrowDown } from "lucide-react"
+import { Github, Mail, Linkedin, ArrowDown } from "lucide-react"
 import { SocialLink } from '../types'
 import XIcon from './XIcon'
 import CreationBackground from './CreationBackground'
@@ -47,7 +47,6 @@ function orbFrame(t: number): string {
 const socialLinks: SocialLink[] = [
   { icon: Mail, href: "mailto:hari1880patel@gmail.com", label: "Email" },
   { icon: XIcon, href: "https://x.com/hari_patell", label: "X" },
-  { icon: Instagram, href: "https://instagram.com/hari_patell", label: "Instagram" },
   { icon: Linkedin, href: "https://www.linkedin.com/in/hari-krishna-patel", label: "LinkedIn" },
   { icon: Github, href: "https://github.com/hari-patell", label: "GitHub" },
 ]
