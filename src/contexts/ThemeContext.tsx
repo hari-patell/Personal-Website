@@ -32,7 +32,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.add(theme)
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', theme === 'dark' ? '#171717' : '#FAF7F2')
+      ?.setAttribute('content', theme === 'dark' ? '#171717' : '#F7F6F2')
   }, [theme])
 
   // Follow the system preference live, unless the user has toggled explicitly

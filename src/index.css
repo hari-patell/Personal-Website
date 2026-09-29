@@ -169,7 +169,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #FAF7F2;
+  background: #F7F6F2;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -237,9 +237,19 @@ body {
   width: 60px;
   height: 1px;
   background: #D6D3D1;
-  margin: 0 auto;
+  /* horizontal only — vertical spacing comes from utilities (my-8, mt-8) */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .dark .serif-divider {
   background: #57534E;
+}
+
+/* Inscription-style label: small, uppercase, widely tracked */
+.inscription {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
 }

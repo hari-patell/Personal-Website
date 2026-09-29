@@ -63,10 +63,10 @@ export default function Navigation({ sections, onOpenTerminal }: NavigationProps
   }
 
   const navButtonClasses = (section: string) =>
-    `font-medium transition-colors duration-200 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg ${
+    `inscription transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100 dark:focus-visible:ring-offset-darkBg ${
       activeSection === section
-        ? 'text-stone-900 dark:text-cream-100 bg-stone-900/5 dark:bg-cream-100/10'
-        : 'text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 hover:bg-stone-900/5 dark:hover:bg-cream-100/10'
+        ? 'text-aegean dark:text-aegean-light'
+        : 'text-stone-500 dark:text-cream-300 hover:text-stone-900 dark:hover:text-cream-100'
     }`
 
   return (
@@ -75,13 +75,13 @@ export default function Navigation({ sections, onOpenTerminal }: NavigationProps
         aria-label="Main navigation"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 safe-area-top ${
           isScrolled
-            ? 'bg-cream-100/90 dark:bg-darkBg/95 backdrop-blur-xl border-b border-stone-200/60 dark:border-stone-700/60 shadow-sm'
+            ? 'bg-cream-100/90 dark:bg-darkBg/95 backdrop-blur-xl border-b border-stone-300/50 dark:border-stone-700/60'
             : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <span className="text-lg sm:text-xl font-serif font-bold text-stone-900 dark:text-cream-100 tracking-tight">
+            <span className="text-xl sm:text-2xl font-serif font-medium text-stone-900 dark:text-cream-100 tracking-tight">
               Hari Patel
             </span>
             <div className="hidden md:flex items-center gap-1">
@@ -90,7 +90,7 @@ export default function Navigation({ sections, onOpenTerminal }: NavigationProps
                   key={section}
                   onClick={() => scrollToSection(section)}
                   aria-current={activeSection === section ? 'true' : undefined}
-                  className={`px-3 py-2 text-sm ${navButtonClasses(section)}`}
+                  className={`px-3 py-2 ${navButtonClasses(section)}`}
                 >
                   {section.charAt(0).toUpperCase() + section.slice(1)}
                 </button>
@@ -139,13 +139,13 @@ export default function Navigation({ sections, onOpenTerminal }: NavigationProps
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-cream-100/95 dark:bg-darkBg/95 backdrop-blur-xl border-b border-stone-200/60 dark:border-stone-700/60 shadow-sm">
+        <div className="bg-cream-100/95 dark:bg-darkBg/95 backdrop-blur-xl border-b border-stone-300/50 dark:border-stone-700/60">
           <div className="px-4 py-4 space-y-2">
             {sections.map((section) => (
               <button
                 key={section}
                 onClick={() => scrollToSection(section)}
-                className={`w-full text-left px-4 py-3 text-base ${navButtonClasses(section)}`}
+                className={`w-full text-left px-4 py-3 ${navButtonClasses(section)}`}
               >
                 {section.charAt(0).toUpperCase() + section.slice(1)}
               </button>

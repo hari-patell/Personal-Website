@@ -157,7 +157,7 @@ export default function Hero() {
                   height: '15.5em',
                   background: isDark
                     ? 'radial-gradient(ellipse, rgba(23,23,23,0.95) 0%, rgba(23,23,23,0.6) 45%, transparent 72%)'
-                    : 'radial-gradient(ellipse, rgba(250,247,242,0.95) 0%, rgba(250,247,242,0.6) 45%, transparent 72%)',
+                    : 'radial-gradient(ellipse, rgba(247,246,242,0.95) 0%, rgba(247,246,242,0.6) 45%, transparent 72%)',
                 }}
               />
               <pre
@@ -199,14 +199,14 @@ export default function Hero() {
         <div className="w-full max-w-2xl text-center">
           {/* Profile Image */}
           <div className="relative mb-8 inline-block hero-animate hero-animate-delay-1">
-            <div className="hero-photo-frame w-28 h-28 sm:w-32 sm:h-32 mx-auto overflow-hidden rounded-full ring-2 ring-stone-200 dark:ring-stone-600 ring-offset-4 ring-offset-cream-100 dark:ring-offset-darkBg">
+            <div className="hero-photo-frame w-28 h-28 sm:w-32 sm:h-32 mx-auto overflow-hidden rounded-full ring-1 ring-stone-300 dark:ring-stone-600 ring-offset-[6px] ring-offset-cream-100 dark:ring-offset-darkBg">
               <img
                 src={profileImage}
                 alt="Hari-Krishna Patel"
                 width={320}
                 height={320}
                 fetchPriority="high"
-                className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+                className="object-cover w-full h-full grayscale-[35%]"
               />
             </div>
           </div>
@@ -219,15 +219,15 @@ export default function Hero() {
           </h1>
 
           {/* Thin divider */}
-          <div className="serif-divider my-6 hero-divider-animate"></div>
+          <div className="serif-divider my-8 hero-divider-animate"></div>
 
           {/* Subtitle */}
-          <p className="hero-animate hero-animate-delay-4 text-base sm:text-lg text-stone-500 dark:text-cream-200 font-light tracking-wide mb-10">
+          <p className="hero-animate hero-animate-delay-4 inscription text-stone-500 dark:text-cream-300 mb-10">
             Software Engineer & Developer
           </p>
 
           {/* Social Links - Horizontal row */}
-          <div className="hero-animate hero-animate-delay-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <div className="hero-animate hero-animate-delay-5 flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-6">
             {socialLinks.map((link) => (
               <SocialLinkComponent key={link.label} {...link} />
             ))}
@@ -239,7 +239,7 @@ export default function Hero() {
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
           <div className="hero-animate hero-animate-delay-5">
             <div className="animate-bounce">
-              <ArrowDown className="w-5 h-5 text-stone-400 dark:text-cream-300" />
+              <ArrowDown className="w-4 h-4 text-stone-400 dark:text-cream-400" strokeWidth={1.25} />
             </div>
           </div>
         </div>
@@ -255,12 +255,10 @@ function SocialLinkComponent({ icon: Icon, href, label }: SocialLink) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Visit ${label} profile`}
-      className="flex items-center gap-2 px-4 py-2.5 transition-all duration-300 rounded-xl bg-white/60 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-600/60 hover:bg-white dark:hover:bg-stone-700/80 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm group focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg"
+      className="group flex items-center gap-2 px-2 py-2 inscription text-stone-500 dark:text-cream-300 hover:text-aegean dark:hover:text-aegean-light transition-colors duration-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-aegean"
     >
-      <Icon className="w-4 h-4 text-stone-500 dark:text-cream-300 transition-colors duration-300 group-hover:text-stone-800 dark:group-hover:text-cream-100" aria-hidden="true" />
-      <span className="text-stone-700 dark:text-cream-200 text-sm font-medium transition-colors duration-300 group-hover:text-stone-900 dark:group-hover:text-cream-100">
-        {label}
-      </span>
+      <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+      <span>{label}</span>
     </a>
   )
 }

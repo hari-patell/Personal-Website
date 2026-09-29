@@ -1,56 +1,35 @@
 import { Github, Mail, Linkedin } from 'lucide-react'
 import XIcon from './XIcon'
 
+// Fixed square hit area with the icon centered — the global mobile 44px
+// min-size rule would otherwise leave the icon pinned to the box's left edge
+const linkClasses =
+  'inline-flex items-center justify-center w-11 h-11 text-stone-400 dark:text-cream-400 hover:text-aegean dark:hover:text-aegean-light transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-aegean'
+
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="relative py-12 px-6 border-t border-stone-200/60 dark:border-stone-700/60">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-stone-500 dark:text-cream-200 text-sm">
-            &copy; {currentYear} Hari-Krishna Patel. All rights reserved.
-          </div>
-          <div className="flex items-center gap-4">
-            <a
-              href="mailto:hari1880patel@gmail.com"
-              aria-label="Send email"
-              className="text-stone-400 dark:text-cream-300 hover:text-stone-700 dark:hover:text-cream-100 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg rounded"
-            >
-              <Mail className="w-5 h-5" aria-hidden="true" />
-            </a>
-            <a
-              href="https://github.com/hari-patell"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit GitHub profile"
-              className="text-stone-400 dark:text-cream-300 hover:text-stone-700 dark:hover:text-cream-100 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg rounded"
-            >
-              <Github className="w-5 h-5" aria-hidden="true" />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/hari-krishna-patel"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit LinkedIn profile"
-              className="text-stone-400 dark:text-cream-300 hover:text-stone-700 dark:hover:text-cream-100 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg rounded"
-            >
-              <Linkedin className="w-5 h-5" aria-hidden="true" />
-            </a>
-            <a
-              href="https://x.com/hari_patell"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit X profile"
-              className="text-stone-400 dark:text-cream-300 hover:text-stone-700 dark:hover:text-cream-100 transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg rounded"
-            >
-              <XIcon className="w-5 h-5" aria-hidden="true" />
-            </a>
-          </div>
+    <footer className="relative pt-16 pb-12 px-6">
+      <div className="max-w-5xl mx-auto flex flex-col items-center gap-8">
+        <div className="serif-divider"></div>
+        <div className="flex items-center justify-center gap-2 sm:gap-4">
+          <a href="mailto:hari1880patel@gmail.com" aria-label="Send email" className={linkClasses}>
+            <Mail className="w-4 h-4" aria-hidden="true" />
+          </a>
+          <a href="https://github.com/hari-patell" target="_blank" rel="noopener noreferrer" aria-label="Visit GitHub profile" className={linkClasses}>
+            <Github className="w-4 h-4" aria-hidden="true" />
+          </a>
+          <a href="https://www.linkedin.com/in/hari-krishna-patel" target="_blank" rel="noopener noreferrer" aria-label="Visit LinkedIn profile" className={linkClasses}>
+            <Linkedin className="w-4 h-4" aria-hidden="true" />
+          </a>
+          <a href="https://x.com/hari_patell" target="_blank" rel="noopener noreferrer" aria-label="Visit X profile" className={linkClasses}>
+            <XIcon className="w-4 h-4" aria-hidden="true" />
+          </a>
         </div>
-        <div className="mt-6 text-center text-stone-400 dark:text-cream-300/80 text-xs font-light">
-          Built with React, TypeScript, and Tailwind CSS
-        </div>
+        <p className="inscription text-center -mr-[0.28em] text-stone-400 dark:text-cream-400">
+          &copy; {currentYear} Hari-Krishna Patel
+        </p>
       </div>
     </footer>
   )

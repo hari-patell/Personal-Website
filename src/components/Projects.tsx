@@ -1,22 +1,20 @@
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 import { projects } from '../data/projects'
 import { Project } from '../types'
-import { Github, ExternalLink, Code2 } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
+import SectionHeader from './SectionHeader'
 
 export default function Projects() {
   const { ref, hasIntersected } = useIntersectionObserver()
-
-  const featuredProjects = projects.filter((p) => p.featured)
-  const otherProjects = projects.filter((p) => !p.featured)
 
   return (
     <section
       id="projects"
       ref={ref}
       aria-label="Projects section"
-      className="min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 safe-area-top"
+      className="flex items-center justify-center py-28 sm:py-36 px-6 safe-area-top"
     >
-      <div className="max-w-6xl w-full">
+      <div className="max-w-5xl w-full">
         <div
           className={`transition-all duration-1000 ${
             hasIntersected
@@ -24,104 +22,49 @@ export default function Projects() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
-            Featured <span className="italic font-medium">Projects</span>
-          </h2>
-          <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 dark:text-cream-200 text-center mb-8 sm:mb-12 text-sm sm:text-base px-2">
-            A selection of projects showcasing my skills and experience
-          </p>
+          <SectionHeader numeral="Δ" title="Projects" />
 
-          {/* Featured Projects */}
-          <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-12 sm:mb-16">
-            {featuredProjects.map((project, index) => (
-              <ProjectCard key={project.id} project={project} index={index} featured />
+          <div className="grid md:grid-cols-2 gap-x-14 gap-y-16">
+            {projects.map((project, index) => (
+              <ProjectEntry key={project.id} project={project} index={index} />
             ))}
           </div>
-
-          {/* Other Projects */}
-          {otherProjects.length > 0 && (
-            <>
-              <h3 className="font-serif text-2xl font-bold mb-6 text-stone-700 dark:text-cream-200">Other Projects</h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {otherProjects.map((project, index) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    index={index + featuredProjects.length}
-                  />
-                ))}
-              </div>
-            </>
-          )}
         </div>
       </div>
     </section>
   )
 }
 
-function ProjectCard({
-  project,
-  index,
-  featured = false,
-}: {
-  project: Project
-  index: number
-  featured?: boolean
-}) {
+const linkClasses =
+  'inline-flex items-center gap-1 inscription text-stone-500 dark:text-cream-300 hover:text-aegean dark:hover:text-aegean-light transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-aegean'
+
+function ProjectEntry({ project, index }: { project: Project; index: number }) {
   return (
-    <div
-      className="group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-stone-800/50 border border-stone-200/60 dark:border-stone-600/50 transition-all duration-300 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-md hover:bg-white dark:hover:bg-stone-700/60"
-      style={{
-        animationDelay: `${index * 100}ms`,
-        animation: 'fadeInUp 0.6s ease-out forwards',
-      }}
-    >
-      <div className="relative p-6 sm:p-8 h-full flex flex-col">
-        {/* Icon */}
-        <div className="mb-5">
-          <div className="w-12 h-12 rounded-xl bg-stone-900 dark:bg-cream-100 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-            <Code2 className="w-5 h-5 text-white dark:text-darkBg" />
-          </div>
-        </div>
+    <article className="border-t border-stone-300/70 dark:border-stone-700 pt-6 flex flex-col">
+      <span className="font-serif text-base [font-variant-numeric:lining-nums] text-stone-400 dark:text-cream-400 mb-3">
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <h3 className="font-serif text-3xl font-medium text-stone-900 dark:text-cream-100 leading-tight mb-3">
+        {project.title}
+      </h3>
+      <p className="text-stone-600 dark:text-cream-200 leading-relaxed font-light mb-5">
+        {project.description}
+      </p>
+      <p className="text-xs text-stone-400 dark:text-cream-400 tracking-wide mb-6">
+        {project.technologies.join('  ·  ')}
+      </p>
 
-        {/* Content */}
-        <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 dark:text-cream-100 mb-2 group-hover:text-stone-700 dark:group-hover:text-cream-200 transition-colors">
-          {project.title}
-        </h3>
-        <p className={`text-stone-500 dark:text-cream-200 mb-4 leading-relaxed ${featured ? 'text-base' : 'text-sm'}`}>
-          {project.description}
-        </p>
-
-        {/* Technologies */}
-        <div className="flex flex-wrap gap-2 mb-4 flex-grow items-start">
-          {project.technologies.slice(0, featured ? 6 : 4).map((tech) => (
-            <span
-              key={tech}
-              className="px-2.5 py-0.5 text-xs rounded-md bg-cream-200/80 dark:bg-stone-700/80 text-stone-600 dark:text-cream-200 border border-stone-200/40 dark:border-stone-600/50 transition-colors leading-tight inline-flex items-center h-5 font-medium"
-            >
-              {tech}
-            </span>
-          ))}
-          {project.technologies.length > (featured ? 6 : 4) && (
-            <span className="px-2.5 py-0.5 text-xs rounded-md bg-cream-200/80 dark:bg-stone-700/80 text-stone-400 dark:text-cream-300 border border-stone-200/40 dark:border-stone-600/50 leading-tight inline-flex items-center h-5">
-              +{project.technologies.length - (featured ? 6 : 4)}
-            </span>
-          )}
-        </div>
-
-        {/* Links */}
-        <div className="flex items-center gap-4 mt-auto pt-4 border-t border-stone-200/60 dark:border-stone-600/50">
+      {(project.githubUrl || project.liveUrl) && (
+        <div className="flex items-center gap-6 mt-auto">
           {project.githubUrl && (
             <a
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`View ${project.title} source code on GitHub`}
-              className="flex items-center gap-2 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 rounded"
+              className={linkClasses}
             >
-              <Github className="w-4 h-4" aria-hidden="true" />
-              <span>Code</span>
+              Code <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
             </a>
           )}
           {project.liveUrl && (
@@ -130,14 +73,13 @@ function ProjectCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`View ${project.title} live demo`}
-              className="flex items-center gap-2 text-stone-500 dark:text-cream-200 hover:text-stone-900 dark:hover:text-cream-100 transition-colors text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 dark:focus-visible:ring-cream-400 rounded"
+              className={linkClasses}
             >
-              <ExternalLink className="w-4 h-4" aria-hidden="true" />
-              <span>Live</span>
+              Live <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
             </a>
           )}
         </div>
-      </div>
-    </div>
+      )}
+    </article>
   )
 }

@@ -1,7 +1,7 @@
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 import { experiences } from '../data/experience'
 import type { Experience } from '../types'
-import { Briefcase, MapPin, Calendar } from 'lucide-react'
+import SectionHeader from './SectionHeader'
 
 export default function Experience() {
   const { ref, hasIntersected } = useIntersectionObserver()
@@ -11,7 +11,7 @@ export default function Experience() {
       id="experience"
       ref={ref}
       aria-label="Experience section"
-      className="min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 safe-area-top"
+      className="flex items-center justify-center py-28 sm:py-36 px-6 safe-area-top"
     >
       <div className="max-w-4xl w-full">
         <div
@@ -21,102 +21,49 @@ export default function Experience() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
-            <span className="italic font-medium">Experience</span>
-          </h2>
-          <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 dark:text-cream-200 text-center mb-12 text-sm sm:text-base">
-            Professional experience and internships
-          </p>
+          <SectionHeader numeral="Γ" title="Experience" />
 
-          <div className="space-y-6">
-            {experiences.map((experience, index) => (
-              <ExperienceCard key={experience.id} experience={experience} index={index} />
+          <ol className="border-b border-stone-300/70 dark:border-stone-700">
+            {experiences.map((experience) => (
+              <ExperienceRow key={experience.id} experience={experience} />
             ))}
-          </div>
+          </ol>
         </div>
       </div>
     </section>
   )
 }
 
-function ExperienceCard({ experience, index }: { experience: Experience; index: number }) {
+function ExperienceRow({ experience }: { experience: Experience }) {
+  const status = experience.current ? 'Current' : experience.incoming ? 'Incoming' : null
+
   return (
-    <div
-      className={`group relative overflow-hidden rounded-2xl bg-white/60 dark:bg-stone-800/50 border backdrop-blur-sm transition-all duration-500 ${
-        experience.incoming || experience.current
-          ? 'border-stone-400/50 dark:border-stone-500/50 shadow-sm hover:shadow-md hover:border-stone-400/70 dark:hover:border-stone-500/70'
-          : 'border-stone-200/60 dark:border-stone-600/50 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm hover:bg-white dark:hover:bg-stone-700/60'
-      }`}
-      style={{
-        animationDelay: `${index * 100}ms`,
-        animation: 'fadeInUp 0.6s ease-out forwards',
-      }}
-    >
-      <div className="relative p-6 sm:p-8">
-        {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-start justify-between mb-2 gap-3">
-            <div className="min-w-0">
-              <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 dark:text-cream-100 mb-1 group-hover:text-stone-700 dark:group-hover:text-cream-200 transition-colors">
-                {experience.position}
-              </h3>
-              <div className="flex items-center gap-2 text-stone-600 dark:text-cream-200 font-medium">
-                <Briefcase className="w-4 h-4 text-stone-400 dark:text-cream-300 shrink-0" />
-                <span>{experience.company}</span>
-              </div>
-            </div>
-            {(experience.incoming || experience.current) && (
-              <div className="shrink-0 mt-1">
-                <div className="px-3 py-1.5 text-xs font-semibold tracking-widest uppercase rounded-md bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg">
-                  {experience.current ? 'Current' : 'Incoming'}
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-4 text-sm text-stone-500 dark:text-cream-200/90 mt-3">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              <span>{experience.startDate} – {experience.endDate}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" />
-              <span>{experience.location}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Description */}
-        <p className="text-stone-600 dark:text-cream-200 mb-4 text-sm sm:text-base leading-relaxed">
-          {experience.description}
-        </p>
-
-        {/* Achievements */}
-        <div className="mb-4">
-          <h4 className="text-sm font-semibold text-stone-500 dark:text-cream-300 mb-2 uppercase tracking-wider">Key Achievements</h4>
-          <ul className="space-y-2">
-            {experience.achievements.map((achievement, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm text-stone-600 dark:text-cream-200">
-                <span className="text-stone-400 dark:text-cream-400 mt-1.5 text-xs">&#9679;</span>
-                <span className="leading-relaxed">{achievement}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Technologies */}
-        <div className="flex flex-wrap gap-2 pt-4 border-t border-stone-200/60 dark:border-stone-600/50">
-          {experience.technologies.map((tech) => (
-            <span
-              key={tech}
-              className="px-2.5 py-0.5 text-xs rounded-md bg-cream-200/80 dark:bg-stone-700/80 text-stone-600 dark:text-cream-200 border border-stone-200/40 dark:border-stone-600/50 transition-colors leading-tight inline-flex items-center h-5 font-medium"
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
+    <li className="grid md:grid-cols-[13rem_1fr] gap-x-10 gap-y-3 border-t border-stone-300/70 dark:border-stone-700 py-10 sm:py-12">
+      <div className="inscription text-stone-400 dark:text-cream-400 leading-relaxed md:pt-2">
+        <div>{experience.startDate} – {experience.endDate}</div>
+        <div className="mt-1 normal-case tracking-normal text-xs font-light">{experience.location}</div>
+        {status && <div className="mt-3 text-aegean dark:text-aegean-light">{status}</div>}
       </div>
-    </div>
+
+      <div>
+        <h3 className="font-serif text-3xl font-medium text-stone-900 dark:text-cream-100 leading-tight">
+          {experience.company}
+        </h3>
+        <p className="mt-1 text-stone-500 dark:text-cream-300 italic font-serif text-lg">{experience.position}</p>
+
+        <ul className="mt-6 space-y-3">
+          {experience.achievements.map((achievement, idx) => (
+            <li key={idx} className="flex gap-3 text-sm sm:text-[0.95rem] text-stone-600 dark:text-cream-200 leading-relaxed font-light">
+              <span aria-hidden="true" className="text-stone-300 dark:text-stone-600">—</span>
+              <span>{achievement}</span>
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-6 text-xs text-stone-400 dark:text-cream-400 tracking-wide">
+          {experience.technologies.join('  ·  ')}
+        </p>
+      </div>
+    </li>
   )
 }

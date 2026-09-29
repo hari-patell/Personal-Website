@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { ArrowUp, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import { getResumeContext } from '../data/resume';
+import SectionHeader from './SectionHeader';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -162,24 +163,22 @@ export default function ResumeChat() {
     <section
       id="AI"
       ref={ref}
-      className="relative min-h-screen py-20 px-4 sm:px-6 lg:px-8"
+      className="relative py-28 sm:py-36 px-6"
     >
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         {/* Section Header */}
         <div
-          className={`text-center mb-12 transition-all duration-1000 ${
+          className={`transition-all duration-1000 ${
             hasIntersected
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
-            Ask About <span className="italic font-medium">My Resume</span>
-          </h2>
-          <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 dark:text-cream-200 text-center text-sm sm:text-base max-w-2xl mx-auto px-2">
-            Have questions about my experience, skills, or projects? Chat with my AI assistant to learn more.
-          </p>
+          <SectionHeader
+            numeral="Ε"
+            title="Ask"
+            subtitle="Questions about my experience, skills, or projects? Ask the assistant."
+          />
         </div>
 
         {/* Chat Interface */}
@@ -190,26 +189,21 @@ export default function ResumeChat() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <div className="bg-white/70 dark:bg-stone-800/60 border border-stone-200/60 dark:border-stone-600/50 rounded-2xl shadow-sm overflow-hidden backdrop-blur-sm">
+          <div className="border-y border-stone-300/70 dark:border-stone-700">
             {/* Messages */}
-            <div ref={messagesContainerRef} className="h-[420px] sm:h-[500px] overflow-y-auto p-4 sm:p-6 space-y-4">
+            <div ref={messagesContainerRef} className="h-[420px] sm:h-[480px] overflow-y-auto py-6 space-y-5">
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex gap-2.5 sm:gap-3 ${
+                  className={`flex ${
                     message.role === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  {message.role === 'assistant' && (
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-darkBg" />
-                    </div>
-                  )}
                   <div
-                    className={`max-w-[82%] sm:max-w-[75%] rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 ${
+                    className={`max-w-[88%] sm:max-w-[80%] ${
                       message.role === 'user'
-                        ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg'
-                        : 'bg-cream-200/60 dark:bg-stone-700/60 text-stone-800 dark:text-cream-100 border border-stone-200/40 dark:border-stone-600/50'
+                        ? 'px-4 py-2.5 bg-cream-200 dark:bg-stone-800 text-stone-900 dark:text-cream-100'
+                        : 'py-1 font-light text-stone-700 dark:text-cream-200'
                     }`}
                   >
                     {message.role === 'user' ? (
@@ -234,20 +228,15 @@ export default function ResumeChat() {
                       </ReactMarkdown>
                     )}
                   </div>
-                  {message.role === 'user' && (
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-200 dark:bg-stone-600 flex items-center justify-center flex-shrink-0">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-stone-600 dark:text-cream-100" />
-                    </div>
-                  )}
                 </div>
               ))}
               {messages.length === 1 && !isLoading && (
-                <div className="flex flex-wrap gap-2 px-1">
+                <div className="flex flex-wrap gap-2">
                   {SUGGESTED_QUESTIONS.map((q) => (
                     <button
                       key={q}
                       onClick={() => handleChipClick(q)}
-                      className="text-sm px-4 py-2 rounded-full border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-cream-200 hover:bg-stone-100 dark:hover:bg-stone-700 hover:text-stone-900 dark:hover:text-cream-100 transition-colors"
+                      className="text-sm px-4 py-2 border border-stone-300 dark:border-stone-700 text-stone-500 dark:text-cream-300 hover:border-aegean hover:text-aegean dark:hover:border-aegean-light dark:hover:text-aegean-light transition-colors"
                     >
                       {q}
                     </button>
@@ -256,10 +245,7 @@ export default function ResumeChat() {
               )}
               {isLoading && !isStreamingReply && (
                 <div className="flex gap-2.5 sm:gap-3 justify-start">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-900 dark:bg-cream-100 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white dark:text-darkBg" />
-                  </div>
-                  <div className="bg-cream-200/60 dark:bg-stone-700/60 border border-stone-200/40 dark:border-stone-600/50 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 flex items-center gap-2">
+                  <div className="py-1 flex items-center gap-2">
                     <Loader2 className="w-4 h-4 text-stone-500 dark:text-cream-300 animate-spin" />
                     <span className="text-sm text-stone-500 dark:text-cream-200">Thinking...</span>
                   </div>
@@ -268,7 +254,7 @@ export default function ResumeChat() {
             </div>
 
             {/* Input */}
-            <div className="p-4 sm:p-6 border-t border-stone-200/60 dark:border-stone-600/50 bg-cream-50/80 dark:bg-stone-800/80 backdrop-blur-sm">
+            <div className="py-4 border-t border-stone-300/70 dark:border-stone-700">
               <div className="flex gap-2.5 sm:gap-3">
                 <input
                   type="text"
@@ -276,16 +262,16 @@ export default function ResumeChat() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask about my resume..."
-                  className="flex-1 min-w-0 bg-white dark:bg-stone-700/50 text-stone-900 dark:text-cream-100 px-4 sm:px-5 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 border border-stone-200/60 dark:border-stone-600/50 transition-all placeholder:text-stone-400 dark:placeholder:text-cream-400/60"
+                  className="flex-1 min-w-0 bg-transparent text-stone-900 dark:text-cream-100 px-1 py-3 focus:outline-none font-serif text-lg placeholder:italic placeholder:text-stone-400 dark:placeholder:text-cream-400/70"
                   disabled={isLoading}
                 />
                 <button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  className="bg-stone-900 dark:bg-cream-100 hover:bg-stone-800 dark:hover:bg-cream-200 text-white dark:text-darkBg px-4 sm:px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm flex-shrink-0"
+                  className="inline-flex items-center justify-center w-11 h-11 bg-aegean dark:bg-aegean-light text-white dark:text-darkBg hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
                   aria-label="Send message"
                 >
-                  <Send className="w-5 h-5" />
+                  <ArrowUp className="w-4 h-4" />
                 </button>
               </div>
             </div>
