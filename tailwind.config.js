@@ -10,21 +10,27 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['"Playfair Display"', 'Georgia', 'Times New Roman', 'serif'],
+        serif: ['"Cormorant Garamond"', 'Georgia', 'Times New Roman', 'serif'],
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       colors: {
+        // Marble — cool, chalky whites rather than warm parchment
         cream: {
-          50: '#FDFCFA',
-          100: '#FAF7F2',
-          200: '#F5F0E8',
-          300: '#EBE4D8',
-          400: '#D6CFC3',
+          50: '#FCFBF9',
+          100: '#F7F6F2',
+          200: '#EEECE6',
+          300: '#E0DDD5',
+          400: '#C9C5BB',
+        },
+        // Aegean blue — the single accent, used sparingly
+        aegean: {
+          DEFAULT: '#1D4E89',
+          light: '#8DB0DB',
         },
         darkBg: '#171717',
       },
       ringOffsetColor: {
-        DEFAULT: '#FAF7F2',
+        DEFAULT: '#F7F6F2',
       },
     },
   },

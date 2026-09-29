@@ -1,40 +1,27 @@
-import { useState } from 'react'
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
 import { skills } from '../data/skills'
-import { Skill } from '../types'
+import type { Skill } from '../types'
+import SectionHeader from './SectionHeader'
 
-const categoryColors = {
-  frontend: 'from-stone-600 to-stone-500',
-  backend: 'from-stone-700 to-stone-600',
-  database: 'from-stone-500 to-stone-400',
-  tools: 'from-stone-800 to-stone-700',
-  cloud: 'from-stone-600 to-stone-500',
-}
-
-const proficiencyColors = {
-  beginner: 'bg-stone-300 dark:bg-stone-400',
-  intermediate: 'bg-stone-400 dark:bg-cream-400',
-  advanced: 'bg-stone-600 dark:bg-cream-300',
-  expert: 'bg-stone-800 dark:bg-cream-100',
-}
+const categoryOrder: { key: Skill['category']; label: string }[] = [
+  { key: 'backend', label: 'Backend' },
+  { key: 'frontend', label: 'Frontend' },
+  { key: 'database', label: 'Data' },
+  { key: 'cloud', label: 'Cloud' },
+  { key: 'tools', label: 'Tools' },
+]
 
 export default function Skills() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const { ref, hasIntersected } = useIntersectionObserver()
-
-  const categories = Array.from(new Set(skills.map((s) => s.category)))
-  const filteredSkills = selectedCategory
-    ? skills.filter((s) => s.category === selectedCategory)
-    : skills
 
   return (
     <section
       id="skills"
       ref={ref}
       aria-label="Skills section"
-      className="min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 safe-area-top"
+      className="flex items-center justify-center py-28 sm:py-36 px-6 safe-area-top"
     >
-      <div className="max-w-6xl w-full">
+      <div className="max-w-5xl w-full">
         <div
           className={`transition-all duration-1000 ${
             hasIntersected
@@ -42,95 +29,26 @@ export default function Skills() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-center text-stone-900 dark:text-cream-100 tracking-tight">
-            Skills & <span className="italic font-medium">Technologies</span>
-          </h2>
-          <div className="serif-divider my-6"></div>
-          <p className="text-stone-500 dark:text-cream-200 text-center mb-8 sm:mb-12 text-sm sm:text-base">
-            Technologies I work with and continue to learn
-          </p>
+          <SectionHeader numeral="Β" title="Skills" />
 
-          {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-2 mb-12">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              aria-label="Show all skills"
-              aria-pressed={selectedCategory === null}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg ${
-                selectedCategory === null
-                  ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg shadow-sm'
-                  : 'bg-white/60 dark:bg-stone-800/60 text-stone-500 dark:text-cream-200 hover:text-stone-800 dark:hover:text-cream-100 hover:bg-white dark:hover:bg-stone-700/80 border border-stone-200/60 dark:border-stone-600/60'
-              }`}
-            >
-              All
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                aria-label={`Filter skills by ${category}`}
-                aria-pressed={selectedCategory === category}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 capitalize focus:outline-none focus:ring-2 focus:ring-stone-400 dark:focus:ring-cream-400 focus:ring-offset-2 focus:ring-offset-cream-100 dark:focus:ring-offset-darkBg ${
-                  selectedCategory === category
-                    ? 'bg-stone-900 dark:bg-cream-100 text-white dark:text-darkBg shadow-sm'
-                    : 'bg-white/60 dark:bg-stone-800/60 text-stone-500 dark:text-cream-200 hover:text-stone-800 dark:hover:text-cream-100 hover:bg-white dark:hover:bg-stone-700/80 border border-stone-200/60 dark:border-stone-600/60'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          {/* Skills Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {filteredSkills.map((skill, index) => (
-              <SkillCard key={skill.name} skill={skill} index={index} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12">
+            {categoryOrder.map(({ key, label }) => (
+              <div key={key} className="border-t border-stone-300/70 dark:border-stone-700 pt-5">
+                <h3 className="inscription text-stone-400 dark:text-cream-400 mb-5">{label}</h3>
+                <ul className="space-y-2.5">
+                  {skills
+                    .filter((s) => s.category === key)
+                    .map((skill) => (
+                      <li key={skill.name} className="font-serif text-xl text-stone-800 dark:text-cream-100">
+                        {skill.name}
+                      </li>
+                    ))}
+                </ul>
+              </div>
             ))}
           </div>
         </div>
       </div>
     </section>
-  )
-}
-
-function SkillCard({ skill, index }: { skill: Skill; index: number }) {
-  return (
-    <div
-      className="group relative p-4 rounded-xl bg-white/60 dark:bg-stone-800/50 border border-stone-200/60 dark:border-stone-600/50 transition-all duration-300 hover:bg-white dark:hover:bg-stone-700/60 hover:border-stone-300 dark:hover:border-stone-500 hover:shadow-sm cursor-pointer"
-      style={{
-        animationDelay: `${index * 50}ms`,
-        animation: 'fadeInUp 0.6s ease-out forwards',
-      }}
-    >
-      <div className="flex flex-col items-center gap-3">
-        <div
-          className={`w-11 h-11 rounded-lg bg-gradient-to-br ${
-            categoryColors[skill.category]
-          } flex items-center justify-center text-white font-serif font-bold text-lg transition-transform duration-300 group-hover:scale-110`}
-        >
-          {skill.name.charAt(0)}
-        </div>
-        <div className="text-center">
-          <h3 className="text-stone-800 dark:text-cream-100 font-medium text-sm mb-1.5">{skill.name}</h3>
-          <div className="flex items-center gap-1 justify-center">
-            {['beginner', 'intermediate', 'advanced', 'expert'].map((level, i) => {
-              const levelIndex = ['beginner', 'intermediate', 'advanced', 'expert'].indexOf(
-                skill.proficiency
-              )
-              return (
-                <div
-                  key={level}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                    i <= levelIndex
-                      ? proficiencyColors[skill.proficiency as keyof typeof proficiencyColors]
-                      : 'bg-stone-200 dark:bg-stone-600'
-                  }`}
-                />
-              )
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
