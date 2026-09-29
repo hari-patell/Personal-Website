@@ -21,7 +21,7 @@ export default function About() {
         >
           <SectionHeader numeral="Α" title="About" />
           <div className="space-y-6 text-stone-600 dark:text-cream-200 leading-loose text-base sm:text-lg font-light">
-            <p className="first-letter:font-serif first-letter:text-6xl first-letter:font-medium first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:leading-[0.8] first-letter:text-stone-900 dark:first-letter:text-cream-100">
+            <p>
               I'm a Computer Science student at the University of Florida and a Software Development Intern at
               Amazon Web Services on the Applied AI team, with a passion for creating high-performance solutions.
               I've shipped production APIs serving 2.5M daily users at Capital One and optimized systems by 96.67% at Honeywell. My expertise spans full-stack development, machine learning, and mobile applications.

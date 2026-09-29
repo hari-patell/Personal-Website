@@ -212,10 +212,10 @@ export default function Hero() {
           </div>
 
           {/* Name - Large Serif */}
-          <h1 className="hero-animate hero-animate-delay-2 font-serif text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-medium text-stone-900 dark:text-cream-100 tracking-tight leading-[0.9] mb-4">
+          <h1 className="hero-animate hero-animate-delay-2 font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-stone-900 dark:text-cream-100 tracking-tight leading-[0.95] mb-4">
             Hari-Krishna
             <br />
-            <span className="italic font-normal">Patel</span>
+            <span className="italic font-medium">Patel</span>
           </h1>
 
           {/* Thin divider */}

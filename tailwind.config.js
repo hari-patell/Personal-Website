@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['"Cormorant Garamond"', 'Georgia', 'Times New Roman', 'serif'],
+        serif: ['"Playfair Display"', 'Georgia', 'Times New Roman', 'serif'],
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       colors: {

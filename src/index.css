@@ -232,24 +232,18 @@ body {
   }
 }
 
-/* Greek key (meander) rule — a single spiral hook on a running baseline,
-   tiled horizontally. Drawn as a mask so it takes the element's color. */
+/* Decorative thin horizontal rule */
 .serif-divider {
-  width: 84px;
-  height: 12px;
+  width: 60px;
+  height: 1px;
+  background: #D6D3D1;
   /* horizontal only — vertical spacing comes from utilities (my-8, mt-8) */
   margin-left: auto;
   margin-right: auto;
-  color: #1D4E89;
-  background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='black' stroke-width='1.1'%3E%3Cpath d='M0 11.5H12M2 11.5V1.5H10V8.5H5V4.5H7.5'/%3E%3C/svg%3E") repeat-x left center / 12px 12px;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='black' stroke-width='1.1'%3E%3Cpath d='M0 11.5H12M2 11.5V1.5H10V8.5H5V4.5H7.5'/%3E%3C/svg%3E") repeat-x left center / 12px 12px;
-  opacity: 0.8;
 }
 
 .dark .serif-divider {
-  color: #8DB0DB;
-  opacity: 0.7;
+  background: #57534E;
 }
 
 /* Inscription-style label: small, uppercase, widely tracked */
