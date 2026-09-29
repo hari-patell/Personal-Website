@@ -1,8 +1,10 @@
 import { Github, Mail, Linkedin } from 'lucide-react'
 import XIcon from './XIcon'
 
+// Fixed square hit area with the icon centered — the global mobile 44px
+// min-size rule would otherwise leave the icon pinned to the box's left edge
 const linkClasses =
-  'text-stone-400 dark:text-cream-400 hover:text-aegean dark:hover:text-aegean-light transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-aegean'
+  'inline-flex items-center justify-center w-11 h-11 text-stone-400 dark:text-cream-400 hover:text-aegean dark:hover:text-aegean-light transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-aegean'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -11,7 +13,7 @@ export default function Footer() {
     <footer className="relative pt-16 pb-12 px-6">
       <div className="max-w-5xl mx-auto flex flex-col items-center gap-8">
         <div className="serif-divider"></div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center justify-center gap-2 sm:gap-4">
           <a href="mailto:hari1880patel@gmail.com" aria-label="Send email" className={linkClasses}>
             <Mail className="w-4 h-4" aria-hidden="true" />
           </a>
@@ -25,7 +27,7 @@ export default function Footer() {
             <XIcon className="w-4 h-4" aria-hidden="true" />
           </a>
         </div>
-        <p className="inscription text-stone-400 dark:text-cream-400">
+        <p className="inscription text-center -mr-[0.28em] text-stone-400 dark:text-cream-400">
           &copy; {currentYear} Hari-Krishna Patel
         </p>
       </div>
