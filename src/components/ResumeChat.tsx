@@ -175,7 +175,6 @@ export default function ResumeChat() {
           }`}
         >
           <SectionHeader
-            numeral="Ε"
             title="Ask"
             subtitle="Questions about my experience, skills, or projects? Ask the assistant."
           />
