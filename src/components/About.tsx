@@ -19,7 +19,7 @@ export default function About() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <SectionHeader numeral="Α" title="About" />
+          <SectionHeader title="About" />
           <div className="space-y-6 text-stone-600 dark:text-cream-200 leading-loose text-base sm:text-lg font-light">
             <p>
               I'm a Computer Science student at the University of Florida and a Software Development Intern at

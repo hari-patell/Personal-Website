@@ -22,7 +22,7 @@ export default function Projects() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <SectionHeader numeral="Δ" title="Projects" />
+          <SectionHeader title="Projects" />
 
           <div className="grid md:grid-cols-2 gap-x-14 gap-y-16">
             {projects.map((project, index) => (

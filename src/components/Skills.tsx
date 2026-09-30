@@ -29,7 +29,7 @@ export default function Skills() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <SectionHeader numeral="Β" title="Skills" />
+          <SectionHeader title="Skills" />
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-12">
             {categoryOrder.map(({ key, label }) => (

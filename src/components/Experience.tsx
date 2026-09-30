@@ -21,7 +21,7 @@ export default function Experience() {
               : 'opacity-0 translate-y-10'
           }`}
         >
-          <SectionHeader numeral="Γ" title="Experience" />
+          <SectionHeader title="Experience" />
 
           <ol className="border-b border-stone-300/70 dark:border-stone-700">
             {experiences.map((experience) => (
