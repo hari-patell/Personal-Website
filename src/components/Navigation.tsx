@@ -57,9 +57,26 @@ export default function Navigation({ sections, onOpenTerminal }: NavigationProps
     }
   }, [isMobileMenuOpen])
 
+  // Full-screen mobile menu: lock the page behind it and close on Escape
+  useEffect(() => {
+    if (!isMobileMenuOpen) return
+    document.body.style.overflow = 'hidden'
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isMobileMenuOpen])
+
   const scrollToSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     setIsMobileMenuOpen(false)
+    // Wait a frame so the scroll lock is released before scrolling
+    requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   const navButtonClasses = (section: string) =>
@@ -130,27 +147,32 @@ export default function Navigation({ sections, onOpenTerminal }: NavigationProps
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — full-screen overlay beneath the nav bar */}
       <div
-        className={`fixed top-[64px] left-0 right-0 z-40 md:hidden transition-all duration-300 safe-area-top ${
+        className={`fixed inset-0 z-40 md:hidden bg-cream-100 dark:bg-darkBg transition-opacity duration-300 ${
           isMobileMenuOpen
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 -translate-y-4 pointer-events-none'
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
         }`}
+        aria-hidden={!isMobileMenuOpen}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-cream-100/95 dark:bg-darkBg/95 backdrop-blur-xl border-b border-stone-300/50 dark:border-stone-700/60">
-          <div className="px-4 py-4 space-y-2">
-            {sections.map((section) => (
-              <button
-                key={section}
-                onClick={() => scrollToSection(section)}
-                className={`w-full text-left px-4 py-3 ${navButtonClasses(section)}`}
-              >
-                {section.charAt(0).toUpperCase() + section.slice(1)}
-              </button>
-            ))}
-          </div>
+        <div
+          className={`flex flex-col justify-center h-full px-8 space-y-2 transition-transform duration-300 ${
+            isMobileMenuOpen ? 'translate-y-0' : '-translate-y-4'
+          }`}
+          style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          {sections.map((section) => (
+            <button
+              key={section}
+              onClick={() => scrollToSection(section)}
+              tabIndex={isMobileMenuOpen ? 0 : -1}
+              className={`w-full text-left py-4 !text-base ${navButtonClasses(section)}`}
+            >
+              {section.charAt(0).toUpperCase() + section.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
     </>
